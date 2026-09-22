@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Cloudflare Pages](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-F38020.svg?style=flat-square&logo=cloudflare)](https://pages.cloudflare.com/)
 
-[在线演示](https://sparknav.pages.dev) · [功能特性](#-核心特性) · [快速开始](#-快速开始) · [自动化收录机器人](#-telegram-自动化收录机器人) · [部署指引](#-部署指引)
+[在线演示](https://xiu-theme.pages.dev/nav) · [功能特性](#-核心特性) · [快速开始](#-快速开始) · [自动化收录机器人](#-telegram-自动化收录机器人) · [部署指引](#-部署指引)
 
 </div>
 
