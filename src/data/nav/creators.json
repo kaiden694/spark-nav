@@ -1,0 +1,53 @@
+[
+  {
+    "id": "creator-karpathy",
+    "platform": "x",
+    "handle": "@karpathy",
+    "name": "Andrej Karpathy",
+    "title": "Andrej Karpathy",
+    "url": "https://x.com/karpathy",
+    "description": "前 OpenAI 创始成员、特斯拉 AI 总监，著名深度学习教育者与 Eureka Labs 创始人。",
+    "avatar_url": "https://unavatar.io/x/karpathy",
+    "followers_count": 1180000,
+    "field": "人工智能 / 深度学习",
+    "category": "creators",
+    "subcategory": "tech",
+    "tags": ["AI 先锋", "深度学习", "教育", "OpenAI"],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "creator-fireship",
+    "platform": "youtube",
+    "handle": "@Fireship",
+    "name": "Fireship",
+    "title": "Fireship",
+    "url": "https://www.youtube.com/@Fireship",
+    "description": "YouTube 著名极客频道，以 100 秒快节奏硬核科普前沿编程语言、云原生与科技热点闻名。",
+    "avatar_url": "https://unavatar.io/youtube/Fireship",
+    "followers_count": 3450000,
+    "field": "极客开发 / 科技速览",
+    "category": "creators",
+    "subcategory": "dev",
+    "tags": ["YouTube", "高能编程", "技术快评"],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "creator-swyx",
+    "platform": "x",
+    "handle": "@swyx",
+    "name": "swyx",
+    "title": "swyx",
+    "url": "https://x.com/swyx",
+    "description": "Latent Space 播客主理人，提倡 AI Engineer (AI 工程师) 概念与前沿技术社群布道者。",
+    "avatar_url": "https://unavatar.io/x/swyx",
+    "followers_count": 138000,
+    "field": "AI Engineer / 独立出海",
+    "category": "creators",
+    "subcategory": "tech",
+    "tags": ["AI Engineer", "独立全栈", "播客"],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  }
+]

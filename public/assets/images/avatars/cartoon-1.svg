@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-panda" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8e6cf"/>
+      <stop offset="100%" stop-color="#56ab2f"/>
+    </linearGradient>
+    <clipPath id="circle-clip-1">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-1)">
+    <rect width="120" height="120" fill="url(#bg-panda)"/>
+    <!-- Ears -->
+    <circle cx="34" cy="34" r="14" fill="#2f3542"/>
+    <circle cx="86" cy="34" r="14" fill="#2f3542"/>
+    <!-- Body -->
+    <ellipse cx="60" cy="105" rx="36" ry="24" fill="#2f3542"/>
+    <ellipse cx="60" cy="108" rx="20" ry="16" fill="#ffffff"/>
+    <!-- Head -->
+    <circle cx="60" cy="62" r="34" fill="#ffffff"/>
+    <!-- Eye Patches -->
+    <ellipse cx="45" cy="58" rx="9" ry="12" fill="#2f3542" transform="rotate(-15 45 58)"/>
+    <ellipse cx="75" cy="58" rx="9" ry="12" fill="#2f3542" transform="rotate(15 75 58)"/>
+    <!-- Eyes -->
+    <circle cx="46" cy="57" r="3.5" fill="#ffffff"/>
+    <circle cx="47" cy="56" r="1.5" fill="#2f3542"/>
+    <circle cx="74" cy="57" r="3.5" fill="#ffffff"/>
+    <circle cx="73" cy="56" r="1.5" fill="#2f3542"/>
+    <!-- Cheeks -->
+    <circle cx="37" cy="68" r="6" fill="#ffb8b8" opacity="0.7"/>
+    <circle cx="83" cy="68" r="6" fill="#ffb8b8" opacity="0.7"/>
+    <!-- Nose & Mouth -->
+    <ellipse cx="60" cy="66" rx="5" ry="3.5" fill="#2f3542"/>
+    <path d="M 56 71 Q 60 75 64 71" stroke="#2f3542" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Bamboo leaf -->
+    <path d="M 68 76 Q 78 72 82 78 Q 76 82 68 76 Z" fill="#2ed573"/>
+  </g>
+</svg>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>离线浏览中心 - XIU主题演示</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    body {
+      background: #f6f6f6;
+      font-family: "Microsoft Yahei", Helvetica, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      box-sizing: border-box;
+    }
+    .offline-container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      max-width: 520px;
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid #eaeaea;
+    }
+    .offline-header {
+      background: linear-gradient(135deg, #ff5e52 0%, #ff8b7e 100%);
+      color: #fff;
+      padding: 28px 24px;
+      text-align: center;
+      position: relative;
+    }
+    .offline-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+      display: inline-block;
+      animation: floatIcon 3s ease-in-out infinite;
+    }
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .offline-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .offline-header p {
+      margin: 8px 0 0;
+      font-size: 13px;
+      opacity: 0.92;
+      color: #fff;
+    }
+    .offline-body {
+      padding: 24px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff3e0;
+      color: #e65100;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 18px;
+    }
+    .status-badge.online {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e65100;
+      animation: pulseDot 1.5s infinite;
+    }
+    .status-badge.online .status-dot {
+      background: #2e7d32;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* 骨架屏占位动画 */
+    .skeleton-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .skeleton-bar {
+      height: 38px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .cached-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+    }
+    .cached-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    .cached-item:hover {
+      background: #fff5f5;
+      border-color: #ffd2cf;
+      transform: translateX(3px);
+    }
+    .cached-link {
+      color: #333;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      margin-right: 10px;
+    }
+    .cached-badge {
+      font-size: 11px;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .queue-notice {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #6c757d;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .btn-primary-offline {
+      background: #ff5e52;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    .btn-primary-offline:hover {
+      background: #e04a3e;
+    }
+    .btn-secondary-offline {
+      background: #f1f3f5;
+      color: #495057;
+      border: 1px solid #dee2e6;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-secondary-offline:hover {
+      background: #e9ecef;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-header">
+      <div class="offline-icon">
+        <i class="site-icon tbfa">&#xe60e;</i>
+      </div>
+      <h2>离线浏览模式</h2>
+      <p>当前网络已断开或目标页面尚未缓存，您仍可访问已缓存内容</p>
+    </div>
+
+    <div class="offline-body">
+      <div style="text-align: center;">
+        <div id="net-status-badge" class="status-badge">
+          <span class="status-dot"></span>
+          <span id="net-status-text">网络连接断开 (离线缓存就绪)</span>
+        </div>
+      </div>
+
+      <!-- 离线待同步操作统计提示 -->
+      <div id="offline-queue-notice" class="queue-notice" style="display: none;">
+        <i class="site-icon tbfa" style="color: #ff9800;">&#xe688;</i>
+        <span>已暂存 <strong id="queue-count" style="color: #ff5e52;">0</strong> 项离线点赞，联网时将自动静默同步至云端。</span>
+      </div>
+
+      <h4 style="font-size: 13px; color: #495057; margin: 0 0 10px 0;">
+        <i class="site-icon tbfa" style="color: #ff5e52; margin-right: 4px;">&#xe602;</i> 本地可离线阅读的文章：
+      </h4>
+
+      <!-- 动态骨架屏 -->
+      <div id="skeleton-loader" class="skeleton-wrap">
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar" style="width: 75%;"></div>
+      </div>
+
+      <!-- 已缓存文章列表 -->
+      <ul id="cached-articles-list" class="cached-list" style="display: none;">
+        <!-- JS 动态注入 -->
+      </ul>
+
+      <div id="no-cached-tip" style="display: none; padding: 20px 0; text-align: center; color: #868e96; font-size: 13px;">
+        本地暂无已缓存的历史文章，您可尝试访问首页或重新检测网络。
+      </div>
+
+      <div class="action-row">
+        <button class="btn-primary-offline" onclick="checkAndReload();">
+          <i class="site-icon tbfa">&#xe658;</i> 刷新重试连接
+        </button>
+        <a href="/" class="btn-secondary-offline">返回离线首页</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function checkAndReload() {
+      if (navigator.onLine) {
+        window.location.reload();
+      } else {
+        alert('当前仍处于离线状态，请检查本地网络或 Wi-Fi 连接');
+      }
+    }
+
+    // 监听网络恢复事件
+    window.addEventListener('online', function() {
+      var badge = document.getElementById('net-status-badge');
+      var text = document.getElementById('net-status-text');
+      if (badge && text) {
+        badge.className = 'status-badge online';
+        text.textContent = '网络已恢复！正在自动重连...';
+      }
+      setTimeout(function() {
+        window.location.reload();
+      }, 800);
+    });
+
+    // 读取已暂存的离线操作队列
+    try {
+      var rawQ = localStorage.getItem('xiu_offline_actions_queue');
+      if (rawQ) {
+        var q = JSON.parse(rawQ);
+        if (Array.isArray(q) && q.length > 0) {
+          var notice = document.getElementById('offline-queue-notice');
+          var countEl = document.getElementById('queue-count');
+          if (notice && countEl) {
+            countEl.textContent = q.length.toString();
+            notice.style.display = 'flex';
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 读取 CacheStorage 中的已缓存文章
+    (async function inspectCache() {
+      var skeleton = document.getElementById('skeleton-loader');
+      var listEl = document.getElementById('cached-articles-list');
+      var noCachedEl = document.getElementById('no-cached-tip');
+
+      var articleMap = {
+        '/posts/wooden-mouse.html': '高逼格的电脑鼠标：原木鼠标',
+        '/posts/3d-printed-motorcycle.html': '全球第一台全3D打印摩托车问世',
+        '/posts/cooked-fruit.html': '水果不止能生着吃 煮着吃更有奇效哟！',
+        '/posts/dimple-pen-cap.html': '创意酒窝笔盖 让书写成为一种乐趣',
+        '/posts/creative-lightbulbs.html': '废灯泡的14种玩法 妹子见了都会心动',
+        '/posts/doge-pumpkin-pants.html': '岛国推出爆款Doge神烦狗南瓜打底裤',
+        '/posts/eating-eggs-taboos.html': '7种东西吃完鸡蛋后不能立即食用',
+        '/posts/hikaru-skirt.html': '日本发光短裙Hikaru Skirt亮瞎宅男双眼',
+        '/posts/future-personal-transportation.html': '未来除了汽车还有哪些个人交通工具',
+        '/posts/iphone-waterproof-case.html': '夏天去潜水必备：卡通iPhone防水手机套',
+        '/posts/underwater-crocodile.html': '与鳄鱼面对面：古巴深水潜水惊心之旅',
+        '/posts/sardine-migration.html': '沙丁鱼迁徙途中与天敌展开“海底之战”',
+        '/posts/ancient-towns.html': '去过这五个古镇 才知道什么是岁月静好'
+      };
+
+      try {
+        var cacheNames = await caches.keys();
+        var cachedUrls = new Set();
+
+        for (var i = 0; i < cacheNames.length; i++) {
+          var c = await caches.open(cacheNames[i]);
+          var requests = await c.keys();
+          requests.forEach(function(req) {
+            try {
+              var u = new URL(req.url);
+              if (u.pathname.startsWith('/posts/') && u.pathname.endsWith('.html')) {
+                cachedUrls.add(u.pathname);
+              }
+            } catch (err) {}
+          });
+        }
+
+        if (skeleton) skeleton.style.display = 'none';
+
+        if (cachedUrls.size > 0 && listEl) {
+          var html = '';
+          cachedUrls.forEach(function(path) {
+            var title = articleMap[path] || path.replace('/posts/', '').replace('.html', '');
+            html += '<li class="cached-item">' +
+              '<a href="' + path + '" class="cached-link" title="' + title + '">' + title + '</a>' +
+              '<span class="cached-badge">已缓存</span>' +
+            '</li>';
+          });
+          listEl.innerHTML = html;
+          listEl.style.display = 'block';
+        } else if (noCachedEl) {
+          noCachedEl.style.display = 'block';
+        }
+      } catch (e) {
+        if (skeleton) skeleton.style.display = 'none';
+        if (noCachedEl) noCachedEl.style.display = 'block';
+      }
+    })();
+  </script>
+</body>
+</html>

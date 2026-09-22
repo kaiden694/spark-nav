@@ -1,0 +1,36 @@
+# SparkNav - Telegram Ingestion Daemon systemd Service Unit
+# Installation on Linux / Ubuntu:
+#   1. Copy to systemd directory:
+#      sudo cp sparknav-bot.service /etc/systemd/system/
+#   2. Reload daemon and enable on boot:
+#      sudo systemctl daemon-reload
+#      sudo systemctl enable sparknav-bot
+#   3. Start / inspect service:
+#      sudo systemctl start sparknav-bot
+#      sudo systemctl status sparknav-bot
+#      sudo journalctl -u sparknav-bot -f
+
+[Unit]
+Description=SparkNav Telegram Bot Ingestion Daemon
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/sparknav
+ExecStart=/usr/bin/node src/scripts/telegram-bot-daemon.mjs
+Restart=always
+RestartSec=5s
+Environment=NODE_ENV=production
+# Environment=TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+# Environment=TELEGRAM_ADMIN_CHAT_ID=your_admin_chat_id_here
+# Environment=GEMINI_API_KEY=your_gemini_api_key_here
+# Environment=LLM_API_KEY=your_deepseek_or_openai_api_key
+
+StandardOutput=journal
+StandardError=journal
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

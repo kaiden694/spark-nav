@@ -1,0 +1,83 @@
+---
+// src/components/nav/TiltEngine.astro
+// Unified 3D Tilt Parallax & Cursor Spotlight Engine for Navigation Hub & Cards
+---
+<script is:inline>
+(function() {
+  if (typeof window === 'undefined') return;
+  if (window.__XIU_TILT_ENGINE_INITIALIZED__) return;
+  window.__XIU_TILT_ENGINE_INITIALIZED__ = true;
+
+  var prefersReducedQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  var hoverFineQuery = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : null;
+
+  function canRunTilt() {
+    if (prefersReducedQuery && prefersReducedQuery.matches) return false;
+    if (hoverFineQuery && !hoverFineQuery.matches) return false;
+    return true;
+  }
+
+  function attach3DTilt(element, maxTilt) {
+    if (!element || !canRunTilt()) return;
+    if (element.__xiu_tilt_bound__) return;
+    element.__xiu_tilt_bound__ = true;
+
+    maxTilt = maxTilt || 6;
+    element.style.transformStyle = 'preserve-3d';
+    element.style.willChange = 'transform';
+
+    var rect = null;
+    var rafId = null;
+
+    function onPointerEnter(e) {
+      if (e && e.pointerType === 'touch') return;
+      rect = element.getBoundingClientRect();
+      element.style.transition = 'transform 0.1s ease-out, border-color 0.2s ease, box-shadow 0.2s ease';
+    }
+
+    function onPointerMove(e) {
+      if (e && e.pointerType === 'touch') return;
+      if (!rect) rect = element.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var centerX = rect.width / 2;
+      var centerY = rect.height / 2;
+      var rotateX = ((y - centerY) / centerY) * -maxTilt;
+      var rotateY = ((x - centerX) / centerX) * maxTilt;
+
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(function() {
+        element.style.transform = 'perspective(1000px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-2px)';
+      });
+    }
+
+    function onPointerLeave() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rect = null;
+      element.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease';
+      element.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+    }
+
+    if (window.PointerEvent) {
+      element.addEventListener('pointerenter', onPointerEnter, { passive: true });
+      element.addEventListener('pointermove', onPointerMove, { passive: true });
+      element.addEventListener('pointerleave', onPointerLeave, { passive: true });
+    } else {
+      element.addEventListener('mouseenter', onPointerEnter, { passive: true });
+      element.addEventListener('mousemove', onPointerMove, { passive: true });
+      element.addEventListener('mouseleave', onPointerLeave, { passive: true });
+    }
+  }
+
+  function init3DTilt(selector, maxTilt) {
+    if (!canRunTilt()) return;
+    var els = document.querySelectorAll(selector || '.nav-card');
+    for (var i = 0; i < els.length; i++) {
+      attach3DTilt(els[i], maxTilt);
+    }
+  }
+
+  window.attach3DTilt = attach3DTilt;
+  window.init3DTilt = init3DTilt;
+})();
+</script>

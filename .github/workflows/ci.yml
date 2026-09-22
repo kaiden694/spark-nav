@@ -1,0 +1,34 @@
+name: SparkNav CI & Quality Gate
+
+on:
+  push:
+    branches: [ main, master, nav-oss ]
+  pull_request:
+    branches: [ main, master, nav-oss ]
+
+jobs:
+  build-and-test:
+    name: Typecheck, Unit Tests & Static Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Astro Type & Syntax Check
+        run: npm run check
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+      - name: Build Static Site
+        run: npm run build

@@ -1,0 +1,95 @@
+# ==========================================
+# Cloudflare Pages 静态与边缘标头策略矩阵
+# ==========================================
+
+# 全局安全与内容基线标头
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https://challenges.cloudflare.com;
+
+# 1. HTML 页面：客户端每次强制协商缓存（0秒），确保发布后秒级感知新版本，并注入核心关键资产 Preload 提示
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+  Link: </assets/css/style.css?v=20260908h>; rel=preload; as=style, </assets/fonts/iconfont.woff2?ver=8.7>; rel=preload; as=font; crossorigin=anonymous, </assets/js/jquery.min.js>; rel=preload; as=script
+  Vary: Accept-Encoding, Cookie, Accept-Language
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+  Link: </assets/css/style.css?v=20260908h>; rel=preload; as=style, </assets/fonts/iconfont.woff2?ver=8.7>; rel=preload; as=font; crossorigin=anonymous, </assets/js/jquery.min.js>; rel=preload; as=script
+  Vary: Accept-Encoding, Cookie, Accept-Language
+
+/offline.html
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Vary: Accept-Encoding, Cookie, Accept-Language
+
+# 2. Astro / Vite 编译哈希静态资产：不可变强缓存 (1年)
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 3. 字体资产：不可变强缓存 + 跨域开放
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+# 4. 主题原生静态资产 (CSS / JS / Theme)
+/assets/css/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/assets/js/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/assets/theme/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+# 5. 媒体与图片资源：不可变强缓存 (1年)
+/assets/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/uploads/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.avif
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+# 6. 站点图标与品牌资产
+/favicon.ico
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+# 7. SEO 与元数据分发（搜索引擎、Sitemap、RSS、搜索索引）
+/robots.txt
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/sitemap.xml
+  Cache-Control: public, max-age=1800, stale-while-revalidate=86400
+  Content-Type: application/xml; charset=UTF-8
+
+/rss.xml
+  Cache-Control: public, max-age=1800, stale-while-revalidate=86400
+  Content-Type: application/rss+xml; charset=UTF-8
+
+/search-index.json
+  Cache-Control: public, max-age=1800, stale-while-revalidate=86400
+  Access-Control-Allow-Origin: *
+  Content-Type: application/json; charset=UTF-8
+
+# 8. PWA 离线服务工作线程与清单文件
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/manifest.json
+  Cache-Control: public, max-age=86400, must-revalidate
+  Content-Type: application/manifest+json; charset=UTF-8
+
+# 9. 边缘动态 API 接口：绝对禁止中间节点缓存，强制穿透至 Workers
+/api/*
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0

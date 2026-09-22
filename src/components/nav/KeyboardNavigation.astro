@@ -1,0 +1,802 @@
+---
+// KeyboardNavigation.astro
+// Universal tactile keyboard navigation engine and shortcuts HUD for XIU Nav Ecosystem
+---
+
+<!-- Floating Quick Keyboard Pill (Bottom Right) -->
+<button
+  type="button"
+  id="nav-keyboard-help-btn"
+  class="nav-keyboard-help-btn"
+  title="查看全域键盘漫游快捷键 [?]"
+  aria-label="键盘漫游快捷键"
+>
+  <span class="nav-kbd-icon">⌨️</span>
+  <span class="nav-kbd-label">快捷键</span>
+  <kbd class="nav-kbd-chip">?</kbd>
+</button>
+
+<!-- Shortcuts CheatSheet Backdrop & Modal -->
+<div id="nav-shortcuts-backdrop" class="nav-shortcuts-backdrop" style="display: none;" aria-hidden="true">
+  <div id="nav-shortcuts-modal" class="nav-shortcuts-modal" role="dialog" aria-modal="true" aria-labelledby="nav-shortcuts-title">
+    <div class="nav-shortcuts-header">
+      <div class="nav-shortcuts-title-wrap">
+        <span class="nav-shortcuts-icon">⚡</span>
+        <div>
+          <div id="nav-shortcuts-title" class="nav-shortcuts-title">全域极客快捷漫游矩阵</div>
+          <div class="nav-shortcuts-subtitle">Keyboard Navigation Matrix · 免鼠标极速穿梭</div>
+        </div>
+      </div>
+      <button type="button" id="nav-shortcuts-close-btn" class="nav-shortcuts-close" title="关闭 (Esc)">&times;</button>
+    </div>
+
+    <div class="nav-shortcuts-body">
+      <!-- Column 1: 漫游定位 -->
+      <div class="nav-shortcuts-col">
+        <div class="nav-shortcuts-col-title">
+          <span class="col-icon-wrap" style="color: #38bdf8;">🧭</span>
+          <span>漫游与定位</span>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">聚焦下一张卡片</span>
+          <div class="nav-shortcut-keys">
+            <kbd>J</kbd>
+            <span class="key-sep">/</span>
+            <kbd>&darr;</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">聚焦上一张卡片</span>
+          <div class="nav-shortcut-keys">
+            <kbd>K</kbd>
+            <span class="key-sep">/</span>
+            <kbd>&uarr;</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">横向左 / 右移动</span>
+          <div class="nav-shortcut-keys">
+            <kbd>H</kbd>
+            <span class="key-sep">/</span>
+            <kbd>L</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: 卡片微指令 -->
+      <div class="nav-shortcuts-col">
+        <div class="nav-shortcuts-col-title">
+          <span class="col-icon-wrap" style="color: #10b981;">🎯</span>
+          <span>卡片微指令</span>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">直达打开访问</span>
+          <div class="nav-shortcut-keys">
+            <kbd>Enter</kbd>
+            <span class="key-sep">/</span>
+            <kbd>Space</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">切换常用收藏</span>
+          <div class="nav-shortcut-keys">
+            <kbd>P</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">动态快览 (RSS)</span>
+          <div class="nav-shortcut-keys">
+            <kbd>F</kbd>
+            <span class="key-sep">/</span>
+            <kbd>R</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">复制直达链接</span>
+          <div class="nav-shortcut-keys">
+            <kbd>C</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">打开备用镜像</span>
+          <div class="nav-shortcut-keys">
+            <kbd>M</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">唤起高级面板</span>
+          <div class="nav-shortcut-keys">
+            <kbd>O</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 3: 全局命令 -->
+      <div class="nav-shortcuts-col">
+        <div class="nav-shortcuts-col-title">
+          <span class="col-icon-wrap" style="color: #a855f7;">🌐</span>
+          <span>全域命令中心</span>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">全局命令搜索</span>
+          <div class="nav-shortcut-keys">
+            <kbd>⌘K</kbd>
+            <span class="key-sep">/</span>
+            <kbd>^K</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">页面内关键词过滤</span>
+          <div class="nav-shortcut-keys">
+            <kbd>/</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">打开 / 关闭此面板</span>
+          <div class="nav-shortcut-keys">
+            <kbd>?</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">退出焦点 / 关闭</span>
+          <div class="nav-shortcut-keys">
+            <kbd>Esc</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-shortcuts-footer">
+      <span>💡 提示：在任意卡片上聚焦时，直接敲击指令键即可；在输入框内输入文字时快捷键将自动静默。</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Floating Help Button (Integrated into NavFloatingToolbar) */
+  .nav-keyboard-help-btn {
+    display: none !important;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 13px;
+    border-radius: 9999px;
+    background: rgba(18, 22, 34, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--nav-text-muted, #94a3b8);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-keyboard-help-btn:hover {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px rgba(56, 189, 248, 0.25);
+  }
+
+  .nav-kbd-icon {
+    font-size: 14px;
+  }
+
+  .nav-kbd-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--nav-accent, #38bdf8);
+    font-family: var(--font-mono, monospace);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  @media (max-width: 768px) {
+    .nav-keyboard-help-btn {
+      display: none;
+    }
+  }
+
+  /* Shortcuts Modal Backdrop */
+  .nav-shortcuts-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-shortcuts-backdrop.is-open {
+    opacity: 1;
+  }
+
+  .nav-shortcuts-modal {
+    width: 100%;
+    max-width: 760px;
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 40px rgba(56, 189, 248, 0.12);
+    box-sizing: border-box;
+    transform: scale(0.94) translateY(12px);
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+  }
+
+  .nav-shortcuts-backdrop.is-open .nav-shortcuts-modal {
+    transform: scale(1) translateY(0);
+  }
+
+  .nav-shortcuts-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .nav-shortcuts-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-shortcuts-icon {
+    font-size: 22px;
+  }
+
+  .nav-shortcuts-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .nav-shortcuts-subtitle {
+    font-size: 11px;
+    color: var(--nav-text-muted, #94a3b8);
+    font-family: var(--font-mono, monospace);
+  }
+
+  .nav-shortcuts-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--nav-text-muted, #94a3b8);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .nav-shortcuts-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .nav-shortcuts-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    padding: 22px 24px;
+  }
+
+  @media (max-width: 680px) {
+    .nav-shortcuts-body {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+  }
+
+  .nav-shortcuts-col {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-shortcuts-col-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #e2e8f0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .nav-shortcut-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .nav-shortcut-desc {
+    font-size: 12px;
+    color: var(--nav-text-muted, #94a3b8);
+  }
+
+  .nav-shortcut-keys {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-shortcut-keys kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    color: #f8fafc;
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .key-sep {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .nav-shortcuts-footer {
+    padding: 12px 24px 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.2);
+    font-size: 11px;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.5;
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var backdrop = document.getElementById('nav-shortcuts-backdrop');
+    var closeBtn = document.getElementById('nav-shortcuts-close-btn');
+    var helpBtn = document.getElementById('nav-keyboard-help-btn');
+
+    function openShortcutsModal() {
+      if (!backdrop) return;
+      backdrop.style.display = 'flex';
+      backdrop.setAttribute('aria-hidden', 'false');
+      setTimeout(function() {
+        backdrop.classList.add('is-open');
+      }, 10);
+    }
+
+    function closeShortcutsModal() {
+      if (!backdrop) return;
+      backdrop.classList.remove('is-open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      setTimeout(function() {
+        backdrop.style.display = 'none';
+      }, 220);
+    }
+
+    function toggleShortcutsModal() {
+      if (!backdrop) return;
+      if (backdrop.classList.contains('is-open')) {
+        closeShortcutsModal();
+      } else {
+        openShortcutsModal();
+      }
+    }
+
+    if (helpBtn) helpBtn.addEventListener('click', toggleShortcutsModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeShortcutsModal);
+    if (backdrop) {
+      backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) closeShortcutsModal();
+      });
+    }
+
+    // Unified Toast Dispatcher
+    function showToast(msg) {
+      if (typeof window.showNavToast === 'function' && window.showNavToast !== showToast) {
+        window.showNavToast(msg);
+        return;
+      }
+      var c = document.getElementById('nav-toast-container');
+      if (!c) {
+        c = document.createElement('div');
+        c.id = 'nav-toast-container';
+        c.className = 'nav-toast-container';
+        document.body.appendChild(c);
+      }
+      var t = document.createElement('div');
+      t.className = 'nav-toast-item';
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(function() {
+        t.style.transition = 'opacity 0.2s, transform 0.2s';
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        setTimeout(function() { t.remove(); }, 200);
+      }, 2200);
+    }
+
+    window.showNavToast = showToast;
+
+    // Clipboard Fallback Helper
+    function copyText(text, cb) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(cb).catch(function() {
+          fallbackCopy(text, cb);
+        });
+      } else {
+        fallbackCopy(text, cb);
+      }
+    }
+
+    function fallbackCopy(text, cb) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        if (cb) cb();
+      } catch (err) {}
+      document.body.removeChild(ta);
+    }
+
+    // ==================== Keyboard Navigation Engine ====================
+    var focusedCardIndex = -1;
+
+    function getVisibleCards() {
+      var all = Array.prototype.slice.call(document.querySelectorAll('.nav-card'));
+      return all.filter(function(card) {
+        if (card.offsetParent === null) return false;
+        var style = window.getComputedStyle(card);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      });
+    }
+
+    function clearKeyboardFocus() {
+      var existing = document.querySelectorAll('.nav-card.is-keyboard-focused');
+      existing.forEach(function(el) {
+        el.classList.remove('is-keyboard-focused');
+      });
+      focusedCardIndex = -1;
+    }
+
+    function setKeyboardFocus(index, scroll) {
+      var cards = getVisibleCards();
+      if (!cards.length) return;
+      if (index < 0) index = 0;
+      if (index >= cards.length) index = cards.length - 1;
+
+      clearKeyboardFocus();
+      var card = cards[index];
+      if (card) {
+        card.classList.add('is-keyboard-focused');
+        focusedCardIndex = index;
+        if (scroll !== false) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+      }
+    }
+
+    // Mouse click tracking: align focus index when user clicks a card
+    document.addEventListener('click', function(e) {
+      var card = e.target.closest('.nav-card');
+      if (card) {
+        var cards = getVisibleCards();
+        var idx = cards.indexOf(card);
+        if (idx !== -1) {
+          clearKeyboardFocus();
+          card.classList.add('is-keyboard-focused');
+          focusedCardIndex = idx;
+        }
+      } else {
+        // Clicking outside clears focus unless clicking interactive controls
+        if (!e.target.closest('.nav-shortcuts-modal') && !e.target.closest('.nav-keyboard-help-btn')) {
+          clearKeyboardFocus();
+        }
+      }
+    }, true);
+
+    // Global Keydown Listener
+    window.addEventListener('keydown', function(e) {
+      var activeEl = document.activeElement;
+      var isInput = activeEl && (
+        activeEl.tagName === 'INPUT' ||
+        activeEl.tagName === 'TEXTAREA' ||
+        activeEl.tagName === 'SELECT' ||
+        activeEl.isContentEditable
+      );
+
+      // Input elements: only handle Escape to blur
+      if (isInput) {
+        if (e.key === 'Escape') {
+          activeEl.blur();
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Check if other modals are open
+      var cmdBackdrop = document.getElementById('nav-cmd-palette');
+      if (cmdBackdrop && cmdBackdrop.classList.contains('is-open')) return;
+
+      var sheetBackdrop = document.getElementById('nav-card-action-sheet') || document.getElementById('nav-action-sheet-backdrop');
+      if (sheetBackdrop && sheetBackdrop.classList.contains('is-open')) return;
+
+      var mirrorBackdrop = document.getElementById('nav-mirror-modal');
+      if (mirrorBackdrop && mirrorBackdrop.classList.contains('is-open')) return;
+
+      var isShortcutsOpen = backdrop && backdrop.classList.contains('is-open');
+
+      // Help Modal Trigger: '?'
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        toggleShortcutsModal();
+        return;
+      }
+
+      if (isShortcutsOpen) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeShortcutsModal();
+        }
+        return;
+      }
+
+      // Local search input focus: '/'
+      if (e.key === '/') {
+        var searchInput = document.getElementById('cat-local-search-input') ||
+                          document.getElementById('nav-search-input') ||
+                          document.getElementById('gh-search-input') ||
+                          document.getElementById('tg-search-input');
+        if (searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+          searchInput.select();
+          return;
+        }
+      }
+
+      // Escape key: clear focus
+      if (e.key === 'Escape') {
+        if (focusedCardIndex !== -1 || document.querySelector('.nav-card.is-keyboard-focused')) {
+          e.preventDefault();
+          clearKeyboardFocus();
+        }
+        return;
+      }
+
+      // Navigation: J / K / ArrowDown / ArrowUp / H / L
+      var cards = getVisibleCards();
+      if (!cards.length) return;
+
+      if (focusedCardIndex === -1) {
+        var activeCardEl = document.querySelector('.nav-card.is-keyboard-focused');
+        if (activeCardEl) {
+          var foundIdx = cards.indexOf(activeCardEl);
+          if (foundIdx !== -1) focusedCardIndex = foundIdx;
+        }
+      }
+
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (focusedCardIndex === -1) {
+          setKeyboardFocus(0);
+        } else {
+          setKeyboardFocus((focusedCardIndex + 1) % cards.length);
+        }
+        return;
+      }
+
+      if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (focusedCardIndex === -1) {
+          setKeyboardFocus(cards.length - 1);
+        } else {
+          setKeyboardFocus((focusedCardIndex - 1 + cards.length) % cards.length);
+        }
+        return;
+      }
+
+      if (e.key === 'h' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (focusedCardIndex > 0) {
+          setKeyboardFocus(focusedCardIndex - 1);
+        }
+        return;
+      }
+
+      if (e.key === 'l' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (focusedCardIndex < cards.length - 1) {
+          setKeyboardFocus(focusedCardIndex + 1);
+        }
+        return;
+      }
+
+      // ==================== Actions on currently focused card ====================
+      if (focusedCardIndex >= 0 && focusedCardIndex < cards.length) {
+        var targetCard = cards[focusedCardIndex];
+
+        // 1. Enter / Space: Visit URL
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          var targetUrl = targetCard.href || targetCard.getAttribute('data-url');
+          var cardId = targetCard.id || targetCard.getAttribute('data-id');
+          if (cardId && window.incrementNavVisit) {
+            if (cardId.startsWith('fav-')) cardId = cardId.slice(4);
+            window.incrementNavVisit(cardId);
+          }
+          if (targetUrl) {
+            window.open(targetUrl, '_blank', 'noopener,noreferrer');
+          }
+          return;
+        }
+
+        // 2. 'P': Toggle Favorite / Pin
+        if (e.key === 'p' || e.key === 'P') {
+          e.preventDefault();
+          var pinBtn = targetCard.querySelector('.nav-card-pin-btn');
+          if (pinBtn) {
+            pinBtn.click();
+          } else if (window.toggleNavFavorite) {
+            var cid = targetCard.getAttribute('data-id') || targetCard.id;
+            var titleEl = targetCard.querySelector('.nav-card-title');
+            var descEl = targetCard.querySelector('.nav-card-desc');
+            var imgEl = targetCard.querySelector('.nav-card-avatar img');
+            var isNowFav = window.toggleNavFavorite({
+              id: cid,
+              title: titleEl ? titleEl.textContent.trim() : (targetCard.getAttribute('data-title') || ''),
+              url: targetCard.getAttribute('data-url') || targetCard.href,
+              description: descEl ? descEl.textContent.trim() : '',
+              icon: imgEl ? imgEl.src : ''
+            });
+            showToast(isNowFav ? '⭐ 已收藏至我的常用看板' : '✓ 已从我的常用中移除');
+          }
+          return;
+        }
+
+        // 2b. 'F' or 'R': Open Feed / RSS Article Preview
+        if (e.key === 'f' || e.key === 'F' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          var feedBtn = targetCard.querySelector('.nav-card-feed-btn');
+          if (feedBtn) {
+            feedBtn.click();
+            return;
+          }
+          var targetFeed = targetCard.getAttribute('data-feed-url');
+          var cardUrl = targetCard.getAttribute('data-url') || targetCard.href || '';
+          var itemType = targetCard.getAttribute('data-type') || '';
+          if (!targetFeed && (itemType === 'github' || cardUrl.includes('github.com'))) {
+            var m = cardUrl.match(/github\.com\/([^\/]+\/[^\/]+)/);
+            if (m) targetFeed = 'https://github.com/' + m[1] + '/releases.atom';
+          }
+          if (targetFeed && window.openNavFeedPreview) {
+            var cardTitleEl = targetCard.querySelector('.nav-card-title');
+            window.openNavFeedPreview({
+              title: cardTitleEl ? cardTitleEl.textContent.trim() : (targetCard.getAttribute('data-title') || ''),
+              url: cardUrl,
+              feedUrl: targetFeed,
+              targetEl: targetCard
+            });
+          } else {
+            showToast('⚠️ 该卡片未配置订阅源 (RSS/Atom)');
+          }
+          return;
+        }
+
+        // 3. 'C': Copy Deep Link
+        if (e.key === 'c' || e.key === 'C') {
+          e.preventDefault();
+          var copyBtn = targetCard.querySelector('.nav-card-copy-btn');
+          if (copyBtn) {
+            copyBtn.click();
+          } else {
+            var shareUrl = window.location.origin + window.location.pathname + '#' + targetCard.id;
+            copyText(shareUrl, function() {
+              targetCard.classList.add('card-anchor-highlight');
+              showToast('✓ 卡片直达链接已复制到剪贴板');
+              setTimeout(function() {
+                targetCard.classList.remove('card-anchor-highlight');
+              }, 2500);
+            });
+          }
+          return;
+        }
+
+        // 4. 'M': Open Mirror / Latency Switcher
+        if (e.key === 'm' || e.key === 'M') {
+          e.preventDefault();
+          var mirrorsStr = targetCard.getAttribute('data-mirrors');
+          if (mirrorsStr) {
+            var mirrors = mirrorsStr.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+            if (mirrors.length > 0) {
+              if (window.openNavMirrorModal) {
+                window.openNavMirrorModal(targetCard);
+              } else {
+                window.open(mirrors[0], '_blank', 'noopener,noreferrer');
+                showToast('✓ 正在打开备用镜像');
+              }
+              return;
+            }
+          }
+          showToast('⚠️ 该卡片当前未配置可用备用镜像');
+          return;
+        }
+
+        // 5. 'O': Open Action Sheet
+        if (e.key === 'o' || e.key === 'O') {
+          e.preventDefault();
+          if (window.openNavCardActionSheet) {
+            window.openNavCardActionSheet(targetCard);
+          }
+          return;
+        }
+      }
+    });
+
+    window.openNavShortcutsModal = openShortcutsModal;
+    window.closeNavShortcutsModal = closeShortcutsModal;
+    window.setNavKeyboardFocus = function(target) {
+      var cards = getVisibleCards();
+      if (!cards.length) return false;
+      var idx = -1;
+      if (typeof target === 'number') {
+        idx = target;
+      } else if (target instanceof HTMLElement) {
+        idx = cards.indexOf(target);
+      } else if (typeof target === 'string') {
+        var el = document.getElementById(target) || document.querySelector(target);
+        if (el) idx = cards.indexOf(el);
+      }
+      if (idx >= 0 && idx < cards.length) {
+        setKeyboardFocus(idx);
+        return true;
+      }
+      return false;
+    };
+    window.clearNavKeyboardFocus = clearKeyboardFocus;
+  })();
+</script>

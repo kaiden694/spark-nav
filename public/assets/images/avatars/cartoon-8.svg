@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-astro" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#302b63"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="visor-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c6ff"/>
+      <stop offset="100%" stop-color="#0072ff"/>
+    </linearGradient>
+    <clipPath id="circle-clip-8">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-8)">
+    <rect width="120" height="120" fill="url(#bg-astro)"/>
+    <!-- Stars -->
+    <circle cx="24" cy="20" r="1.5" fill="#ffffff" opacity="0.8"/>
+    <circle cx="98" cy="26" r="1.2" fill="#ffffff" opacity="0.8"/>
+    <circle cx="86" cy="94" r="1.5" fill="#ffffff" opacity="0.8"/>
+    <!-- Helmet Base -->
+    <rect x="28" y="24" width="64" height="60" rx="26" fill="#f1f2f6"/>
+    <rect x="36" y="78" width="48" height="10" rx="5" fill="#ced6e0"/>
+    <!-- Visor -->
+    <rect x="36" y="34" width="48" height="38" rx="14" fill="url(#visor-grad)"/>
+    <!-- Cute Eyes inside helmet -->
+    <ellipse cx="50" cy="52" rx="3.5" ry="5" fill="#ffffff"/>
+    <circle cx="49" cy="50" r="1.5" fill="#0072ff"/>
+    <ellipse cx="70" cy="52" rx="3.5" ry="5" fill="#ffffff"/>
+    <circle cx="69" cy="50" r="1.5" fill="#0072ff"/>
+    <!-- Visor shine -->
+    <path d="M 40 40 Q 56 36 74 44" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <!-- Space Suit Body -->
+    <path d="M 30 96 C 30 86 90 86 90 96 L 90 120 L 30 120 Z" fill="#f1f2f6"/>
+    <circle cx="60" cy="100" r="4" fill="#ff4757"/>
+  </g>
+</svg>

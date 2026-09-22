@@ -1,0 +1,16 @@
+{
+  "name": "XIU主题演示",
+  "short_name": "XIU主题",
+  "description": "高性能自包含响应式 Astro 静态博客主题",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff5e52",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

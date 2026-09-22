@@ -1,0 +1,692 @@
+---
+// NavCoreStore.astro
+// Core navigation client-side state store (User Favorites, Visit Frequency, Mirror Preferences, Custom RSS Feeds)
+// Placed in <head> for synchronous initialization before any page or slot script executes.
+---
+  <script is:inline>
+    (function() {
+      var FAVORITES_KEY = 'spark_nav_user_favorites';
+      var LEGACY_FAVORITES_KEY = 'xiu_nav_user_favorites';
+
+      window.getNavFavorites = function() {
+        try {
+          var raw = localStorage.getItem(FAVORITES_KEY) || localStorage.getItem(LEGACY_FAVORITES_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return [];
+        }
+      };
+
+      window.isNavFavorite = function(id) {
+        if (!id) return false;
+        var list = window.getNavFavorites();
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].id === id) return true;
+        }
+        return false;
+      };
+
+      window.saveNavFavorites = function(list) {
+        try {
+          localStorage.setItem(FAVORITES_KEY, JSON.stringify(list));
+        } catch (e) {}
+      };
+
+      window.toggleNavFavorite = function(item) {
+        if (!item || !item.id) return false;
+        var list = window.getNavFavorites();
+        var existsIndex = -1;
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].id === item.id) {
+            existsIndex = i;
+            break;
+          }
+        }
+
+        var isNowPinned = false;
+        if (existsIndex !== -1) {
+          list.splice(existsIndex, 1);
+          isNowPinned = false;
+        } else {
+          list.unshift({
+            id: item.id,
+            title: item.title || '',
+            url: item.url || '',
+            icon: item.icon || '',
+            item_type: item.item_type || 'website',
+            description: item.description || '',
+            pinnedAt: Date.now()
+          });
+          isNowPinned = true;
+        }
+
+        window.saveNavFavorites(list);
+        window.dispatchEvent(new CustomEvent('nav-favorites-updated', {
+          detail: {
+            favorites: list,
+            targetId: item.id,
+            isPinned: isNowPinned
+          }
+        }));
+
+        return isNowPinned;
+      };
+
+      window.removeNavFavorite = function(id) {
+        if (!id) return;
+        var list = window.getNavFavorites().filter(function(x) { return x.id !== id; });
+        window.saveNavFavorites(list);
+        window.dispatchEvent(new CustomEvent('nav-favorites-updated', {
+          detail: {
+            favorites: list,
+            targetId: id,
+            isPinned: false
+          }
+        }));
+      };
+
+      window.clearNavFavorites = function() {
+        window.saveNavFavorites([]);
+        window.dispatchEvent(new CustomEvent('nav-favorites-updated', {
+          detail: {
+            favorites: [],
+            targetId: null,
+            isPinned: false
+          }
+        }));
+      };
+
+      function simpleHash(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+          hash = (hash << 5) - hash + str.charCodeAt(i);
+          hash |= 0;
+        }
+        return Math.abs(hash).toString(36);
+      }
+
+      window.parseBookmarkFile = function(content) {
+        if (!content || typeof content !== 'string') return { type: 'unknown', items: [] };
+        var trimmed = content.trim();
+
+        // 1. Check if Netscape Bookmark HTML format (Chrome, Edge, Firefox, Safari)
+        if (trimmed.includes('<!DOCTYPE NETSCAPE-Bookmark-file-1') ||
+            trimmed.includes('<DL>') ||
+            trimmed.includes('<DT><A') ||
+            (trimmed.startsWith('<') && trimmed.includes('<A HREF='))) {
+          try {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(trimmed, 'text/html');
+            var linkEls = doc.querySelectorAll('a[href]');
+            var items = [];
+            for (var i = 0; i < linkEls.length; i++) {
+              var a = linkEls[i];
+              var href = a.getAttribute('href') || '';
+              if (!href || href.startsWith('javascript:') || href.startsWith('place:')) continue;
+              var title = a.textContent.trim() || href;
+              var icon = a.getAttribute('icon') || '';
+              var addDate = a.getAttribute('add_date');
+              var pinnedAt = addDate ? parseInt(addDate, 10) * 1000 : Date.now();
+              var catName = '';
+              var parentDl = a.closest('dl');
+              if (parentDl && parentDl.parentElement) {
+                var prevHeader = parentDl.parentElement.querySelector('h3, h2, h1');
+                if (prevHeader) catName = prevHeader.textContent.trim();
+              }
+              items.push({
+                id: 'bm-' + simpleHash(href),
+                title: title,
+                url: href,
+                category: catName,
+                icon: icon,
+                item_type: 'website',
+                description: catName ? '[' + catName + '] 从浏览器书签导入' : '从浏览器书签导入',
+                pinnedAt: isNaN(pinnedAt) ? Date.now() : pinnedAt
+              });
+            }
+            return { type: 'html', items: items };
+          } catch (e) {
+            console.error('[Bookmark Parser] HTML parse error:', e);
+          }
+        }
+
+        // 1b. Check if OPML XML format
+        if (trimmed.includes('<opml') || (trimmed.includes('<outline') && (trimmed.includes('xmlUrl') || trimmed.includes('htmlUrl'))) || (trimmed.startsWith('<?xml') && trimmed.includes('<opml'))) {
+          try {
+            var xmlParser = new DOMParser();
+            var xmlDoc = xmlParser.parseFromString(trimmed, 'application/xml');
+            var outlines = xmlDoc.querySelectorAll('outline[xmlUrl], outline[htmlUrl], outline[url]');
+            if (!outlines.length) {
+              outlines = xmlDoc.querySelectorAll('outline');
+            }
+            var opmlItems = [];
+            for (var m = 0; m < outlines.length; m++) {
+              var node = outlines[m];
+              var nodeXmlUrl = node.getAttribute('xmlUrl') || '';
+              var nodeHtmlUrl = node.getAttribute('htmlUrl') || node.getAttribute('url') || nodeXmlUrl;
+              if (!nodeHtmlUrl || nodeHtmlUrl.startsWith('javascript:')) continue;
+              var nodeTitle = node.getAttribute('title') || node.getAttribute('text') || nodeHtmlUrl;
+              var nodeDesc = node.getAttribute('description') || '';
+              var parentOutline = node.parentElement ? node.parentElement.closest('outline') : null;
+              var nodeCategory = parentOutline ? (parentOutline.getAttribute('title') || parentOutline.getAttribute('text') || '') : '';
+              opmlItems.push({
+                id: 'bm-' + simpleHash(nodeHtmlUrl),
+                title: nodeTitle,
+                url: nodeHtmlUrl,
+                feed_url: nodeXmlUrl,
+                category: nodeCategory,
+                icon: '',
+                item_type: 'website',
+                description: nodeDesc || (nodeCategory ? '[' + nodeCategory + '] 从 OPML 订阅源导入' : (nodeXmlUrl ? '从 OPML 订阅源导入' : '从书签导入')),
+                pinnedAt: Date.now()
+              });
+            }
+            if (opmlItems.length > 0) {
+              return { type: 'opml', items: opmlItems };
+            }
+          } catch (e) {
+            console.error('[Bookmark Parser] OPML parse error:', e);
+          }
+        }
+
+        // 2. Parse as JSON format
+        try {
+          var json = JSON.parse(trimmed);
+          var rawList = Array.isArray(json) ? json : (json.favorites || json.bookmarks || []);
+          if (Array.isArray(rawList)) {
+            var jsonItems = [];
+            for (var j = 0; j < rawList.length; j++) {
+              var item = rawList[j];
+              if (item && item.url) {
+                var itId = item.id || ('bm-' + simpleHash(item.url));
+                jsonItems.push({
+                  id: itId,
+                  title: item.title || item.url,
+                  url: item.url,
+                  category: item.category || '',
+                  feed_url: item.feed_url || '',
+                  icon: item.icon || '',
+                  item_type: item.item_type || 'website',
+                  description: item.description || '',
+                  pinnedAt: item.pinnedAt || Date.now()
+                });
+              }
+            }
+            var profileMeta = {
+              customFeeds: (json.customFeeds && typeof json.customFeeds === 'object') ? json.customFeeds : null,
+              mirrorPreferences: (json.mirrorPreferences && typeof json.mirrorPreferences === 'object') ? json.mirrorPreferences : null
+            };
+            return { type: 'json', items: jsonItems, profile: profileMeta };
+          }
+        } catch (e) {
+          // not valid json
+        }
+
+        return { type: 'unknown', items: [] };
+      };
+
+      window.exportNavFavoritesAsJson = function() {
+        var list = window.getNavFavorites();
+        var customFeeds = window.getNavCustomFeeds ? window.getNavCustomFeeds() : {};
+        var mirrorsRaw = {};
+        try { mirrorsRaw = JSON.parse(localStorage.getItem('xiu_nav_mirror_prefs') || '{}'); } catch (e) {}
+        if (list.length === 0 && Object.keys(customFeeds).length === 0 && Object.keys(mirrorsRaw).length === 0) return false;
+        var payload = {
+          app: 'xiu-navigation',
+          version: '2.0',
+          exportedAt: new Date().toISOString(),
+          count: list.length,
+          favorites: list,
+          customFeeds: customFeeds,
+          mirrorPreferences: mirrorsRaw
+        };
+        var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var dateStr = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = 'xiu-nav-profile-' + dateStr + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return true;
+      };
+
+      window.exportNavFavoritesAsHtml = function() {
+        var list = window.getNavFavorites();
+        if (list.length === 0) return false;
+        var nowSec = Math.floor(Date.now() / 1000);
+        var lines = [
+          '<!DOCTYPE NETSCAPE-Bookmark-file-1>',
+          '<!-- This is an automatically generated file.',
+          '     It will be read and overwritten.',
+          '     DO NOT EDIT! -->',
+          '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">',
+          '<TITLE>Bookmarks</TITLE>',
+          '<H1>Bookmarks</H1>',
+          '<DL><p>',
+          '    <DT><H3 ADD_DATE="' + nowSec + '" LAST_MODIFIED="' + nowSec + '">XIU神站导航常用收藏</H3>',
+          '    <DL><p>'
+        ];
+
+        for (var i = 0; i < list.length; i++) {
+          var item = list[i];
+          var safeUrl = (item.url || '').replace(/"/g, '&quot;');
+          var safeTitle = (item.title || item.url || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          var addDate = Math.floor((item.pinnedAt || Date.now()) / 1000);
+          var iconAttr = item.icon ? ' ICON="' + item.icon.replace(/"/g, '&quot;') + '"' : '';
+          lines.push('        <DT><A HREF="' + safeUrl + '" ADD_DATE="' + addDate + '"' + iconAttr + '>' + safeTitle + '</A>');
+        }
+
+        lines.push('    </DL><p>');
+        lines.push('</DL><p>');
+
+        var blob = new Blob([lines.join('\n')], { type: 'text/html;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var dateStr = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = 'xiu-bookmarks-' + dateStr + '.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return true;
+      };
+
+      window.exportNavFavoritesAsOpml = function() {
+        var list = window.getNavFavorites();
+        if (list.length === 0) return false;
+        var rfcDate = new Date().toUTCString();
+        var lines = [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<opml version="2.0">',
+          '  <head>',
+          '    <title>XIU神站导航常用收藏与订阅源</title>',
+          '    <dateCreated>' + rfcDate + '</dateCreated>',
+          '    <docs>http://opml.org/spec2.opml</docs>',
+          '  </head>',
+          '  <body>'
+        ];
+
+        var categorized = {};
+        var defaultGroup = [];
+        for (var i = 0; i < list.length; i++) {
+          var it = list[i];
+          if (it.category) {
+            if (!categorized[it.category]) categorized[it.category] = [];
+            categorized[it.category].push(it);
+          } else {
+            defaultGroup.push(it);
+          }
+        }
+
+        function renderOutlineNode(item, indent) {
+          var safeU = (item.url || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+          var safeT = (item.title || item.url || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+          var safeD = (item.description || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+          var safeF = (item.feed_url || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+          var xmlAttr = safeF ? ' xmlUrl="' + safeF + '" type="rss"' : ' type="link"';
+          return indent + '<outline' + xmlAttr + ' text="' + safeT + '" title="' + safeT + '" htmlUrl="' + safeU + '" url="' + safeU + '" description="' + safeD + '" />';
+        }
+
+        var catKeys = Object.keys(categorized);
+        if (catKeys.length > 0) {
+          for (var c = 0; c < catKeys.length; c++) {
+            var catName = (catKeys[c] || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            lines.push('    <outline text="' + catName + '" title="' + catName + '">');
+            var groupItems = categorized[catKeys[c]];
+            for (var g = 0; g < groupItems.length; g++) {
+              lines.push(renderOutlineNode(groupItems[g], '      '));
+            }
+            lines.push('    </outline>');
+          }
+          if (defaultGroup.length > 0) {
+            lines.push('    <outline text="XIU神站导航常用收藏" title="XIU神站导航常用收藏">');
+            for (var d = 0; d < defaultGroup.length; d++) {
+              lines.push(renderOutlineNode(defaultGroup[d], '      '));
+            }
+            lines.push('    </outline>');
+          }
+        } else {
+          lines.push('    <outline text="XIU神站导航常用收藏" title="XIU神站导航常用收藏">');
+          for (var j = 0; j < list.length; j++) {
+            lines.push(renderOutlineNode(list[j], '      '));
+          }
+          lines.push('    </outline>');
+        }
+
+        lines.push('  </body>');
+        lines.push('</opml>');
+
+        var blob = new Blob([lines.join('\n')], { type: 'application/xml;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var dateStr = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = 'xiu-bookmarks-' + dateStr + '.opml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return true;
+      };
+
+      window.importNavFavorites = function(newItems, profile) {
+        if (!Array.isArray(newItems)) return 0;
+        var existing = window.getNavFavorites();
+        var existingMap = new Map();
+        for (var i = 0; i < existing.length; i++) {
+          existingMap.set(existing[i].id, existing[i]);
+        }
+
+        var addedCount = 0;
+        for (var j = 0; j < newItems.length; j++) {
+          var it = newItems[j];
+          if (it && it.url) {
+            var id = it.id || ('bm-' + simpleHash(it.url));
+            var title = it.title || it.url;
+            if (!existingMap.has(id)) {
+              addedCount++;
+            }
+            existingMap.set(id, {
+              id: id,
+              title: title,
+              url: it.url,
+              feed_url: it.feed_url || '',
+              category: it.category || '',
+              icon: it.icon || '',
+              item_type: it.item_type || 'website',
+              description: it.description || '',
+              pinnedAt: it.pinnedAt || Date.now()
+            });
+          }
+        }
+
+        var merged = Array.from(existingMap.values());
+        window.saveNavFavorites(merged);
+
+        if (profile) {
+          if (profile.customFeeds && typeof profile.customFeeds === 'object') {
+            try {
+              var curFeeds = window.getNavCustomFeeds ? window.getNavCustomFeeds() : {};
+              Object.assign(curFeeds, profile.customFeeds);
+              localStorage.setItem('xiu_nav_custom_feeds', JSON.stringify(curFeeds));
+              if (window.applyNavCustomFeeds) window.applyNavCustomFeeds();
+            } catch (e) {}
+          }
+          if (profile.mirrorPreferences && typeof profile.mirrorPreferences === 'object') {
+            try {
+              var curMirrors = {};
+              try { curMirrors = JSON.parse(localStorage.getItem('xiu_nav_mirror_prefs') || '{}'); } catch (e) {}
+              Object.assign(curMirrors, profile.mirrorPreferences);
+              localStorage.setItem('xiu_nav_mirror_prefs', JSON.stringify(curMirrors));
+              if (window.applyNavMirrorPreferences) window.applyNavMirrorPreferences();
+            } catch (e) {}
+          }
+        }
+
+        window.dispatchEvent(new CustomEvent('nav-favorites-updated', {
+          detail: {
+            favorites: merged,
+            targetId: null,
+            isPinned: true
+          }
+        }));
+        return addedCount;
+      };
+
+      // ==================== User Visit Frequency Metrics ====================
+      var VISIT_COUNTS_KEY = 'spark_nav_visit_counts';
+      var LEGACY_VISIT_COUNTS_KEY = 'xiu_nav_visit_counts';
+
+      window.getNavVisitCounts = function() {
+        try {
+          var raw = localStorage.getItem(VISIT_COUNTS_KEY) || localStorage.getItem(LEGACY_VISIT_COUNTS_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      };
+
+      window.getNavVisitCount = function(id) {
+        if (!id) return 0;
+        var counts = window.getNavVisitCounts();
+        return Number(counts[id]) || 0;
+      };
+
+      window.incrementNavVisit = function(id) {
+        if (!id) return 0;
+        var counts = window.getNavVisitCounts();
+        var current = (Number(counts[id]) || 0) + 1;
+        counts[id] = current;
+        try {
+          localStorage.setItem(VISIT_COUNTS_KEY, JSON.stringify(counts));
+        } catch (e) {}
+
+        window.dispatchEvent(new CustomEvent('nav-visit-counted', {
+          detail: { id: id, count: current }
+        }));
+        return current;
+      };
+
+      // Global delegation to track clicks on nav cards
+      document.addEventListener('click', function(e) {
+        var card = e.target.closest('.nav-card');
+        if (!card) return;
+        if (e.target.closest('.nav-card-copy-btn') || e.target.closest('.nav-card-pin-btn')) {
+          return;
+        }
+        var cid = card.id;
+        if (cid) {
+          if (cid.startsWith('fav-')) cid = cid.slice(4);
+          window.incrementNavVisit(cid);
+        }
+      });
+
+      // ==================== Smart Mirror Route Preferences ====================
+      var MIRROR_PREFS_KEY = 'spark_nav_mirror_prefs';
+      var LEGACY_MIRROR_PREFS_KEY = 'xiu_nav_mirror_prefs';
+
+      window.getNavMirrorPreferences = function() {
+        try {
+          var raw = localStorage.getItem(MIRROR_PREFS_KEY) || localStorage.getItem(LEGACY_MIRROR_PREFS_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      };
+
+      window.getNavMirrorPreference = function(idOrUrl) {
+        if (!idOrUrl) return null;
+        var prefs = window.getNavMirrorPreferences();
+        return prefs[idOrUrl] || null;
+      };
+
+      window.setNavMirrorPreference = function(idOrUrl, targetUrl, latency, label) {
+        if (!idOrUrl || !targetUrl) return false;
+        try {
+          var prefs = window.getNavMirrorPreferences();
+          prefs[idOrUrl] = {
+            url: targetUrl,
+            latency: typeof latency === 'number' ? latency : null,
+            label: label || '',
+            updatedAt: Date.now()
+          };
+          localStorage.setItem(MIRROR_PREFS_KEY, JSON.stringify(prefs));
+          window.dispatchEvent(new CustomEvent('nav-mirror-prefs-updated', {
+            detail: { id: idOrUrl, url: targetUrl, latency: latency }
+          }));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      window.clearNavMirrorPreference = function(idOrUrl) {
+        if (!idOrUrl) return false;
+        try {
+          var prefs = window.getNavMirrorPreferences();
+          if (prefs[idOrUrl]) {
+            delete prefs[idOrUrl];
+            localStorage.setItem(MIRROR_PREFS_KEY, JSON.stringify(prefs));
+            window.dispatchEvent(new CustomEvent('nav-mirror-prefs-updated', {
+              detail: { id: idOrUrl, cleared: true }
+            }));
+            return true;
+          }
+          return false;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      function applyMirrorPreferencesToCards() {
+        var prefs = window.getNavMirrorPreferences();
+        var cards = document.querySelectorAll('.nav-card');
+        cards.forEach(function(card) {
+          var cardId = card.id || card.getAttribute('data-id') || '';
+          var rawUrl = card.getAttribute('data-origin-url') || card.getAttribute('data-url') || card.getAttribute('href') || '';
+          if (!card.getAttribute('data-origin-url') && rawUrl) {
+            card.setAttribute('data-origin-url', rawUrl);
+          }
+          var originUrl = card.getAttribute('data-origin-url') || rawUrl;
+          var pref = (cardId && prefs[cardId]) || (originUrl && prefs[originUrl]);
+
+          var titleEl = card.querySelector('.nav-card-title');
+          var existingBadge = card.querySelector('.nav-card-accelerated-badge');
+
+          if (pref && pref.url && pref.url !== originUrl) {
+            card.href = pref.url;
+            card.setAttribute('data-url', pref.url);
+            if (!existingBadge) {
+              var badge = document.createElement('span');
+              badge.className = 'nav-card-accelerated-badge';
+              badge.title = '已启用加速路线: ' + pref.url + (pref.latency ? ' (' + pref.latency + 'ms)' : '');
+              badge.textContent = '⚡ 加速';
+              if (titleEl) {
+                titleEl.appendChild(badge);
+              } else {
+                card.appendChild(badge);
+              }
+            } else {
+              existingBadge.style.display = 'inline-flex';
+              existingBadge.title = '已启用加速路线: ' + pref.url + (pref.latency ? ' (' + pref.latency + 'ms)' : '');
+            }
+          } else {
+            if (originUrl) {
+              card.href = originUrl;
+              card.setAttribute('data-url', originUrl);
+            }
+            if (existingBadge) {
+              existingBadge.style.display = 'none';
+            }
+          }
+        });
+      }
+
+      window.applyNavMirrorPreferences = applyMirrorPreferencesToCards;
+      window.addEventListener('nav-mirror-prefs-updated', applyMirrorPreferencesToCards);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyMirrorPreferencesToCards);
+      } else {
+        setTimeout(applyMirrorPreferencesToCards, 50);
+      }
+
+      // ==================== User Custom Feeds Store ====================
+      var CUSTOM_FEEDS_KEY = 'spark_nav_custom_feeds';
+      var LEGACY_CUSTOM_FEEDS_KEY = 'xiu_nav_custom_feeds';
+
+      window.getNavCustomFeeds = function() {
+        try {
+          var raw = localStorage.getItem(CUSTOM_FEEDS_KEY) || localStorage.getItem(LEGACY_CUSTOM_FEEDS_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      };
+
+      window.getNavCustomFeed = function(idOrUrl) {
+        if (!idOrUrl) return null;
+        var feeds = window.getNavCustomFeeds();
+        return feeds[idOrUrl] || null;
+      };
+
+      window.setNavCustomFeed = function(idOrUrl, feedUrl) {
+        if (!idOrUrl) return false;
+        try {
+          var feeds = window.getNavCustomFeeds();
+          if (feedUrl && feedUrl.trim()) {
+            feeds[idOrUrl] = feedUrl.trim();
+          } else {
+            delete feeds[idOrUrl];
+          }
+          localStorage.setItem(CUSTOM_FEEDS_KEY, JSON.stringify(feeds));
+          window.dispatchEvent(new CustomEvent('nav-custom-feeds-updated', {
+            detail: { id: idOrUrl, feedUrl: feedUrl }
+          }));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      function applyCustomFeedsToCards() {
+        var feeds = window.getNavCustomFeeds();
+        var cards = document.querySelectorAll('.nav-card');
+        cards.forEach(function(card) {
+          var cardId = card.id || card.getAttribute('data-id') || '';
+          var rawUrl = card.getAttribute('data-origin-url') || card.getAttribute('data-url') || card.getAttribute('href') || '';
+          var repo = card.getAttribute('data-repo') || '';
+          var customFeed = (cardId && feeds[cardId]) || (rawUrl && feeds[rawUrl]) || (repo && feeds[repo]);
+          if (customFeed) {
+            card.setAttribute('data-feed-url', customFeed);
+            var existingFeedBtn = card.querySelector('.nav-card-feed-btn');
+            if (!existingFeedBtn) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'nav-card-feed-btn';
+              btn.title = '查看最新动态 (自定义 RSS)';
+              btn.setAttribute('data-feed-url', customFeed);
+              var cardTitle = card.querySelector('.nav-card-title');
+              btn.setAttribute('data-title', cardTitle ? cardTitle.textContent.trim() : '');
+              btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>';
+              
+              var group = card.querySelector('.nav-card-actions-group');
+              if (group) {
+                group.insertBefore(btn, group.firstChild);
+              } else {
+                var footer = card.querySelector('.nav-card-footer') || card;
+                footer.appendChild(btn);
+              }
+            } else {
+              existingFeedBtn.setAttribute('data-feed-url', customFeed);
+            }
+          }
+        });
+        if (typeof window.refreshNavFeedCardBadges === 'function') {
+          window.refreshNavFeedCardBadges();
+        }
+      }
+
+      window.applyNavCustomFeeds = applyCustomFeedsToCards;
+      window.addEventListener('nav-custom-feeds-updated', applyCustomFeedsToCards);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyCustomFeedsToCards);
+      } else {
+        setTimeout(applyCustomFeedsToCards, 60);
+      }
+      // Dispatch immediate initialization event for any client components
+      try {
+        window.dispatchEvent(new CustomEvent('nav-favorites-ready', {
+          detail: {
+            favorites: window.getNavFavorites(),
+            visitCounts: window.getNavVisitCounts(),
+            mirrorPreferences: window.getNavMirrorPreferences(),
+            customFeeds: window.getNavCustomFeeds()
+          }
+        }));
+      } catch (e) {}
+    })();
+  </script>

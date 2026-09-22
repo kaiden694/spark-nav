@@ -1,0 +1,871 @@
+---
+// CardActionSheet.astro
+// Universal touch long-press action sheet for mobile and touch devices
+---
+
+<div id="nav-action-sheet-backdrop" class="nav-action-sheet-backdrop" style="display: none;" aria-hidden="true">
+  <div id="nav-action-sheet" class="nav-action-sheet" role="dialog" aria-modal="true" aria-labelledby="nav-sheet-title">
+    <div class="nav-sheet-handle"></div>
+    <div class="nav-sheet-header">
+      <div id="nav-sheet-avatar" class="nav-sheet-avatar"></div>
+      <div class="nav-sheet-info">
+        <div id="nav-sheet-title" class="nav-sheet-title">资源名称</div>
+        <div class="nav-sheet-meta-row" style="display: flex; align-items: center; gap: 6px;">
+          <div id="nav-sheet-badge" class="nav-sheet-badge">精选</div>
+          <div id="nav-sheet-status" class="nav-sheet-status-badge" style="display: none;">⚠️ 可能失联</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="nav-sheet-actions">
+      <button type="button" class="nav-sheet-btn nav-sheet-btn-primary" id="nav-sheet-btn-visit">
+        <span class="nav-sheet-btn-icon">🚀</span>
+        <span class="nav-sheet-btn-text">直接打开访问</span>
+        <span class="nav-sheet-btn-arrow">&rarr;</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-mirror" style="display: none;">
+        <span class="nav-sheet-btn-icon">🪞</span>
+        <span class="nav-sheet-btn-text" id="nav-sheet-mirror-text">打开备用镜像 (Mirror)</span>
+        <span class="nav-sheet-btn-arrow">&rarr;</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-reset-mirror" style="display: none;">
+        <span class="nav-sheet-btn-icon">🔄</span>
+        <span class="nav-sheet-btn-text">恢复为官方主站直达</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-feed" style="display: none;">
+        <span class="nav-sheet-btn-icon">📰</span>
+        <span class="nav-sheet-btn-text" id="nav-sheet-feed-text">查看最新动态 (RSS/Atom)</span>
+        <span id="nav-sheet-feed-unread" class="nav-sheet-feed-unread" style="display: none;"></span>
+        <span class="nav-sheet-btn-arrow">&rarr;</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-custom-feed">
+        <span class="nav-sheet-btn-icon">⚙️</span>
+        <span class="nav-sheet-btn-text" id="nav-sheet-custom-feed-text">自定义订阅源 (RSS)</span>
+        <span class="nav-sheet-btn-arrow">&rarr;</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-pin">
+        <span class="nav-sheet-btn-icon" id="nav-sheet-pin-icon">⭐</span>
+        <span class="nav-sheet-btn-text" id="nav-sheet-pin-text">收藏至我的常用</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-copy-deep">
+        <span class="nav-sheet-btn-icon">📋</span>
+        <span class="nav-sheet-btn-text">复制卡片直达链接</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-report">
+        <span class="nav-sheet-btn-icon">🚨</span>
+        <span class="nav-sheet-btn-text">反馈失效或分类纠错</span>
+      </button>
+
+      <button type="button" class="nav-sheet-btn" id="nav-sheet-btn-qr">
+        <span class="nav-sheet-btn-icon">📱</span>
+        <span class="nav-sheet-btn-text">手机扫码直达 (二维码)</span>
+      </button>
+
+      <div id="nav-sheet-qr-box" class="nav-sheet-qr-box" style="display: none;">
+        <div class="nav-sheet-qr-frame">
+          <img id="nav-sheet-qr-img" src="" alt="手机扫码二维码" width="140" height="140" />
+        </div>
+        <span class="nav-sheet-qr-hint">手机相机或微信扫一扫即可在移动端打开</span>
+      </div>
+
+      <button type="button" class="nav-sheet-btn nav-sheet-btn-cancel" id="nav-sheet-btn-cancel">
+        取消
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .nav-action-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.68);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-action-sheet-backdrop.is-open {
+    opacity: 1;
+  }
+
+  .nav-action-sheet {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(18, 22, 34, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: none;
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    padding: 12px 20px 32px 20px;
+    box-sizing: border-box;
+    transform: translateY(100%);
+    transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (min-width: 769px) {
+    .nav-action-sheet-backdrop {
+      align-items: center;
+    }
+    .nav-action-sheet {
+      border-radius: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      transform: scale(0.92) translateY(16px);
+      padding: 18px 22px 22px 22px;
+    }
+    .nav-action-sheet-backdrop.is-open .nav-action-sheet {
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .nav-action-sheet-backdrop.is-open .nav-action-sheet {
+    transform: translateY(0);
+  }
+
+  .nav-sheet-handle {
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.26);
+    margin: 4px auto 16px;
+    cursor: grab;
+    touch-action: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .nav-sheet-handle:active {
+    cursor: grabbing;
+    background: rgba(255, 255, 255, 0.45);
+    transform: scale(1.06);
+  }
+
+  @media (min-width: 769px) {
+    .nav-sheet-handle {
+      display: none;
+    }
+  }
+
+  .nav-sheet-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 12px;
+  }
+
+  .nav-sheet-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .nav-sheet-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .nav-sheet-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nav-sheet-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f8fafc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 4px;
+  }
+
+  .nav-sheet-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.14);
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 5px;
+  }
+
+  .nav-sheet-status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(244, 63, 94, 0.15);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+  }
+
+  .nav-sheet-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-sheet-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+  }
+
+  .nav-sheet-btn:hover, .nav-sheet-btn:active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-1px);
+  }
+
+  .nav-sheet-btn-primary {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+  }
+
+  .nav-sheet-btn-primary:hover, .nav-sheet-btn-primary:active {
+    background: rgba(56, 189, 248, 0.25);
+    border-color: rgba(56, 189, 248, 0.5);
+  }
+
+  .nav-sheet-btn-cancel {
+    margin-top: 6px;
+    justify-content: center;
+    background: transparent;
+    border-color: transparent;
+    color: #94a3b8;
+  }
+
+  .nav-sheet-btn-cancel:hover, .nav-sheet-btn-cancel:active {
+    background: rgba(255, 255, 255, 0.04);
+    color: #f8fafc;
+  }
+
+  .nav-sheet-btn-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .nav-sheet-btn-text {
+    flex: 1;
+  }
+
+  .nav-sheet-feed-unread {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    border-radius: 10px;
+    background: rgba(249, 115, 22, 0.2);
+    border: 1px solid rgba(249, 115, 22, 0.45);
+    color: #f97316;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  .nav-sheet-btn-arrow {
+    color: #64748b;
+    font-size: 16px;
+  }
+
+  .nav-sheet-qr-box {
+    margin: 8px 0;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-sheet-qr-frame {
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-sheet-qr-frame img {
+    display: block;
+    border-radius: 4px;
+  }
+
+  .nav-sheet-qr-hint {
+    font-size: 11px;
+    color: #94a3b8;
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var backdrop = document.getElementById('nav-action-sheet-backdrop');
+    var sheet = document.getElementById('nav-action-sheet');
+    var titleEl = document.getElementById('nav-sheet-title');
+    var badgeEl = document.getElementById('nav-sheet-badge');
+    var avatarEl = document.getElementById('nav-sheet-avatar');
+    var btnVisit = document.getElementById('nav-sheet-btn-visit');
+    var btnPin = document.getElementById('nav-sheet-btn-pin');
+    var pinIcon = document.getElementById('nav-sheet-pin-icon');
+    var pinText = document.getElementById('nav-sheet-pin-text');
+    var btnCopyDeep = document.getElementById('nav-sheet-btn-copy-deep');
+    var btnCopyUrl = document.getElementById('nav-sheet-btn-copy-url');
+    var btnQr = document.getElementById('nav-sheet-btn-qr');
+    var qrBox = document.getElementById('nav-sheet-qr-box');
+    var qrImg = document.getElementById('nav-sheet-qr-img');
+    var btnCancel = document.getElementById('nav-sheet-btn-cancel');
+
+    var currentCard = null;
+    var currentUrl = '';
+    var currentCardId = '';
+
+    function openActionSheet(cardEl) {
+      if (!cardEl) return;
+      currentCard = cardEl;
+      currentUrl = cardEl.getAttribute('href') || '';
+      currentCardId = cardEl.id || '';
+
+      var title = cardEl.querySelector('.nav-card-title');
+      var badge = cardEl.querySelector('.nav-badge');
+      var avatar = cardEl.querySelector('.nav-card-avatar');
+
+      if (titleEl) titleEl.textContent = title ? title.textContent.trim() : '资源卡片';
+      if (badgeEl) {
+        if (badge) {
+          badgeEl.textContent = badge.textContent.trim();
+          badgeEl.style.display = 'inline-block';
+        } else {
+          badgeEl.style.display = 'none';
+        }
+      }
+      if (avatarEl) {
+        avatarEl.innerHTML = avatar ? avatar.innerHTML : '🌐';
+      }
+
+      var statusEl = document.getElementById('nav-sheet-status');
+      var isAlive = cardEl.getAttribute('data-is-alive');
+      if (statusEl) {
+        if (isAlive === 'false') {
+          statusEl.style.display = 'inline-block';
+        } else {
+          statusEl.style.display = 'none';
+        }
+      }
+
+      var btnMirror = document.getElementById('nav-sheet-btn-mirror');
+      var mirrorText = document.getElementById('nav-sheet-mirror-text');
+      var mirrorsStr = cardEl.getAttribute('data-mirrors');
+      if (btnMirror) {
+        if (mirrorsStr) {
+          var mirrors = mirrorsStr.split(',').map(function(m) { return m.trim(); }).filter(Boolean);
+          if (mirrors.length > 0) {
+            btnMirror.style.display = 'flex';
+            btnMirror.setAttribute('data-target-mirror', mirrors[0]);
+            if (mirrorText) {
+              mirrorText.textContent = mirrors.length > 1
+                ? '备用镜像与测速 (' + mirrors.length + ' 个镜像)'
+                : '备用镜像与测速 (Mirror)';
+            }
+          } else {
+            btnMirror.style.display = 'none';
+          }
+        } else {
+          btnMirror.style.display = 'none';
+        }
+      }
+
+      var btnResetMirror = document.getElementById('nav-sheet-btn-reset-mirror');
+      var targetKey = currentCardId || currentUrl;
+      var currentPref = (window.getNavMirrorPreference && targetKey) ? window.getNavMirrorPreference(targetKey) : null;
+      if (btnResetMirror) {
+        if (currentPref && currentPref.url) {
+          btnResetMirror.style.display = 'flex';
+          btnResetMirror.setAttribute('data-target-id', targetKey);
+        } else {
+          btnResetMirror.style.display = 'none';
+        }
+      }
+
+      var targetKey = currentCardId || currentUrl;
+      var btnFeed = document.getElementById('nav-sheet-btn-feed');
+      var feedUnreadEl = document.getElementById('nav-sheet-feed-unread');
+      var btnCustomFeed = document.getElementById('nav-sheet-btn-custom-feed');
+      var customFeedText = document.getElementById('nav-sheet-custom-feed-text');
+
+      var customFeed = (window.getNavCustomFeed && targetKey) ? window.getNavCustomFeed(targetKey) : '';
+      var feedUrl = customFeed || cardEl.getAttribute('data-feed-url') || '';
+      var itemType = cardEl.getAttribute('data-type') || '';
+      var repo = cardEl.getAttribute('data-repo') || '';
+      if (!feedUrl && repo) {
+        feedUrl = 'https://github.com/' + repo + '/releases.atom';
+      } else if (!feedUrl && (itemType === 'github' || currentUrl.includes('github.com'))) {
+        var match = currentUrl.match(/github\.com\/([^\/]+\/[^\/]+)/);
+        if (match) {
+          feedUrl = 'https://github.com/' + match[1].replace(/\.git$/, '') + '/releases.atom';
+        }
+      }
+
+      if (btnFeed) {
+        if (feedUrl) {
+          btnFeed.style.display = 'flex';
+          btnFeed.setAttribute('data-target-feed', feedUrl);
+
+          // Calculate unread badge from cache & read state
+          if (feedUnreadEl) {
+            var unreadCount = 0;
+            try {
+              var cacheRaw = localStorage.getItem('xiu_nav_feed_cache_v1');
+              var readRaw = localStorage.getItem('xiu_nav_feed_read_state_v1');
+              var allCache = cacheRaw ? JSON.parse(cacheRaw) : {};
+              var allRead = readRaw ? JSON.parse(readRaw) : {};
+              var cached = allCache[feedUrl];
+              var readState = allRead[feedUrl] || { lastViewedAt: 0, readGuids: [] };
+              if (cached && cached.data && Array.isArray(cached.data.articles)) {
+                if (!readState.lastViewedAt) {
+                  unreadCount = cached.data.articles.length;
+                } else {
+                  var rGuids = readState.readGuids || [];
+                  cached.data.articles.forEach(function(art) {
+                    var g = art.guid || art.link || art.title;
+                    if (rGuids.indexOf(g) === -1) unreadCount++;
+                  });
+                }
+              }
+            } catch (e) {}
+
+            if (unreadCount > 0) {
+              feedUnreadEl.textContent = unreadCount + ' 篇未读';
+              feedUnreadEl.style.display = 'inline-flex';
+            } else {
+              feedUnreadEl.style.display = 'none';
+            }
+          }
+        } else {
+          btnFeed.style.display = 'none';
+          if (feedUnreadEl) feedUnreadEl.style.display = 'none';
+        }
+      }
+
+      if (btnCustomFeed && customFeedText) {
+        customFeedText.textContent = customFeed ? '修改订阅源 (已自定义 RSS)' : '自定义订阅源 (RSS)';
+      }
+
+      if (btnPin && window.isNavFavorite) {
+        var isFav = window.isNavFavorite(currentCardId);
+        if (pinIcon) pinIcon.textContent = isFav ? '★' : '⭐';
+        if (pinText) pinText.textContent = isFav ? '从我的常用中移除' : '收藏至我的常用';
+        if (isFav) {
+          btnPin.style.color = '#f59e0b';
+        } else {
+          btnPin.style.color = '';
+        }
+      }
+
+      if (qrBox) qrBox.style.display = 'none';
+
+      backdrop.style.display = 'flex';
+      backdrop.setAttribute('aria-hidden', 'false');
+      setTimeout(function() {
+        backdrop.classList.add('is-open');
+      }, 10);
+    }
+
+    function inferPlatformFeed(url, title) {
+      if (!url) return '';
+      var ghMatch = url.match(/github\.com\/([^\/]+\/[^\/]+)/);
+      if (ghMatch) return 'https://github.com/' + ghMatch[1] + '/releases.atom';
+
+      var tgMatch = url.match(/t\.me\/([a-zA-Z0-9_]+)/);
+      if (tgMatch && ['joinchat', 'addstickers', 'c'].indexOf(tgMatch[1]) === -1) {
+        return 'https://rsshub.app/telegram/channel/' + tgMatch[1];
+      }
+
+      var biliMatch = url.match(/space\.bilibili\.com\/([0-9]+)/);
+      if (biliMatch) {
+        return 'https://rsshub.app/bilibili/user/video/' + biliMatch[1];
+      }
+
+      var ytMatch = url.match(/youtube\.com\/@([a-zA-Z0-9_]+)/);
+      if (ytMatch) {
+        return 'https://rsshub.app/youtube/user/@' + ytMatch[1];
+      }
+
+      var xMatch = url.match(/(?:twitter|x)\.com\/([a-zA-Z0-9_]+)/);
+      if (xMatch && ['home', 'explore', 'notifications', 'messages'].indexOf(xMatch[1]) === -1) {
+        return 'https://rsshub.app/twitter/user/' + xMatch[1];
+      }
+
+      return '';
+    }
+
+    function closeActionSheet() {
+      backdrop.classList.remove('is-open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      if (qrBox) qrBox.style.display = 'none';
+      if (sheet) sheet.style.transform = '';
+      setTimeout(function() {
+        backdrop.style.display = 'none';
+        currentCard = null;
+      }, 240);
+    }
+
+    // Touch Drag-to-Dismiss Gesture
+    if (sheet) {
+      var touchStartY = 0;
+      var currentDeltaY = 0;
+      var isDraggingSheet = false;
+
+      sheet.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
+          touchStartY = e.touches[0].clientY;
+          currentDeltaY = 0;
+          isDraggingSheet = true;
+          sheet.style.transition = 'none';
+        }
+      }, { passive: true });
+
+      sheet.addEventListener('touchmove', function(e) {
+        if (!isDraggingSheet || e.touches.length !== 1) return;
+        var moveY = e.touches[0].clientY;
+        var deltaY = moveY - touchStartY;
+        if (deltaY > 0) {
+          currentDeltaY = deltaY;
+          sheet.style.transform = 'translateY(' + (deltaY * 0.85) + 'px)';
+        } else {
+          sheet.style.transform = 'translateY(' + (deltaY * 0.2) + 'px)';
+        }
+      }, { passive: true });
+
+      sheet.addEventListener('touchend', function() {
+        if (!isDraggingSheet) return;
+        isDraggingSheet = false;
+        sheet.style.transition = 'transform 0.26s cubic-bezier(0.16, 1, 0.3, 1)';
+        if (currentDeltaY > 80) {
+          closeActionSheet();
+        } else {
+          sheet.style.transform = '';
+        }
+        currentDeltaY = 0;
+      });
+    }
+
+    // Button actions
+    if (btnVisit) {
+      btnVisit.addEventListener('click', function() {
+        if (currentUrl) {
+          window.open(currentUrl, '_blank', 'noopener,noreferrer');
+        }
+        closeActionSheet();
+      });
+    }
+
+    var btnCustomFeed = document.getElementById('nav-sheet-btn-custom-feed');
+    if (btnCustomFeed) {
+      btnCustomFeed.addEventListener('click', function() {
+        var targetKey = currentCardId || currentUrl;
+        var existing = (window.getNavCustomFeed && targetKey) ? window.getNavCustomFeed(targetKey) : '';
+        var inferred = inferPlatformFeed(currentUrl, titleEl ? titleEl.textContent : '');
+        var promptDefault = existing || inferred || '';
+        var msg = '请输入该卡片的 RSS / Atom 订阅源地址：\n(支持直接输入链接，留空确认可清除自定义设置)';
+        if (inferred && !existing) {
+          msg += '\n\n💡 智能推导推荐：\n' + inferred;
+        }
+        var input = window.prompt(msg, promptDefault);
+        if (input !== null) {
+          var clean = input.trim();
+          if (window.setNavCustomFeed) {
+            window.setNavCustomFeed(targetKey, clean);
+            showToast(clean ? '✓ 已成功保存自定义订阅源' : '✓ 已清除自定义订阅源');
+          }
+          closeActionSheet();
+        }
+      });
+    }
+
+    var btnMirror = document.getElementById('nav-sheet-btn-mirror');
+    if (btnMirror) {
+      btnMirror.addEventListener('click', function() {
+        var mirrorsStr = currentCard ? currentCard.getAttribute('data-mirrors') : '';
+        var mirrors = mirrorsStr ? mirrorsStr.split(',').map(function(m) { return m.trim(); }).filter(Boolean) : [];
+        if (mirrors.length > 0 && window.openNavMirrorModal) {
+          window.openNavMirrorModal(currentCard);
+        } else {
+          var mirrorUrl = btnMirror.getAttribute('data-target-mirror');
+          if (mirrorUrl) {
+            window.open(mirrorUrl, '_blank', 'noopener,noreferrer');
+            showToast('✓ 正在打开备用镜像');
+          }
+        }
+        closeActionSheet();
+      });
+    }
+
+    var btnResetMirror = document.getElementById('nav-sheet-btn-reset-mirror');
+    if (btnResetMirror) {
+      btnResetMirror.addEventListener('click', function() {
+        var tid = btnResetMirror.getAttribute('data-target-id') || currentCardId || currentUrl;
+        if (tid && window.clearNavMirrorPreference) {
+          window.clearNavMirrorPreference(tid);
+          showToast('✓ 已恢复为官方默认主站直达');
+        }
+        closeActionSheet();
+      });
+    }
+
+    var btnFeed = document.getElementById('nav-sheet-btn-feed');
+    if (btnFeed) {
+      btnFeed.addEventListener('click', function() {
+        var targetFeed = btnFeed.getAttribute('data-target-feed');
+        var cardTitle = currentCard ? ((currentCard.querySelector('.nav-card-title') ? currentCard.querySelector('.nav-card-title').textContent.trim() : '') || currentCard.getAttribute('data-title') || '') : '';
+        if (targetFeed && window.openNavFeedPreview) {
+          window.openNavFeedPreview({
+            title: cardTitle,
+            url: currentUrl,
+            feedUrl: targetFeed,
+            targetEl: currentCard
+          });
+        }
+        closeActionSheet();
+      });
+    }
+
+    if (btnPin) {
+      btnPin.addEventListener('click', function() {
+        if (currentCard && window.toggleNavFavorite) {
+          var titleEl = currentCard.querySelector('.nav-card-title');
+          var descEl = currentCard.querySelector('.nav-card-desc');
+          var imgEl = currentCard.querySelector('.nav-card-avatar img');
+          var isNowPinned = window.toggleNavFavorite({
+            id: currentCardId,
+            title: titleEl ? titleEl.textContent.trim() : '',
+            url: currentUrl,
+            description: descEl ? descEl.textContent.trim() : '',
+            icon: imgEl ? imgEl.src : ''
+          });
+          showToast(isNowPinned ? '✓ 已添加至我的常用收藏' : '✓ 已从我的常用中移除');
+        }
+        closeActionSheet();
+      });
+    }
+
+    if (btnCopyDeep) {
+      btnCopyDeep.addEventListener('click', function() {
+        if (currentCardId) {
+          var deepLink = window.location.origin + window.location.pathname + '#' + currentCardId;
+          copyText(deepLink, function() {
+            showToast('✓ 直达链接已复制到剪贴板');
+            history.replaceState(null, '', '#' + currentCardId);
+            if (currentCard) {
+              currentCard.classList.remove('card-anchor-highlight');
+              void currentCard.offsetWidth;
+              currentCard.classList.add('card-anchor-highlight');
+              setTimeout(function() { currentCard.classList.remove('card-anchor-highlight'); }, 3000);
+            }
+          });
+        }
+        closeActionSheet();
+      });
+    }
+
+    if (btnCopyUrl) {
+      btnCopyUrl.addEventListener('click', function() {
+        if (currentUrl) {
+          copyText(currentUrl, function() {
+            showToast('✓ 官方网址已复制到剪贴板');
+          });
+        }
+        closeActionSheet();
+      });
+    }
+
+    if (btnQr) {
+      btnQr.addEventListener('click', function() {
+        if (!qrBox || !qrImg || !currentUrl) return;
+        if (qrBox.style.display === 'none') {
+          qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=' + encodeURIComponent(currentUrl);
+          qrBox.style.display = 'flex';
+        } else {
+          qrBox.style.display = 'none';
+        }
+      });
+    }
+
+    var btnReport = document.getElementById('nav-sheet-btn-report');
+    if (btnReport) {
+      btnReport.addEventListener('click', function() {
+        var cardTitle = currentCard ? ((currentCard.querySelector('.nav-card-title') ? currentCard.querySelector('.nav-card-title').textContent.trim() : '') || currentCard.getAttribute('data-title') || '') : '';
+        var isAlive = currentCard ? (currentCard.getAttribute('data-is-alive') !== 'false') : true;
+        closeActionSheet();
+        if (typeof window.openNavReportModal === 'function') {
+          window.openNavReportModal({
+            target: cardTitle + (currentUrl ? ' (' + currentUrl + ')' : ''),
+            issueType: !isAlive ? 'broken' : 'cat_err',
+            details: ''
+          });
+        }
+      });
+    }
+
+    if (btnCancel) {
+      btnCancel.addEventListener('click', closeActionSheet);
+    }
+
+    backdrop.addEventListener('click', function(e) {
+      if (e.target === backdrop) {
+        closeActionSheet();
+      }
+    });
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && backdrop.classList.contains('is-open')) {
+        closeActionSheet();
+      }
+    });
+
+    function copyText(text, cb) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(cb).catch(function() {
+          fallback(text, cb);
+        });
+      } else {
+        fallback(text, cb);
+      }
+    }
+
+    function fallback(text, cb) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        if (cb) cb();
+      } catch (err) {}
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      var c = document.getElementById('nav-toast-container');
+      if (!c) {
+        c = document.createElement('div');
+        c.id = 'nav-toast-container';
+        c.className = 'nav-toast-container';
+        document.body.appendChild(c);
+      }
+      var t = document.createElement('div');
+      t.className = 'nav-toast-item';
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(function() {
+        t.style.transition = 'opacity 0.2s, transform 0.2s';
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        setTimeout(function() { t.remove(); }, 200);
+      }, 2200);
+    }
+
+    // Touch Long-Press Engine
+    var longPressTimer = null;
+    var startX = 0;
+    var startY = 0;
+    var isLongPressActive = false;
+    var targetCard = null;
+
+    document.addEventListener('touchstart', function(e) {
+      var card = e.target.closest('.nav-card');
+      if (!card) return;
+      
+      // Do not trigger on copy button click
+      if (e.target.closest('.nav-card-copy-btn')) return;
+
+      targetCard = card;
+      isLongPressActive = false;
+      var touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(function() {
+        isLongPressActive = true;
+        if (navigator.vibrate) {
+          try { navigator.vibrate(25); } catch (v) {}
+        }
+        openActionSheet(card);
+      }, 420);
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!longPressTimer) return;
+      var touch = e.touches[0];
+      var dx = Math.abs(touch.clientX - startX);
+      var dy = Math.abs(touch.clientY - startY);
+      if (dx > 12 || dy > 12) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    });
+
+    document.addEventListener('touchcancel', function(e) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    });
+
+    // Suppress click if long press fired
+    document.addEventListener('click', function(e) {
+      if (isLongPressActive) {
+        e.preventDefault();
+        e.stopPropagation();
+        isLongPressActive = false;
+      }
+    }, true);
+
+    // Global trigger
+    window.openNavCardActionSheet = openActionSheet;
+    window.openNavActionSheet = openActionSheet;
+  })();
+</script>

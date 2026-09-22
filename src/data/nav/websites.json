@@ -1,0 +1,2950 @@
+[
+  {
+    "id": "site-huarun",
+    "title": "华润赢",
+    "url": "https://huarun.win/",
+    "description": "翻墙应用商店、协议谱系与人物纪事，收录全平台网络客户端并比较开源代码状态。",
+    "icon": "/assets/images/nav/avatars/site-site-huarun.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "应用商店",
+      "网络工具",
+      "协议科普",
+      "科学上网"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web",
+      "iOS",
+      "Android",
+      "Win",
+      "Mac"
+    ],
+    "is_featured": true,
+    "feed_url": "/rss.xml",
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-tg10000",
+    "title": "TG10000 频道导航",
+    "url": "https://www.tg10000.com/",
+    "description": "Telegram 群组频道导航，收录海量电报群组、频道合集与全网实用 Bot 机器人。",
+    "icon": "https://www.tg10000.com/favicon.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "Telegram",
+      "频道导航",
+      "资源聚合",
+      "网盘搜索"
+    ],
+    "pricing": "free",
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-v0-dev",
+    "title": "v0.dev",
+    "url": "https://v0.dev/",
+    "description": "Vercel 推出的生成式 UI 交互平台，基于 Tailwind CSS 与 React 快速生成现代界面组件。",
+    "icon": "https://v0.dev/favicon.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "AI 编程",
+      "UI 生成",
+      "React",
+      "Tailwind"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-cloudflare",
+    "title": "Cloudflare 控制台",
+    "url": "https://dash.cloudflare.com/",
+    "description": "全球领先的 CDN、DNS 解析、Edge Workers 与 Pages 无服务器全栈托管平台。",
+    "icon": "/assets/images/nav/avatars/site-site-cloudflare.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "CDN",
+      "Serverless",
+      "网络安全",
+      "部署"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "mirror_urls": [
+      "https://dash.cloudflare.com/login"
+    ],
+    "feed_url": "https://blog.cloudflare.com/rss/",
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-cursor",
+    "title": "Cursor",
+    "url": "https://www.cursor.com/",
+    "description": "下一代 AI 优先的智能代码编辑器，基于 VSCode 底层深度融合代码库多模态上下文理解。",
+    "icon": "/assets/images/nav/avatars/site-site-cursor.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "AI 编程",
+      "代码编辑器",
+      "生产力",
+      "开源项目"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Win",
+      "Mac",
+      "Linux"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-raycast",
+    "title": "Raycast",
+    "url": "https://www.raycast.com/",
+    "description": "极速且可扩展的桌面启动器，集成窗口管理、剪贴板历史、AI 对话与丰富的社区插件扩展。",
+    "icon": "https://www.raycast.com/favicon.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "效率启动器",
+      "Mac",
+      "Windows",
+      "生产力"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Mac",
+      "Win"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-dify",
+    "title": "Dify.ai",
+    "url": "https://dify.ai/",
+    "description": "下一代开源 LLM 应用开发平台，融合 Agent 智能体编排、Prompt 工程与 RAG 知识库检索增强。",
+    "icon": "https://dify.ai/favicon.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "Agent",
+      "RAG",
+      "LLM工作流",
+      "AI开发"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Web",
+      "Docker"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-claude",
+    "title": "Claude",
+    "url": "https://claude.ai/",
+    "description": "Anthropic 出品的下一代 AI 助手，超长上下文理解能力、极强代码生成与 Artifacts 交互画布。",
+    "icon": "/assets/images/nav/avatars/site-site-claude.ico",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "大语言模型",
+      "代码生成",
+      "Artifacts",
+      "AI"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Web",
+      "iOS",
+      "Android"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-huggingface",
+    "title": "Hugging Face",
+    "url": "https://huggingface.co/",
+    "description": "全球最大的机器学习与开源模型社区平台，汇聚海量开源权重、Datasets 数据集与 Spaces 在线演示。",
+    "icon": "/assets/images/nav/avatars/site-site-huggingface.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开源模型",
+      "AI社区",
+      "模型权重",
+      "Spaces"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "mirror_urls": [
+      "https://hf-mirror.com/"
+    ],
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-subconverter",
+    "title": "Subconverter Web",
+    "url": "https://sub.xeton.dev/",
+    "description": "通用节点订阅转换工具，支持 Clash、Sing-box、Surge、V2Ray 等多客户端配置规则在线转换。",
+    "icon": "https://sub.xeton.dev/favicon.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "订阅转换",
+      "Clash",
+      "Sing-box",
+      "规则分流"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-excalidraw",
+    "title": "Excalidraw",
+    "url": "https://excalidraw.com/",
+    "description": "极简手绘风虚拟白板协作工具，支持端到端加密、无限画布、架构图绘制与 SVG/PNG 极速导出。",
+    "icon": "/assets/images/nav/avatars/site-site-excalidraw.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "白板",
+      "手绘架构图",
+      "在线协作",
+      "生产力"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-notion",
+    "title": "Notion",
+    "url": "https://www.notion.so/",
+    "description": "集成文档笔记、关系型数据库、项目看板与原生 AI 知识库的全能型生产力工作台。",
+    "icon": "https://www.notion.so/favicon.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "知识库",
+      "数据库",
+      "笔记",
+      "协同办公"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Web",
+      "Mac",
+      "Win",
+      "iOS",
+      "Android"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-15"
+  },
+  {
+    "id": "site-linux-do-",
+    "title": "LINUX DO",
+    "url": "https://linux.do/",
+    "description": "新一代极客开源技术论坛与高价值讨论社区，涵盖大模型技巧、网络技术与极客资源分享。",
+    "icon": "https://linux.do/uploads/default/optimized/1X/1c52d43e34b9cfcfcc1d00c3bcf52ee240742137_2_32x32.png",
+    "category": "featured",
+    "subcategory": "dev-system",
+    "tags": [
+      "常用精选",
+      "精选推荐",
+      "开源项目",
+      "AI工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-17"
+  },
+  {
+    "id": "site-xiu-theme-pages-dev-",
+    "title": "XIU 秀",
+    "url": "https://xiu-theme.pages.dev/",
+    "description": "聚焦数字科技、现代生活与创作者文化的独立内容平台，以极简质感的呈现方式输出深度的技术思考与生活洞察。",
+    "icon": "/assets/images/nav/favicons/xiu-theme-pages-dev-.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "实用工具",
+      "精选推荐",
+      "开源项目",
+      "编程开发"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-17"
+  },
+  {
+    "id": "site-d-hel-cc-cd-",
+    "title": "OmniParser",
+    "url": "https://d.hel.cc.cd/",
+    "description": "跨平台极速无痕解析工具，支持百余主流音视频站点的去水印提取，提供高效稳定的媒体资源采集服务。",
+    "icon": "/assets/images/nav/avatars/site-site-d-hel-cc-cd-.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "实用工具",
+      "精选推荐",
+      "开源项目",
+      "编程开发"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-17"
+  },
+  {
+    "id": "site-wu5mv-com-8dts",
+    "title": "555电影",
+    "url": "https://wu5mv.com/",
+    "description": "555电影 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-wu5mv-com-8dts.ico",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-kanju3-com-mji1",
+    "title": "看剧AI",
+    "url": "https://kanju3.com/",
+    "description": "看剧AI 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://kanju3.com/?utm_source=WZ-adzhp",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-fdzys-net-8m8e",
+    "title": "饭搭子影视",
+    "url": "https://fdzys.net/",
+    "description": "饭搭子影视 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://fdzys.net",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-metaso-cn-nax4",
+    "title": "秘塔AI搜索",
+    "url": "https://metaso.cn/",
+    "description": "秘塔AI搜索 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "/assets/images/nav/avatars/site-site-metaso-cn-nax4.png",
+    "category": "tools",
+    "subcategory": "ai-tools",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI生成"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-suno-songin-ai-ahbp",
+    "title": "Songin AI (颂音)",
+    "url": "https://suno.songin.ai/",
+    "description": "Songin AI (颂音) 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "/assets/images/nav/avatars/site-site-suno-songin-ai-ahbp.png",
+    "category": "tools",
+    "subcategory": "ai-tools",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI生成"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-dmxq30-com-1v2y",
+    "title": "大米星球",
+    "url": "https://dmxq30.com/",
+    "description": "大米星球 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-dmxq30-com-1v2y.png",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-aippt-cn-tcj1",
+    "title": "AIPPT",
+    "url": "https://www.aippt.cn/",
+    "description": "AIPPT 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "/assets/images/nav/avatars/site-site-aippt-cn-tcj1.png",
+    "category": "tools",
+    "subcategory": "ai-tools",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI生成"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-katuai-cn-98s6",
+    "title": "卡图AI (KatuAI)",
+    "url": "https://www.katuai.cn/",
+    "description": "卡图AI (KatuAI) 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "/assets/images/nav/avatars/site-site-katuai-cn-98s6.ico",
+    "category": "tools",
+    "subcategory": "ai-tools",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI生成"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-jiaotuai-cn-h4sy",
+    "title": "蕉图AI (NanoBanana)",
+    "url": "https://www.jiaotuai.cn/",
+    "description": "蕉图AI (NanoBanana) 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "/assets/images/nav/avatars/site-site-jiaotuai-cn-h4sy.png",
+    "category": "tools",
+    "subcategory": "ai-tools",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI生成"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-sspai-com-dxx4",
+    "title": "少数派",
+    "url": "https://sspai.com/",
+    "description": "少数派 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "/assets/images/nav/avatars/site-site-sspai-com-dxx4.ico",
+    "category": "tools",
+    "subcategory": "digital-life",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "数字生活",
+      "前沿资讯"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-izuiyou-com-n2rx",
+    "title": "最右网页版",
+    "url": "https://www.izuiyou.com/",
+    "description": "最右网页版 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.izuiyou.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "开发者工具",
+      "技术资源"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-topbook-cc-overview-zvda",
+    "title": "Topbook",
+    "url": "https://topbook.cc/overview",
+    "description": "Topbook 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "/assets/images/nav/avatars/site-site-topbook-cc-overview-zvda.png",
+    "category": "tools",
+    "subcategory": "digital-life",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "数字生活",
+      "前沿资讯"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yxxq25-cc-9g53",
+    "title": "映像星球",
+    "url": "http://www.yxxq25.cc/",
+    "description": "映像星球 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-yxxq25-cc-9g53.png",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体",
+      "开发者工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-v-xl01-eu-cc-q78q",
+    "title": "雪落影视(修罗影视）",
+    "url": "https://v.xl01.eu.cc/",
+    "description": "雪落影视(修罗影视） 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://v.xl01.eu.cc",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-bttwo-vip-pauz",
+    "title": "两个BT",
+    "url": "https://www.bttwo.vip/",
+    "description": "两个BT 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-bttwo-vip-pauz.png",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-cz01-tv-owtm",
+    "title": "厂长资源",
+    "url": "https://cz01.tv/",
+    "description": "厂长资源 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-cz01-tv-owtm.ico",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-gaze-red-cqti",
+    "title": "注视影视",
+    "url": "https://gaze.red/",
+    "description": "注视影视 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-gaze-red-cqti.png",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yunduoyingshi-com-ujor",
+    "title": "云朵影视",
+    "url": "https://yunduoyingshi.com/",
+    "description": "云朵影视 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://yunduoyingshi.com",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-sotvla-cc-o6n9",
+    "title": "SOTVLA",
+    "url": "https://www.sotvla.cc/",
+    "description": "SOTVLA 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-sotvla-cc-o6n9.ico",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-ylsp-lv-959r",
+    "title": "永乐视频",
+    "url": "https://www.ylsp.lv/",
+    "description": "永乐视频 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-ylsp-lv-959r.png",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-codepen-io-KungfuF-Loma-f-l95n",
+    "title": "看片狂人",
+    "url": "https://codepen.io/KungfuF-Loma/full/GgNKJOM",
+    "description": "看片狂人 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-codepen-io-kungfuf-loma-f-l95n.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体",
+      "开发者工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-dyrs-me-wl4b",
+    "title": "电影人生",
+    "url": "http://dyrs.me/",
+    "description": "电影人生 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-dyrs-me-wl4b.ico",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-monkey-flix-com-ma9a",
+    "title": "猴影工坊",
+    "url": "https://monkey-flix.com/",
+    "description": "猴影工坊 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://monkey-flix.com",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-mtyy1-cc-mmh3",
+    "title": "麦田影院",
+    "url": "https://www.mtyy1.cc/",
+    "description": "麦田影院 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-mtyy1-cc-mmh3.ico",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-asd123sx23xdacsx-top-eic4",
+    "title": "布布追剧",
+    "url": "https://asd123sx23xdacsx.top/",
+    "description": "布布追剧 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://asd123sx23xdacsx.top",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-soupian-plus-ifyy",
+    "title": "搜片.com",
+    "url": "https://soupian.plus/",
+    "description": "搜片.com 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-soupian-plus-ifyy.png",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-qlys-cc-vj6d",
+    "title": "麒麟影视",
+    "url": "https://www.qlys.cc/",
+    "description": "麒麟影视 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-qlys-cc-vj6d.png",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-xiguadh-com-mbi4",
+    "title": "西瓜影院",
+    "url": "https://www.xiguadh.com/",
+    "description": "西瓜影院 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-xiguadh-com-mbi4.ico",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-4kvm-site-q7cn",
+    "title": "4K影视",
+    "url": "https://4kvm.site/",
+    "description": "4K影视 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-4kvm-site-q7cn.png",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-panlegepan-com-xd2k",
+    "title": "盘了个盘",
+    "url": "https://www.panlegepan.com/",
+    "description": "盘了个盘 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "/assets/images/nav/avatars/site-site-panlegepan-com-xd2k.svg",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-xn-ykq321c-com-720f",
+    "title": "观影 GYING",
+    "url": "https://www.xn--ykq321c.com/",
+    "description": "观影 GYING 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "/assets/images/nav/avatars/site-site-xn-ykq321c-com-720f.ico",
+    "category": "tools",
+    "subcategory": "media-video",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-aipan-me-65y3",
+    "title": "AIPAN搜索",
+    "url": "https://www.aipan.me/",
+    "description": "AIPAN搜索 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.aipan.me",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-birdiesearch-com-i-IZ3721531-43gy",
+    "title": "小鸟搜索",
+    "url": "https://www.birdiesearch.com/i/IZ3721531",
+    "description": "小鸟搜索 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "/assets/images/nav/avatars/site-site-birdiesearch-com-i-iz3721531-43gy.png",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yiso-fun-9915",
+    "title": "易搜",
+    "url": "https://yiso.fun/",
+    "description": "易搜 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "/assets/images/nav/avatars/site-site-yiso-fun-9915.png",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "磁力检索"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yunso-net-t140",
+    "title": "小云搜索",
+    "url": "https://www.yunso.net/",
+    "description": "小云搜索 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.yunso.net",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-aipanso-com-mq2h",
+    "title": "爱盘搜",
+    "url": "https://aipanso.com/",
+    "description": "爱盘搜 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://aipanso.com",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-pansearch-me-s44f",
+    "title": "PanSearch",
+    "url": "https://www.pansearch.me/",
+    "description": "PanSearch 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.pansearch.me",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "磁力检索"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-panyq-com-odpv",
+    "title": "盘友圈",
+    "url": "https://panyq.com/",
+    "description": "盘友圈 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "/assets/images/nav/avatars/site-site-panyq-com-odpv.ico",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-so1st-com-tbmz",
+    "title": "又一个资源",
+    "url": "https://www.so1st.com/",
+    "description": "又一个资源 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.so1st.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "磁力检索"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-kuakuaso-com-k8tk",
+    "title": "夸夸盘搜",
+    "url": "https://www.kuakuaso.com/",
+    "description": "夸夸盘搜 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "/assets/images/nav/avatars/site-site-kuakuaso-com-k8tk.svg",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-pikasoo-top-ad40",
+    "title": "皮卡搜",
+    "url": "https://www.pikasoo.top/",
+    "description": "皮卡搜 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.pikasoo.top",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "磁力检索"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-cuppaso-com-ap14",
+    "title": "咔帕搜索",
+    "url": "https://www.cuppaso.com/",
+    "description": "咔帕搜索 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.cuppaso.com",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-nmme-one-d74j",
+    "title": "橘子盘搜",
+    "url": "https://www.nmme.one/",
+    "description": "橘子盘搜 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.nmme.one",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-lingfengyun-com-wfr1",
+    "title": "凌风云搜索",
+    "url": "https://www.lingfengyun.com/",
+    "description": "凌风云搜索 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.lingfengyun.com",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-dalipan-xyz-fb0w",
+    "title": "大力盘",
+    "url": "http://www.dalipan.xyz/",
+    "description": "大力盘 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.dalipan.xyz/#/?code=ebVSz75H0",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-52pojie-cn-d0b7",
+    "title": "吾爱破解",
+    "url": "https://www.52pojie.cn/",
+    "description": "吾爱破解 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "/assets/images/nav/avatars/site-site-52pojie-cn-d0b7.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-423down-com-vmf9",
+    "title": "423Down",
+    "url": "https://www.423down.com/",
+    "description": "423Down 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "/assets/images/nav/avatars/site-site-423down-com-vmf9.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-downloadlynet-ir-d732",
+    "title": "Downloadly",
+    "url": "https://downloadlynet.ir/",
+    "description": "Downloadly 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "/favicon.ico",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-appinn-com-jhi8",
+    "title": "小众软件",
+    "url": "https://www.appinn.com/",
+    "description": "小众软件 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.appinn.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-xibuluo-com-nsdp",
+    "title": "西部落",
+    "url": "https://www.xibuluo.com/",
+    "description": "西部落 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.xibuluo.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yxssp-com-vuz9",
+    "title": "异星软件空间",
+    "url": "https://www.yxssp.com/",
+    "description": "异星软件空间 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.yxssp.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-apphot-cc-kmvp",
+    "title": "APP热",
+    "url": "https://apphot.cc/",
+    "description": "APP热 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://apphot.cc",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-ghxi-com-o3bd",
+    "title": "果核剥壳",
+    "url": "https://www.ghxi.com/",
+    "description": "果核剥壳 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.ghxi.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-tenlonstudio-com-hup1",
+    "title": "腾龙工作室",
+    "url": "https://www.tenlonstudio.com/",
+    "description": "腾龙工作室 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "/assets/images/nav/avatars/site-site-tenlonstudio-com-hup1.png",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-xd-x6d-com-html-23-html-elhv",
+    "title": "小刀娱乐网",
+    "url": "https://xd.x6d.com/html/23.html",
+    "description": "小刀娱乐网 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://xd.x6d.com/html/23.html",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yxzhi-com-g106",
+    "title": "鸭先知",
+    "url": "https://www.yxzhi.com/",
+    "description": "鸭先知 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.yxzhi.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-masuit-org-3rg7",
+    "title": "懒得勤快",
+    "url": "https://masuit.org/",
+    "description": "懒得勤快 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://masuit.org",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-ahhhhfs-com-q420",
+    "title": "A姐分享",
+    "url": "https://www.ahhhhfs.com/",
+    "description": "A姐分享 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.ahhhhfs.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-fy6b-com-jcmn",
+    "title": "枫音应用",
+    "url": "https://www.fy6b.com/",
+    "description": "枫音应用 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.fy6b.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-annas-archive-gl-zkb0",
+    "title": "安娜的档案",
+    "url": "https://annas-archive.gl/",
+    "description": "安娜的档案 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://annas-archive.gl",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-24hbook-com-dk4f",
+    "title": "24小时搜书",
+    "url": "https://24hbook.com/",
+    "description": "24小时搜书 聚合海量正版与精选电子书、漫画图书资源，提供舒适沉浸的跨设备排版阅读体验。",
+    "icon": "/assets/images/nav/avatars/site-site-24hbook-com-dk4f.ico",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-book-tstrs-me-poiu",
+    "title": "SaltyLeo 的书架",
+    "url": "https://book.tstrs.me/",
+    "description": "SaltyLeo 的书架 聚合海量正版与精选电子书、漫画图书资源，提供舒适沉浸的跨设备排版阅读体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://book.tstrs.me",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-findbooks-eu-org-m3xz",
+    "title": "找书网",
+    "url": "https://findbooks.eu.org/",
+    "description": "找书网 聚合海量正版与精选电子书、漫画图书资源，提供舒适沉浸的跨设备排版阅读体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://findbooks.eu.org",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-feiku6-com-index-html-0q2b",
+    "title": "飞库网",
+    "url": "https://www.feiku6.com/index.html",
+    "description": "飞库网 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.feiku6.com/index.html",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-kgbook-com-kzoz",
+    "title": "苦瓜书盘",
+    "url": "https://kgbook.com/",
+    "description": "苦瓜书盘 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://kgbook.com",
+    "category": "tools",
+    "subcategory": "cloud-search",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-xmsoushu-com-7nsk",
+    "title": "熊猫搜索导航",
+    "url": "https://xmsoushu.com/",
+    "description": "熊猫搜索导航 汇聚主流网盘与多维度资源索引，支持跨平台极速检索电影、电子书、应用与学习资料。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://xmsoushu.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "网盘搜索",
+      "资源聚合",
+      "检索工具",
+      "影音播放"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-zxcs-zip-gqps",
+    "title": "知轩藏书",
+    "url": "https://zxcs.zip/",
+    "description": "知轩藏书 聚合海量正版与精选电子书、漫画图书资源，提供舒适沉浸的跨设备排版阅读体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://zxcs.zip",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-shukui-net-o2nl",
+    "title": "书葵网",
+    "url": "https://www.shukui.net/",
+    "description": "书葵网 聚合海量正版与精选电子书、漫画图书资源，提供舒适沉浸的跨设备排版阅读体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.shukui.net",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-ibooks-org-cn-qkxl",
+    "title": "读书小站",
+    "url": "https://ibooks.org.cn/",
+    "description": "读书小站 聚合海量正版与精选电子书、漫画图书资源，提供舒适沉浸的跨设备排版阅读体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://ibooks.org.cn",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-pdfdrive-com-kg2n",
+    "title": "PDF Drive",
+    "url": "https://www.pdfdrive.com/",
+    "description": "PDF Drive 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.pdfdrive.com",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-haodoo-net-ewm4",
+    "title": "好读",
+    "url": "http://www.haodoo.net/",
+    "description": "好读 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.haodoo.net",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-bookfere-com-ox3s",
+    "title": "书伴",
+    "url": "https://bookfere.com/",
+    "description": "书伴 聚合海量正版与精选电子书、漫画图书资源，提供舒适沉浸的跨设备排版阅读体验。",
+    "icon": "/assets/images/nav/avatars/site-site-bookfere-com-ox3s.ico",
+    "category": "tools",
+    "subcategory": "books-reading",
+    "tags": [
+      "书籍阅读",
+      "电子书",
+      "资源聚合",
+      "数字图书馆"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-tool-liumingye-cn-music-24c2",
+    "title": "MyFreeMp3",
+    "url": "http://tool.liumingye.cn/music",
+    "description": "MyFreeMp3 汇聚海量高品质音乐与音频资源，支持便捷的在线视听、榜单浏览与流畅无损播放。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://tool.liumingye.cn/music",
+    "category": "tools",
+    "subcategory": "media-audio",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yym4s-com-0lpc",
+    "title": "音乐魔石",
+    "url": "https://yym4s.com/",
+    "description": "音乐魔石 汇聚海量高品质音乐与音频资源，支持便捷的在线视听、榜单浏览与流畅无损播放。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://yym4s.com",
+    "category": "tools",
+    "subcategory": "media-audio",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-xiageba-com-vpol",
+    "title": "下歌吧",
+    "url": "https://xiageba.com/",
+    "description": "下歌吧 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://xiageba.com",
+    "category": "tools",
+    "subcategory": "media-audio",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-zz123-com-ognw",
+    "title": "zz123",
+    "url": "https://zz123.com/",
+    "description": "zz123 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://zz123.com",
+    "category": "tools",
+    "subcategory": "media-audio",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-mu-jie-cc-musicBox-4rig",
+    "title": "昔枫音乐盒",
+    "url": "https://mu-jie.cc/musicBox",
+    "description": "昔枫音乐盒 汇聚海量高品质音乐与音频资源，支持便捷的在线视听、榜单浏览与流畅无损播放。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://mu-jie.cc/musicBox",
+    "category": "tools",
+    "subcategory": "media-audio",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yinwe-com-ou0d",
+    "title": "音微网",
+    "url": "https://www.yinwe.com/",
+    "description": "音微网 汇聚海量高品质音乐与音频资源，支持便捷的在线视听、榜单浏览与流畅无损播放。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.yinwe.com",
+    "category": "tools",
+    "subcategory": "media-audio",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-fangpi-net-n8l4",
+    "title": "放屁音乐网",
+    "url": "https://www.fangpi.net/",
+    "description": "放屁音乐网 汇聚海量高品质音乐与音频资源，支持便捷的在线视听、榜单浏览与流畅无损播放。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.fangpi.net",
+    "category": "tools",
+    "subcategory": "media-audio",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-acgjc-com-221z",
+    "title": "ACG漫音社",
+    "url": "http://www.acgjc.com/",
+    "description": "ACG漫音社 汇聚海量高品质音乐与音频资源，支持便捷的在线视听、榜单浏览与流畅无损播放。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.acgjc.com",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "在线音乐",
+      "音频电台",
+      "多媒体",
+      "无损试听"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-chat-deepseek-com-sc3d",
+    "title": "DeepSeek",
+    "url": "https://chat.deepseek.com/",
+    "description": "DeepSeek 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://chat.deepseek.com",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-mimo-xiaomi-com-j2h8",
+    "title": "小米MIMO",
+    "url": "https://mimo.xiaomi.com/",
+    "description": "小米MIMO 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://mimo.xiaomi.com",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "开发者工具",
+      "技术资源"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-kimi-moonshot-cn-ur4r",
+    "title": "Kimi",
+    "url": "https://kimi.moonshot.cn/",
+    "description": "Kimi 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://kimi.moonshot.cn",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-qwen-ai-lem9",
+    "title": "Qwen.ai",
+    "url": "https://qwen.ai/",
+    "description": "Qwen.ai 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://qwen.ai",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-chatglm-cn-x3an",
+    "title": "智谱清言",
+    "url": "https://chatglm.cn/",
+    "description": "智谱清言 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://chatglm.cn",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-doubao-com-chat-g922",
+    "title": "豆包",
+    "url": "https://www.doubao.com/chat",
+    "description": "豆包 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.doubao.com/chat",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "AI对话",
+      "大模型"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-chat-openai-com-ukbr",
+    "title": "ChatGPT",
+    "url": "https://chat.openai.com/",
+    "description": "ChatGPT 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://chat.openai.com",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-qianwen-com-ds5k",
+    "title": "通义千问",
+    "url": "https://www.qianwen.com/",
+    "description": "通义千问 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "/assets/images/nav/avatars/site-site-qianwen-com-ds5k.png",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yiyan-baidu-com-0bp0",
+    "title": "文心一言",
+    "url": "https://yiyan.baidu.com/",
+    "description": "文心一言 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://yiyan.baidu.com",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-xinghuo-xfyun-cn-desk-h00o",
+    "title": "讯飞星火",
+    "url": "https://xinghuo.xfyun.cn/desk",
+    "description": "讯飞星火 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://xinghuo.xfyun.cn/desk",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "AI对话",
+      "大模型"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-chat-stepfun-com-lgbb",
+    "title": "阶跃AI",
+    "url": "https://chat.stepfun.com/",
+    "description": "阶跃AI 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://chat.stepfun.com",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-poe-com-49nj",
+    "title": "Poe",
+    "url": "https://poe.com/",
+    "description": "Poe 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://poe.com",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "AI对话",
+      "大模型"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-ying-baichuan-ai-com-chat-2ecz",
+    "title": "百川智能",
+    "url": "https://ying.baichuan-ai.com/chat",
+    "description": "百川智能 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://ying.baichuan-ai.com/chat",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-meta-ai-6p4v",
+    "title": "Meta AI",
+    "url": "https://www.meta.ai/",
+    "description": "Meta AI 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.meta.ai",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-yuanbao-tencent-com-hlz6",
+    "title": "腾讯元宝",
+    "url": "https://yuanbao.tencent.com/",
+    "description": "腾讯元宝 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "/assets/images/nav/avatars/site-site-yuanbao-tencent-com-hlz6.png",
+    "category": "tools",
+    "subcategory": "dev-system",
+    "tags": [
+      "实用工具",
+      "精选站点",
+      "开发者工具",
+      "技术资源"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-grok-com-p5gl",
+    "title": "Grok",
+    "url": "https://grok.com/",
+    "description": "Grok 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://grok.com",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-agent-minimaxi-com-xw7c",
+    "title": "MiniMax",
+    "url": "https://agent.minimaxi.com/",
+    "description": "MiniMax 专注前沿人工智能与自动化生成能力，提供高效的大模型对话交互与生产力辅助体验。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://agent.minimaxi.com",
+    "category": "tools",
+    "subcategory": "ai-chat",
+    "tags": [
+      "AI工具",
+      "大模型",
+      "智能助手",
+      "AI对话"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-study-163-com-fp1g",
+    "title": "网易云课堂",
+    "url": "https://study.163.com/",
+    "description": "网易云课堂 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://study.163.com",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-icourse163-org-wk6d",
+    "title": "中国大学MOOC",
+    "url": "https://www.icourse163.org/",
+    "description": "中国大学MOOC 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.icourse163.org",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-open-163-com-cqoa",
+    "title": "网易公开课",
+    "url": "https://open.163.com/",
+    "description": "网易公开课 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://open.163.com",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-gaokao-com-950i",
+    "title": "高考网",
+    "url": "http://www.gaokao.com/",
+    "description": "高考网 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.gaokao.com",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-51zxw-net-gvw5",
+    "title": "我要自学网",
+    "url": "https://www.51zxw.net/",
+    "description": "我要自学网 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.51zxw.net",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-erya-mooc-chaoxing-com-qdu8",
+    "title": "超星尔雅",
+    "url": "http://erya.mooc.chaoxing.com/",
+    "description": "超星尔雅 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://erya.mooc.chaoxing.com",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-coursera-org-mpdj",
+    "title": "Coursera",
+    "url": "https://www.coursera.org/",
+    "description": "Coursera 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.coursera.org",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-edx-org-wwed",
+    "title": "EDX",
+    "url": "https://www.edx.org/",
+    "description": "EDX 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.edx.org",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-icourses-cn-home-d0oh",
+    "title": "爱课程",
+    "url": "http://www.icourses.cn/home",
+    "description": "爱课程 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.icourses.cn/home",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-next-xuetangx-com-xor2",
+    "title": "学堂在线",
+    "url": "https://next.xuetangx.com/",
+    "description": "学堂在线 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://next.xuetangx.com",
+    "category": "tools",
+    "subcategory": "study-courses",
+    "tags": [
+      "在线学习",
+      "优质课程",
+      "知识提升",
+      "名校公开课"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-hippter-com-cv7w",
+    "title": "HiPPTER",
+    "url": "http://www.hippter.com/",
+    "description": "HiPPTER 汇聚高质量精选演示文档设计素材与实用办公模板，全面提升日常汇报与演示效率。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.hippter.com",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "办公素材",
+      "PPT模板",
+      "效率办公",
+      "效率设计"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-officeplus-cn-PPT-template-mq7z",
+    "title": "OfficePLUS",
+    "url": "https://www.officeplus.cn/PPT/template",
+    "description": "OfficePLUS 聚合精选核心功能与高频日常实用入口，界面极简轻量，助力日常高效探索与生产力提升。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.officeplus.cn/PPT/template",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "办公素材",
+      "PPT模板",
+      "效率办公",
+      "效率设计"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-ypppt-com-oyix",
+    "title": "优品PPT",
+    "url": "http://www.ypppt.com/",
+    "description": "优品PPT 汇聚高质量精选演示文档设计素材与实用办公模板，全面提升日常汇报与演示效率。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.ypppt.com",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "办公素材",
+      "PPT模板",
+      "效率办公",
+      "效率设计"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-rapidesign-cn-mrwd",
+    "title": "锐普PPT",
+    "url": "https://www.rapidesign.cn/",
+    "description": "锐普PPT 面向极客与开发者群体，提供前沿技术框架、软件分享、安全工具链与高效实用资源。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.rapidesign.cn",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "开发者工具",
+      "技术资源",
+      "系统工具",
+      "办公素材"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-52ppt-com-hhal",
+    "title": "PPT之家",
+    "url": "https://www.52ppt.com/",
+    "description": "PPT之家 汇聚高质量精选演示文档设计素材与实用办公模板，全面提升日常汇报与演示效率。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.52ppt.com",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "办公素材",
+      "PPT模板",
+      "效率办公",
+      "效率设计"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-51pptmoban-com-gjhf",
+    "title": "51PPT",
+    "url": "http://www.51pptmoban.com/",
+    "description": "51PPT 汇聚高质量精选演示文档设计素材与实用办公模板，全面提升日常汇报与演示效率。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.51pptmoban.com",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "办公素材",
+      "PPT模板",
+      "效率办公",
+      "效率设计"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-pptfans-cn-9mrq",
+    "title": "pptfans",
+    "url": "https://www.pptfans.cn/",
+    "description": "pptfans 汇聚高质量精选演示文档设计素材与实用办公模板，全面提升日常汇报与演示效率。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=https://www.pptfans.cn",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "办公素材",
+      "PPT模板",
+      "效率办公",
+      "效率设计"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-1ppt-com-lxom",
+    "title": "第一PPT",
+    "url": "http://www.1ppt.com/",
+    "description": "第一PPT 汇聚高质量精选演示文档设计素材与实用办公模板，全面提升日常汇报与演示效率。",
+    "icon": "https://t3.gstatic.cn/faviconV2?client=SOCIAL&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;size=128&amp;url=http://www.1ppt.com",
+    "category": "tools",
+    "subcategory": "office-design",
+    "tags": [
+      "办公素材",
+      "PPT模板",
+      "效率办公",
+      "效率设计"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-quark-cn-s-6f835d23f7df-h9lg",
+    "title": "易看Pro",
+    "url": "https://pan.quark.cn/s/6f835d23f7df",
+    "description": "易看Pro 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-quark-cn-s-6f835d23f7df-h9lg.png",
+    "category": "tools",
+    "subcategory": "media-tvbox",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体",
+      "And"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-zoo-ink-kxnq",
+    "title": "优可",
+    "url": "https://zoo.ink/?p=584",
+    "description": "优可 汇聚全网优质视听内容，提供流畅高清的在线音视频播放与便捷的流媒体检索体验。",
+    "icon": "/assets/images/nav/avatars/site-site-zoo-ink-kxnq.png",
+    "category": "tools",
+    "subcategory": "media-tvbox",
+    "tags": [
+      "影音播放",
+      "影视检索",
+      "多媒体",
+      "And"
+    ],
+    "pricing": "free",
+    "is_featured": false,
+    "created_at": "2026-09-21"
+  },
+  {
+    "id": "site-mangacopy-com-0vrr",
+    "title": "拷贝漫画",
+    "url": "https://www.mangacopy.com",
+    "description": "优质在线漫画阅读平台，汇聚海量日漫、韩漫与国漫，提供高清极速的跨端画质与翻页体验。",
+    "icon": "/assets/images/nav/avatars/site-site-mangacopy-com-0vrr.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "在线漫画",
+      "漫画阅读",
+      "高清画质",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web",
+      "Android",
+      "iOS"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-baozimh-com-ga03",
+    "title": "包子漫画",
+    "url": "https://www.baozimh.com",
+    "description": "纯净免翻的极速在线漫画平台，界面极简无广告侵扰，覆盖热门连载与经典完结作品。",
+    "icon": "/assets/images/nav/avatars/site-site-baozimh-com-ga03.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "在线漫画",
+      "免翻阅读",
+      "极简无广",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-manhuagui-com-kjig",
+    "title": "漫画柜",
+    "url": "https://www.manhuagui.com",
+    "description": "老牌中文在线漫画平台，收录几十万部经典日漫与原创佳作，具备深厚的分卷书库与社区讨论。",
+    "icon": "/assets/images/nav/avatars/site-site-manhuagui-com-kjig.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "老牌漫画",
+      "在线漫画",
+      "经典日漫",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-miaoqumh-org-gff9",
+    "title": "喵趣漫画",
+    "url": "https://www.miaoqumh.org",
+    "description": "高清无删减在线漫画阅读站，实时追踪全网热门热血、恋爱与悬疑新作，排版加载流畅。",
+    "icon": "https://www.miaoqumh.org/favicon.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "在线漫画",
+      "实时追更",
+      "全彩画质",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-mengman-cc-k1gw",
+    "title": "梦漫",
+    "url": "https://www.mengman.cc",
+    "description": "汇集海量优质中日漫画资源的在线阅读站点，支持跨设备自适应排版与舒适视网膜级阅读。",
+    "icon": "https://www.mengman.cc/favicon.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "在线漫画",
+      "自适应排版",
+      "跨端阅读",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-mangadex-org-qnfy",
+    "title": "MangaDex",
+    "url": "https://mangadex.org",
+    "description": "全球知名的开源多语言非营利漫画平台，支持多语种翻译组直传与开放无广告的阅读体验。",
+    "icon": "/assets/images/nav/avatars/site-site-mangadex-org-qnfy.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "开源平台",
+      "全球漫画",
+      "多语言",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-kuaikanmanhua-com-bjsa",
+    "title": "快看漫画",
+    "url": "https://www.kuaikanmanhua.com",
+    "description": "国内领先的条漫与国漫原创平台，收录超人气正版国漫连载，具备高质量全彩排版与移动端适读体验。",
+    "icon": "/assets/images/nav/avatars/site-site-kuaikanmanhua-com-bjsa.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "原创国漫",
+      "全彩条漫",
+      "正版连载",
+      "Web"
+    ],
+    "pricing": "freemium",
+    "platform": [
+      "Web",
+      "Android",
+      "iOS"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-dm5-com-1wyo",
+    "title": "动漫屋",
+    "url": "https://www.dm5.com",
+    "description": "国内知名老牌综合漫画门户，提供热门正版授权与经典连载索引，支持全屏双页翻阅模式。",
+    "icon": "/assets/images/nav/avatars/site-site-dm5-com-1wyo.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "老牌门户",
+      "在线漫画",
+      "双页翻看",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-manben-com-lupj",
+    "title": "漫本网",
+    "url": "https://www.manben.com",
+    "description": "专注原创与热门日韩漫画发行的综合阅读平台，分类细致，支持极速预加载与横竖屏切换。",
+    "icon": "/assets/images/nav/avatars/site-site-manben-com-lupj.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "在线漫画",
+      "预加载",
+      "横竖屏切换",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-agedm-io-hoqs",
+    "title": "AGE动漫",
+    "url": "https://www.agedm.io",
+    "description": "专注于二次元动漫追番的纯净影视站点，更新神速，提供多线高清播放源与完备的年度季度索引。",
+    "icon": "/assets/images/nav/avatars/site-site-agedm-io-hoqs.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "动漫追番",
+      "新番速递",
+      "高清播放",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-omofun-in-duqr",
+    "title": "OmoFun",
+    "url": "https://omofun.in",
+    "description": "老牌二次元动漫点播网站，涵盖完备的新番弹幕播放与高分剧场版，支持快速倍速与全屏视听。",
+    "icon": "/assets/images/nav/avatars/site-site-omofun-in-duqr.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "动漫追番",
+      "弹幕播放",
+      "剧场版",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-xifandm-com-emu3",
+    "title": "稀饭动漫",
+    "url": "https://xifandm.com",
+    "description": "老牌动漫在线观看网站，汇聚每季当红热门新番与经典动画合集，提供多线路自适应解析播放。",
+    "icon": "https://xifandm.com/favicon.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "老牌动漫",
+      "在线追番",
+      "多线路解析",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-auvfun-com-vykc",
+    "title": "AuvFun",
+    "url": "https://auvfun.com",
+    "description": "界面清新现代的在线动漫追番网站，无冗余广告，支持新番时间表查询与多画质极速播放。",
+    "icon": "https://auvfun.com/favicon.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "动漫追番",
+      "新番时刻表",
+      "清爽界面",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-bangumi-tv-qg12",
+    "title": "Bangumi 番组计划",
+    "url": "https://bangumi.tv",
+    "description": "中文互联网最权威的二次元番组资料库与评分社区，提供全面精准的新番时刻表、收录与评分。",
+    "icon": "https://bangumi.tv/favicon.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "番组计划",
+      "权威评分",
+      "ACG资料库",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-moegirl-org-cn-17td",
+    "title": "萌娘百科",
+    "url": "https://zh.moegirl.org.cn",
+    "description": "万物皆可萌的中文 ACG 综合百科全书，深度解析二次元人物设定、梗文化、声优与创作脉络。",
+    "icon": "/assets/images/nav/avatars/site-site-moegirl-org-cn-17td.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "ACG百科",
+      "萌属性",
+      "梗文化解析",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-mikanani-me-x9bp",
+    "title": "蜜柑计划",
+    "url": "https://mikanani.me",
+    "description": "新一代二次元新番订阅与动漫 BT 索引平台，支持自动追番 RSS 订阅与各大字幕组原盘直发。",
+    "icon": "/assets/images/nav/avatars/site-site-mikanani-me-x9bp.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "新番订阅",
+      "RSS追番",
+      "字幕组原盘",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-dmhy-org-mj30",
+    "title": "动漫花园 (DMHY)",
+    "url": "https://share.dmhy.org",
+    "description": "老牌最具影响力的动漫爱好者资源自由交流与发布平台，聚合两岸三地顶尖字幕组的首发资源。",
+    "icon": "/assets/images/nav/avatars/site-site-dmhy-org-mj30.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "字幕组首发",
+      "动漫资源",
+      "老牌平台",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-anime1-me-k56v",
+    "title": "Anime1",
+    "url": "https://anime1.me",
+    "description": "极简无广的日漫在线点播网站，分类直观，支持上百部当季新番与完结动画免费在线观看。",
+    "icon": "/assets/images/nav/avatars/site-site-anime1-me-k56v.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "在线追番",
+      "极简无广",
+      "日漫点播",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-bangumi-moe-8mrt",
+    "title": "萌番组",
+    "url": "https://bangumi.moe",
+    "description": "现代化非营利性动漫资源聚合发布索引，采用开放 API 与现代化响应式设计，极速搜索下载。",
+    "icon": "/assets/images/nav/avatars/site-site-bangumi-moe-8mrt.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "资源聚合",
+      "开放API",
+      "二次元分享",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-nyaa-si-032e",
+    "title": "Nyaa",
+    "url": "https://nyaa.si",
+    "description": "全球最大的东亚二次元多媒体与动漫公网 BT 索引库，提供海量生肉、熟肉与无损原盘音视频。",
+    "icon": "https://nyaa.si/favicon.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "全球BT",
+      "动漫原盘",
+      "无损音频",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-tsdm39-com-1q4m",
+    "title": "天使动漫论坛",
+    "url": "https://www.tsdm39.com",
+    "description": "历史悠久的大型综合动漫社区与同好交流论坛，涵盖字幕翻译、音乐分享、同人创作与资源互助。",
+    "icon": "/assets/images/nav/avatars/site-site-tsdm39-com-1q4m.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "动漫论坛",
+      "同好社区",
+      "字幕组互助",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-acfun-cn-yc20",
+    "title": "AcFun 弹幕视频网",
+    "url": "https://www.acfun.cn",
+    "description": "中国第一家弹幕视频网站，浓厚的硬核二次元与同好交流氛围，汇聚精选番剧、虚拟偶像与UP主创作。",
+    "icon": "/assets/images/nav/avatars/site-site-acfun-cn-yc20.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "弹幕视频",
+      "二次元门户",
+      "原创番剧",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-wallhaven-cc-4k",
+    "title": "Wallhaven",
+    "url": "https://wallhaven.cc",
+    "description": "全球知名的极客与二次元 4K/8K 超高清动漫壁纸索引库，支持多标签精准检索、色彩过滤与原图下载。",
+    "icon": "/assets/images/nav/avatars/site-site-wallhaven-cc-4k.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "4K壁纸",
+      "动漫壁纸",
+      "高清图库",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": true,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-vndb-org-db",
+    "title": "VNDB 视觉小说库",
+    "url": "https://vndb.org",
+    "description": "全球最全面权威的二次元视觉小说 (Galgame) 综合维基资料库，收录完备的制作组、声优、发行与评分信息。",
+    "icon": "/assets/images/nav/avatars/site-site-vndb-org-db.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "视觉小说",
+      "Galgame",
+      "ACG数据库",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-konachan-net-board",
+    "title": "Konachan",
+    "url": "https://konachan.net",
+    "description": "知名二次元动漫高清插画与同人壁纸图库分享平台，涵盖海量热门 ACG 角色画作、原画与精美同人图集。",
+    "icon": "/assets/images/nav/avatars/site-site-konachan-net-board.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "动漫插画",
+      "同人壁纸",
+      "二次元图库",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  },
+  {
+    "id": "site-2dfan-com-wiki",
+    "title": "2dfan 视觉小说",
+    "url": "https://2dfan.com",
+    "description": "中文二次元美少女游戏与视觉小说同好社区，提供深度剧情考据、攻略评测、汉化索引与资料整合。",
+    "icon": "/assets/images/nav/avatars/site-site-2dfan-com-wiki.ico",
+    "category": "tools",
+    "subcategory": "acg-media",
+    "tags": [
+      "视觉小说",
+      "汉化索引",
+      "同好交流",
+      "Web"
+    ],
+    "pricing": "free",
+    "platform": [
+      "Web"
+    ],
+    "is_featured": false,
+    "created_at": "2026-09-22"
+  }
+]

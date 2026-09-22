@@ -1,0 +1,68 @@
+[
+  {
+    "id": "featured",
+    "name": "常用精选",
+    "icon": "🌟",
+    "description": "高频访问的核心工具、神器与日常必备入口",
+    "badge": "必备"
+  },
+  {
+    "id": "tools",
+    "name": "实用工具",
+    "icon": "🛠️",
+    "description": "收录深度实用的前沿 AI、效率利器、开发辅助与网络工具。已优化独立切片矩阵架构，保障秒级检索与极速直达。",
+    "subcategories": [
+      { "id": "ai-chat", "name": "AI 对话模型", "icon": "🤖" },
+      { "id": "ai-tools", "name": "AI 创意生成", "icon": "✨" },
+      { "id": "media-video", "name": "影视流媒体", "icon": "🎬" },
+      { "id": "acg-media", "name": "二次元与动漫", "icon": "🌸" },
+      { "id": "media-tvbox", "name": "TvBox与播放器", "icon": "📺" },
+      { "id": "media-audio", "name": "音乐与音频", "icon": "🎵" },
+      { "id": "cloud-search", "name": "网盘磁力搜索", "icon": "🔍" },
+      { "id": "books-reading", "name": "电子书与阅读", "icon": "📚" },
+      { "id": "dev-system", "name": "系统与软件工具", "icon": "💻" },
+      { "id": "study-courses", "name": "学习与公开课", "icon": "🎓" },
+      { "id": "office-design", "name": "PPT模板与设计", "icon": "📐" },
+      { "id": "digital-life", "name": "数字生活资讯", "icon": "☕" }
+    ]
+  },
+  {
+    "id": "github",
+    "name": "开源矩阵",
+    "icon": "💻",
+    "description": "高星开源项目、全平台网络工具与极客项目",
+    "subcategories": [
+      { "id": "proxy-clients", "name": "代理与网络" },
+      { "id": "devtools", "name": "开发者神器" },
+      { "id": "ai-models", "name": "开源 AI" }
+    ]
+  },
+  {
+    "id": "telegram",
+    "name": "电报生态",
+    "icon": "✈️",
+    "description": "优质 TG 频道、实用机器人与技术交流社群",
+    "subcategories": [
+      { "id": "news", "name": "资讯新闻", "icon": "📰" },
+      { "id": "tools", "name": "软件工具", "icon": "🛠️" },
+      { "id": "dev", "name": "极客开发", "icon": "💻" },
+      { "id": "network", "name": "网络主机", "icon": "🌐" },
+      { "id": "media", "name": "影音资源", "icon": "🎬" },
+      { "id": "finance", "name": "金融理财", "icon": "🪙" },
+      { "id": "community", "name": "同好社群", "icon": "👥" },
+      { "id": "official", "name": "官方服务", "icon": "🛡️" },
+      { "id": "nsfw", "name": "NSFW/成人", "icon": "🔞" }
+    ]
+  },
+  {
+    "id": "creators",
+    "name": "优质博主",
+    "icon": "👤",
+    "description": "X、YouTube 等社交平台技术专家、AI 先锋与独立创作者",
+    "subcategories": [
+      { "id": "tech", "name": "科技与AI" },
+      { "id": "dev", "name": "独立全栈" },
+      { "id": "content", "name": "海外视野" }
+    ]
+  }
+]

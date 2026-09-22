@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-penguin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4facfe"/>
+      <stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+    <clipPath id="circle-clip-7">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-7)">
+    <rect width="120" height="120" fill="url(#bg-penguin)"/>
+    <!-- Body -->
+    <ellipse cx="60" cy="66" rx="34" ry="36" fill="#2f3542"/>
+    <!-- White Belly / Face -->
+    <ellipse cx="60" cy="70" rx="24" ry="28" fill="#ffffff"/>
+    <!-- Eyes -->
+    <ellipse cx="48" cy="58" rx="3.5" ry="4.5" fill="#2f3542"/>
+    <circle cx="47" cy="56.5" r="1.5" fill="#ffffff"/>
+    <ellipse cx="72" cy="58" rx="3.5" ry="4.5" fill="#2f3542"/>
+    <circle cx="71" cy="56.5" r="1.5" fill="#ffffff"/>
+    <!-- Cheeks -->
+    <circle cx="40" cy="66" r="5" fill="#ff4757" opacity="0.6"/>
+    <circle cx="80" cy="66" r="5" fill="#ff4757" opacity="0.6"/>
+    <!-- Beak -->
+    <polygon points="54,64 66,64 60,73" fill="#ffa502"/>
+    <!-- Winter Earmuffs -->
+    <path d="M 28 52 A 32 32 0 0 1 92 52" stroke="#ff4757" stroke-width="4" fill="none"/>
+    <circle cx="28" cy="54" r="9" fill="#ff4757"/>
+    <circle cx="28" cy="54" r="5" fill="#ffffff"/>
+    <circle cx="92" cy="54" r="9" fill="#ff4757"/>
+    <circle cx="92" cy="54" r="5" fill="#ffffff"/>
+  </g>
+</svg>

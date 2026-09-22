@@ -1,0 +1,128 @@
+name: Scheduled Navigation Health & Metric Sync Pipeline
+
+on:
+  schedule:
+    # Run every Sunday at 02:00 UTC (10:00 AM CST)
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Audit target scope'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - github-only
+          - telegram-only
+          - websites-only
+      dry_run:
+        description: 'Dry run without committing changes'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  audit-and-sync:
+    name: Audit Nav Status, Refresh Metrics & Commit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Execute Navigation Health Audit
+        id: audit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
+            ARGS="--write"
+          else
+            ARGS="--dry-run"
+          fi
+
+          if [ "${{ github.event.inputs.target }}" = "github-only" ]; then
+            ARGS="$ARGS --github-only"
+          elif [ "${{ github.event.inputs.target }}" = "telegram-only" ]; then
+            ARGS="$ARGS --telegram-only"
+          elif [ "${{ github.event.inputs.target }}" = "websites-only" ]; then
+            ARGS="$ARGS --websites-only"
+          fi
+
+          echo "Running: node src/scripts/audit-nav-health.mjs $ARGS"
+          node src/scripts/audit-nav-health.mjs $ARGS
+
+      - name: Generate Health Audit Step Summary
+        if: always()
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'audit-reports/nav-health-report.json';
+            if (!fs.existsSync(path)) process.exit(0);
+            try {
+              const r = JSON.parse(fs.readFileSync(path, 'utf8'));
+              let md = '### 🩺 Navigation Health Audit Summary\n\n';
+              md += '| Scope | Total | Alive | Healed | Dead/Issues |\n';
+              md += '| :--- | :--- | :--- | :--- | :--- |\n';
+              if (r.summary) {
+                const s = r.summary;
+                md += \`| **Overall** | \${s.total || 0} | \${s.alive || 0} | \${s.healed || 0} | \${s.dead || 0} |\n\`;
+              }
+              if (r.websites) {
+                const w = r.websites;
+                md += \`| Websites | \${w.total || 0} | \${w.alive || 0} | \${w.healed || 0} | \${w.dead || 0} |\n\`;
+              }
+              if (r.github) {
+                const g = r.github;
+                md += \`| GitHub | \${g.total || 0} | \${g.alive || 0} | \${g.healed || 0} | \${g.dead || 0} |\n\`;
+              }
+              if (r.telegram) {
+                const t = r.telegram;
+                md += \`| Telegram | \${t.total || 0} | \${t.alive || 0} | \${t.healed || 0} | \${t.dead || 0} |\n\`;
+              }
+              if (process.env.GITHUB_STEP_SUMMARY) {
+                fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+              }
+            } catch (e) {
+              console.error('Failed to append step summary:', e);
+            }
+          "
+
+      - name: Cache Remote Avatars & Favicons
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: node src/scripts/cache-nav-avatars.mjs --write
+
+      - name: Verify Nav Search Index
+        run: node src/scripts/build-nav-search-index.mjs
+
+      - name: Commit & Push Health Updates
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ -n "$(git status --porcelain src/data/nav/ public/nav-search-index.json dist/nav-search-index.json public/assets/images/nav/)" ]; then
+            echo "[HEALTH] Detected dataset mutations, avatar downloads or metric refreshes. Committing changes..."
+            git add src/data/nav/ public/nav-search-index.json dist/nav-search-index.json public/assets/images/nav/
+            git commit -m "chore(nav): automated health audit, asset cache & metric sync [skip ci]"
+            git push
+          else
+            echo "[HEALTH] No mutations or metric drift detected. Nav datasets are up to date."
+          fi

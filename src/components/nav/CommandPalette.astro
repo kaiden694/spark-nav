@@ -1,0 +1,1586 @@
+---
+// Global Command Palette Component (Cmd + K / Ctrl + K / '/')
+---
+<div id="nav-cmd-palette" class="cmd-palette-backdrop" style="display: none;" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="cmd-palette-container">
+    <!-- Header: Search Input & Shortcuts -->
+    <div class="cmd-palette-header">
+      <div class="cmd-search-input-wrap">
+        <svg class="cmd-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          id="cmd-palette-input"
+          class="cmd-palette-input"
+          placeholder="搜索全网资源、GitHub高星库、TG频道或博主..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button type="button" id="cmd-clear-btn" class="cmd-clear-btn" title="清空输入" style="display: none;">
+          &times;
+        </button>
+      </div>
+      <button type="button" class="cmd-close-btn" id="cmd-close-btn" title="关闭 (ESC)">
+        <kbd class="cmd-kbd-esc">ESC</kbd>
+        <span class="cmd-close-icon" aria-hidden="true">取消</span>
+      </button>
+    </div>
+
+    <!-- Filter Facets Tabs -->
+    <div class="cmd-palette-filter-bar">
+      <button type="button" class="cmd-filter-pill is-active" data-type="all">全部 <span class="cmd-filter-badge" id="cmd-count-all">0</span></button>
+      <button type="button" class="cmd-filter-pill" data-type="favorite">⭐ 收藏 <span class="cmd-filter-badge" id="cmd-count-favorite">0</span></button>
+      <button type="button" class="cmd-filter-pill" data-type="website">🛠️ 工具 <span class="cmd-filter-badge" id="cmd-count-website">0</span></button>
+      <button type="button" class="cmd-filter-pill" data-type="github">💻 开源 <span class="cmd-filter-badge" id="cmd-count-github">0</span></button>
+      <button type="button" class="cmd-filter-pill" data-type="telegram">✈️ Telegram <span class="cmd-filter-badge" id="cmd-count-telegram">0</span></button>
+      <button type="button" class="cmd-filter-pill" data-type="creator">👤 博主 <span class="cmd-filter-badge" id="cmd-count-creator">0</span></button>
+    </div>
+
+    <!-- Results List Area -->
+    <div class="cmd-palette-body">
+      <div id="cmd-palette-results" class="cmd-results-list" role="listbox">
+        <!-- Injected via JavaScript -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="cmd-empty-state" class="cmd-empty-state" style="display: none;">
+        <span class="cmd-empty-icon">🛸</span>
+        <div class="cmd-empty-title">未找到匹配结果</div>
+        <div class="cmd-empty-desc">尝试更换更通用的关键词，或通过上方分类标签缩小检索范围</div>
+      </div>
+    </div>
+
+    <!-- Footer: Keyboard Shortcuts Guide -->
+    <div class="cmd-palette-footer">
+      <div class="cmd-key-hints">
+        <span class="cmd-hint-item"><kbd>&uarr;</kbd><kbd>&darr;</kbd> 移动选择</span>
+        <span class="cmd-hint-item"><kbd>&crarr;</kbd> 打开链接</span>
+        <span class="cmd-hint-item"><kbd>ESC</kbd> 关闭面板</span>
+      </div>
+      <div class="cmd-footer-brand">
+        <span>XIU NAV COMMAND</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .cmd-palette-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: clamp(40px, 12vh, 120px);
+    padding-left: 16px;
+    padding-right: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cmd-palette-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .cmd-palette-container {
+    width: 100%;
+    max-width: 680px;
+    background: rgba(18, 22, 34, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    transform: scale(0.96) translateY(-10px);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(85vh - 80px);
+  }
+
+  .cmd-palette-backdrop.is-open .cmd-palette-container {
+    transform: scale(1) translateY(0);
+  }
+
+  /* Header */
+  .cmd-palette-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .cmd-search-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .cmd-search-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--nav-accent, #38bdf8);
+    flex-shrink: 0;
+  }
+
+  .cmd-palette-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #f8fafc;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: inherit;
+  }
+
+  .cmd-palette-input::placeholder {
+    color: #64748b;
+    font-size: 14px;
+  }
+
+  .cmd-clear-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .cmd-clear-btn:hover {
+    color: #f8fafc;
+  }
+
+  .cmd-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .cmd-close-btn kbd {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .cmd-close-icon {
+    display: none;
+    font-size: 22px;
+    color: #94a3b8;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .cmd-close-icon:hover {
+    color: #f8fafc;
+  }
+
+  /* Filter Bar */
+  .cmd-palette-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cmd-palette-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cmd-filter-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .cmd-filter-pill:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+  }
+
+  .cmd-filter-pill.is-active {
+    background: rgba(56, 189, 248, 0.16);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    font-weight: 600;
+  }
+
+  .cmd-filter-badge {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 10px;
+  }
+  .cmd-filter-pill.is-active .cmd-filter-badge {
+    background: rgba(56, 189, 248, 0.25);
+    color: #38bdf8;
+  }
+
+  /* Body & Results */
+  .cmd-palette-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  .cmd-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cmd-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+  }
+
+  .cmd-clear-history-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+
+  .cmd-clear-history-btn:hover {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
+  }
+
+  .cmd-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    text-decoration: none !important;
+    color: #f1f5f9 !important;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .cmd-item:visited {
+    color: #f1f5f9 !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item:hover,
+  .cmd-item.is-selected {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(56, 189, 248, 0.3) !important;
+    color: #f1f5f9 !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .cmd-item-icon {
+    width: 34px !important;
+    height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  .cmd-item-icon img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: inherit;
+  }
+
+  .cmd-item-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    flex-shrink: 0 !important;
+    display: block !important;
+  }
+
+  .cmd-item-icon span {
+    font-size: 18px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cmd-item-meta {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  .cmd-item-title-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 2px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .cmd-item-title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #f1f5f9 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-badge {
+    font-size: 10px !important;
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+    flex-shrink: 0 !important;
+    line-height: 1.3 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-fav-pill {
+    font-size: 10px !important;
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+    color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.15) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-pref-pill {
+    font-size: 10px !important;
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+    color: #38bdf8 !important;
+    background: rgba(14, 165, 233, 0.16) !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-status-pill {
+    font-size: 10px !important;
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-status-pill.status-offline {
+    color: #f43f5e !important;
+    background: rgba(244, 63, 94, 0.15) !important;
+    border: 1px solid rgba(244, 63, 94, 0.3) !important;
+  }
+
+  .cmd-item-nsfw-pill {
+    font-size: 10px !important;
+    padding: 1px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+    color: #fb7185 !important;
+    background: rgba(244, 63, 94, 0.2) !important;
+    border: 1px solid rgba(244, 63, 94, 0.4) !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-visit-pill {
+    font-size: 10px !important;
+    padding: 1px 5px !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+    color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.12) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-badge-website { background: rgba(245, 158, 11, 0.15) !important; color: #fbbf24 !important; }
+  .cmd-badge-github { background: rgba(168, 85, 247, 0.15) !important; color: #c084fc !important; }
+  .cmd-badge-telegram { background: rgba(14, 165, 233, 0.15) !important; color: #38bdf8 !important; }
+  .cmd-badge-creator { background: rgba(236, 72, 153, 0.15) !important; color: #f472b6 !important; }
+
+  .cmd-item-desc {
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .cmd-item-stat {
+    font-size: 11px !important;
+    color: #cbd5e1 !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item-action {
+    font-size: 12px !important;
+    color: var(--nav-accent, #38bdf8) !important;
+    font-weight: 600 !important;
+    opacity: 0 !important;
+    transform: translateX(-4px);
+    transition: all 0.15s ease;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+  }
+
+  .cmd-item:hover .cmd-item-action,
+  .cmd-item.is-selected .cmd-item-action {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+  }
+
+  .cmd-item-mirror-btn {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    opacity: 0.9;
+  }
+
+  .cmd-item-mirror-btn:hover {
+    background: rgba(56, 189, 248, 0.24);
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #ffffff;
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .cmd-item-feed-btn {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #f97316;
+    background: rgba(249, 115, 22, 0.12);
+    border: 1px solid rgba(249, 115, 22, 0.28);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    opacity: 0.9;
+  }
+
+  .cmd-item-feed-btn:hover {
+    background: rgba(249, 115, 22, 0.24);
+    border-color: rgba(249, 115, 22, 0.5);
+    color: #ffffff;
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  /* Empty state */
+  .cmd-empty-state {
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .cmd-empty-icon { font-size: 36px; display: block; margin-bottom: 8px; }
+  .cmd-empty-title { font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+  .cmd-empty-desc { font-size: 12px; color: #64748b; }
+
+  /* Footer */
+  .cmd-palette-footer {
+    padding: 10px 18px;
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #64748b;
+  }
+
+  .cmd-key-hints {
+    display: flex;
+    gap: 12px;
+  }
+
+  .cmd-hint-item kbd {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: #cbd5e1;
+    font-size: 10px;
+    margin-right: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .cmd-footer-brand {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  .cmd-highlight,
+  :global(.cmd-highlight) {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.18);
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  /* Light Theme Overrides */
+  [data-theme="light"] .cmd-palette-container {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  [data-theme="light"] .cmd-palette-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  [data-theme="light"] .cmd-palette-input {
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .cmd-palette-input::placeholder {
+    color: #94a3b8;
+  }
+
+  [data-theme="light"] .cmd-clear-btn {
+    color: #64748b;
+  }
+
+  [data-theme="light"] .cmd-clear-btn:hover {
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .cmd-close-btn kbd {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #64748b;
+  }
+
+  [data-theme="light"] .cmd-palette-filter-bar {
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+  }
+
+  [data-theme="light"] .cmd-filter-pill {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #64748b;
+  }
+
+  [data-theme="light"] .cmd-filter-pill:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .cmd-filter-pill.is-active {
+    background: rgba(14, 165, 233, 0.12);
+    border-color: rgba(14, 165, 233, 0.4);
+    color: #0284c7;
+  }
+
+  [data-theme="light"] .cmd-filter-badge {
+    background: rgba(0, 0, 0, 0.06);
+    color: #64748b;
+  }
+
+  [data-theme="light"] .cmd-filter-pill.is-active .cmd-filter-badge {
+    background: rgba(14, 165, 233, 0.2);
+    color: #0284c7;
+  }
+
+  [data-theme="light"] .cmd-palette-body {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  [data-theme="light"] .cmd-section-header {
+    color: #64748b;
+  }
+
+  [data-theme="light"] .cmd-clear-history-btn {
+    color: #94a3b8;
+  }
+
+  [data-theme="light"] .cmd-item {
+    color: #0f172a !important;
+  }
+
+  [data-theme="light"] .cmd-item:visited {
+    color: #0f172a !important;
+  }
+
+  [data-theme="light"] .cmd-item:hover,
+  [data-theme="light"] .cmd-item.is-selected {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(14, 165, 233, 0.3) !important;
+    color: #0f172a !important;
+  }
+
+  [data-theme="light"] .cmd-item-icon {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  [data-theme="light"] .cmd-item-title {
+    color: #0f172a !important;
+  }
+
+  [data-theme="light"] .cmd-item-desc {
+    color: #64748b !important;
+  }
+
+  [data-theme="light"] .cmd-item-stat {
+    color: #475569 !important;
+    background: rgba(0, 0, 0, 0.06) !important;
+  }
+
+  [data-theme="light"] .cmd-empty-title {
+    color: #1e293b;
+  }
+
+  [data-theme="light"] .cmd-empty-desc {
+    color: #64748b;
+  }
+
+  [data-theme="light"] .cmd-palette-footer {
+    background: rgba(0, 0, 0, 0.03);
+    border-top-color: rgba(0, 0, 0, 0.06);
+    color: #64748b;
+  }
+
+  [data-theme="light"] .cmd-hint-item kbd {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #475569;
+  }
+
+  [data-theme="light"] .cmd-footer-brand {
+    color: rgba(0, 0, 0, 0.25);
+  }
+
+  [data-theme="light"] .cmd-highlight {
+    color: #0284c7;
+    background: rgba(14, 165, 233, 0.14);
+  }
+
+  /* Mobile Responsive Bottom Sheet */
+  @media (max-width: 640px) {
+    .cmd-palette-backdrop {
+      padding: 0;
+      align-items: flex-end;
+    }
+
+    .cmd-palette-container {
+      max-width: 100%;
+      width: 100%;
+      max-height: 90vh;
+      border-radius: 20px 20px 0 0;
+      border-bottom: none;
+      border-left: none;
+      border-right: none;
+      transform: translateY(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cmd-palette-backdrop.is-open .cmd-palette-container {
+      transform: translateY(0);
+    }
+
+    .cmd-palette-header {
+      padding: 12px 14px;
+    }
+
+    .cmd-kbd-esc {
+      display: none !important;
+    }
+
+    .cmd-close-icon {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--nav-accent, #38bdf8);
+      padding: 4px 8px;
+      white-space: nowrap;
+    }
+
+    .cmd-palette-filter-bar {
+      padding: 8px 12px;
+      gap: 6px;
+    }
+
+    .cmd-filter-pill {
+      font-size: 11px;
+      padding: 3px 10px;
+    }
+
+    .cmd-palette-body {
+      padding: 6px;
+      max-height: calc(90vh - 120px);
+    }
+
+    .cmd-item {
+      padding: 8px 10px !important;
+      gap: 10px !important;
+    }
+
+    .cmd-item-desc {
+      font-size: 11px !important;
+    }
+
+    .cmd-item-action {
+      display: none !important;
+    }
+
+    .cmd-key-hints {
+      display: none !important;
+    }
+
+    .cmd-palette-footer {
+      padding: 8px 14px;
+      justify-content: center;
+    }
+
+    .cmd-footer-brand {
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var modal = document.getElementById('nav-cmd-palette');
+    var input = document.getElementById('cmd-palette-input');
+    var clearBtn = document.getElementById('cmd-clear-btn');
+    var closeBtn = document.getElementById('cmd-close-btn');
+    var resultsContainer = document.getElementById('cmd-palette-results');
+    var emptyState = document.getElementById('cmd-empty-state');
+    var filterPills = document.querySelectorAll('.cmd-filter-pill');
+
+    var countAll = document.getElementById('cmd-count-all');
+    var countFav = document.getElementById('cmd-count-favorite');
+    var countWeb = document.getElementById('cmd-count-website');
+    var countGh = document.getElementById('cmd-count-github');
+    var countTg = document.getElementById('cmd-count-telegram');
+    var countCr = document.getElementById('cmd-count-creator');
+
+    var navItems = [];
+    var activeFilter = 'all';
+    var selectedIndex = 0;
+    var filteredResults = [];
+    var isLoaded = false;
+
+    var searchWorker = null;
+    var workerReady = false;
+
+    function initSearchWorker() {
+      if (typeof window !== 'undefined' && window.Worker && !searchWorker) {
+        try {
+          searchWorker = new Worker('/assets/js/nav-search-worker.js');
+          searchWorker.onmessage = function(e) {
+            var msg = e.data || {};
+            if (msg.action === 'INIT_SUCCESS') {
+              workerReady = true;
+            } else if (msg.action === 'SEARCH_SUCCESS' || msg.action === 'SEARCH_RESULTS') {
+              var currentQuery = input.value.trim().toLowerCase();
+              if (msg.query === currentQuery && msg.filter === activeFilter) {
+                filteredResults = msg.results || [];
+                selectedIndex = 0;
+                renderResults();
+              }
+            }
+          };
+          searchWorker.onerror = function() {
+            workerReady = false;
+          };
+        } catch (err) {
+          searchWorker = null;
+          workerReady = false;
+        }
+      }
+    }
+
+    initSearchWorker();
+
+    function getLocalMetrics() {
+      var visitCounts = {};
+      try {
+        var rawVisits = localStorage.getItem('xiu_nav_visit_counts');
+        visitCounts = rawVisits ? JSON.parse(rawVisits) : {};
+      } catch (e) {}
+
+      var favIds = [];
+      if (typeof window.getNavFavorites === 'function') {
+        favIds = window.getNavFavorites().map(function(f) { return f.id; });
+      }
+      return { visitCounts: visitCounts, favorites: favIds };
+    }
+
+    function syncWorkerMetrics() {
+      if (searchWorker && workerReady) {
+        var m = getLocalMetrics();
+        searchWorker.postMessage({
+          action: 'SYNC_METRICS',
+          visitCounts: m.visitCounts,
+          favorites: m.favorites
+        });
+      }
+    }
+
+    window.addEventListener('nav-favorites-updated', function() {
+      syncWorkerMetrics();
+      updateCounts();
+    });
+
+    window.addEventListener('nav-mirror-prefs-updated', function() {
+      renderResults();
+    });
+
+    function loadNavIndex() {
+      if (isLoaded) return Promise.resolve(navItems);
+      return fetch('/nav-search-index.json')
+        .then(function(res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function(data) {
+          navItems = Array.isArray(data) ? data : [];
+          isLoaded = true;
+          updateCounts();
+          if (searchWorker) {
+            var m = getLocalMetrics();
+            searchWorker.postMessage({
+              action: 'INIT',
+              items: navItems,
+              visitCounts: m.visitCounts,
+              favorites: m.favorites
+            });
+          }
+          return navItems;
+        })
+        .catch(function(err) {
+          console.warn('[CommandPalette] Index load failed:', err);
+          return [];
+        });
+    }
+
+    // Preload index in idle time
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(function() { loadNavIndex(); });
+    } else {
+      setTimeout(loadNavIndex, 1500);
+    }
+
+    function updateCounts() {
+      if (!navItems.length) return;
+      var webCount = 0, ghCount = 0, tgCount = 0, crCount = 0;
+      for (var i = 0; i < navItems.length; i++) {
+        var t = navItems[i].item_type;
+        if (t === 'website') webCount++;
+        else if (t === 'github') ghCount++;
+        else if (t === 'telegram') tgCount++;
+        else if (t === 'creator') crCount++;
+      }
+      var favCount = (typeof window.getNavFavorites === 'function') ? window.getNavFavorites().length : 0;
+      if (countAll) countAll.textContent = navItems.length;
+      if (countFav) countFav.textContent = favCount;
+      if (countWeb) countWeb.textContent = webCount;
+      if (countGh) countGh.textContent = ghCount;
+      if (countTg) countTg.textContent = tgCount;
+      if (countCr) countCr.textContent = crCount;
+    }
+
+    var RECENT_KEY = 'xiu_nav_recent_visits';
+    var MAX_RECENT = 6;
+
+    function getRecentVisits() {
+      try {
+        var raw = localStorage.getItem(RECENT_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function recordRecentVisit(item) {
+      if (!item || !item.url) return;
+      try {
+        var list = getRecentVisits();
+        list = list.filter(function(x) { return x.url !== item.url; });
+        list.unshift({
+          id: item.id,
+          title: item.title,
+          url: item.url,
+          item_type: item.item_type,
+          tg_type: item.tg_type,
+          owner: item.owner,
+          icon: item.icon,
+          stat: item.stat,
+          description: item.description,
+          search_text: item.search_text || '',
+          _isRecent: true,
+          visitedAt: Date.now()
+        });
+        if (list.length > MAX_RECENT) list.pop();
+        localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function clearRecentVisits() {
+      try {
+        localStorage.removeItem(RECENT_KEY);
+        doSearch();
+      } catch (e) {}
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function highlightText(text, queryTokens) {
+      if (!text) return '';
+      var safeText = escapeHtml(text);
+      if (!queryTokens || !queryTokens.length) return safeText;
+
+      var validTokens = queryTokens
+        .filter(Boolean)
+        .map(function(t) { return t.trim(); })
+        .filter(function(t) { return t.length > 0; });
+
+      if (!validTokens.length) return safeText;
+
+      var uniqueTokens = Array.from(new Set(validTokens)).sort(function(a, b) {
+        return b.length - a.length;
+      });
+
+      var patternStr = uniqueTokens.map(function(t) {
+        return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }).join('|');
+
+      try {
+        var reg = new RegExp('(' + patternStr + ')', 'gi');
+        return safeText.replace(reg, '<span class="cmd-highlight">$1</span>');
+      } catch (e) {
+        return safeText;
+      }
+    }
+
+    function renderResults() {
+      resultsContainer.innerHTML = '';
+
+      var nsfwMode = 'blur';
+      try {
+        nsfwMode = localStorage.getItem('xiu_nav_nsfw_mode') || 'blur';
+      } catch (e) {}
+
+      var effectiveResults = filteredResults;
+      if (nsfwMode === 'hide') {
+        effectiveResults = filteredResults.filter(function(x) {
+          return !Boolean(x.is_nsfw || (x.tags && x.tags.includes('NSFW')) || x.subcategory === 'nsfw');
+        });
+      }
+
+      if (effectiveResults.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      var rawQuery = input.value.trim().toLowerCase();
+      var tokens = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
+
+      var maxDisplay = Math.min(effectiveResults.length, 50);
+      var fragment = document.createDocumentFragment();
+      var hasRenderedExploreHeader = false;
+      var hasRenderedFavHeader = false;
+
+      for (var i = 0; i < maxDisplay; i++) {
+        var item = effectiveResults[i];
+        var isSelected = (i === selectedIndex);
+
+        if (!tokens.length && activeFilter === 'all') {
+          if (i === 0 && item._isRecent) {
+            var headRecent = document.createElement('div');
+            headRecent.className = 'cmd-section-header';
+            headRecent.innerHTML = '<span>⚡ 最近访问</span><button type="button" class="cmd-clear-history-btn" id="cmd-clear-history-btn">清空历史</button>';
+            fragment.appendChild(headRecent);
+          } else if (item._isFavorite && !item._isRecent && !hasRenderedFavHeader) {
+            var headFav = document.createElement('div');
+            headFav.className = 'cmd-section-header';
+            headFav.innerHTML = '<span>⭐ 我的常用收藏</span>';
+            fragment.appendChild(headFav);
+            hasRenderedFavHeader = true;
+          } else if (!item._isRecent && !item._isFavorite && !hasRenderedExploreHeader) {
+            var headExplore = document.createElement('div');
+            headExplore.className = 'cmd-section-header';
+            headExplore.innerHTML = '<span>🔥 探索推荐</span>';
+            fragment.appendChild(headExplore);
+            hasRenderedExploreHeader = true;
+          }
+        }
+
+        var a = document.createElement('a');
+        a.className = 'cmd-item' + (isSelected ? ' is-selected' : '');
+        a.setAttribute('role', 'option');
+        a.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.setAttribute('data-index', i);
+        a.setAttribute('data-id', item.id || '');
+        a.setAttribute('data-type', item.item_type || item.category || 'website');
+
+        a.addEventListener('click', (function(targetItem) {
+          return function() {
+            recordRecentVisit(targetItem);
+          };
+        })(item));
+
+        var badgeLabel = '工具';
+        var badgeClass = 'cmd-badge-website';
+        if (item.item_type === 'github' || item.category === 'github') {
+          badgeLabel = '开源';
+          badgeClass = 'cmd-badge-github';
+        } else if (item.item_type === 'telegram' || item.category === 'telegram') {
+          badgeLabel = item.type === 'bot' ? 'Bot' : (item.type === 'group' ? '群组' : '频道');
+          badgeClass = 'cmd-badge-telegram';
+        } else if (item.item_type === 'creator') {
+          badgeLabel = '博主';
+          badgeClass = 'cmd-badge-creator';
+        }
+
+        var iconHtml = '';
+        if (item.item_type === 'github') {
+          var ghAvatar = item.icon || (item.owner ? 'https://github.com/' + encodeURIComponent(item.owner) + '.png?size=96' : '');
+          if (ghAvatar) {
+            iconHtml = '<img src="' + escapeHtml(ghAvatar) + '" alt="' + escapeHtml(item.title) + '" loading="lazy" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'block\';" />' +
+              '<svg style="display: none;" width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>';
+          } else {
+            iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>';
+          }
+        } else if (item.item_type === 'telegram') {
+          var tgAvatar = item.icon;
+          if (tgAvatar && !tgAvatar.includes('default-avatar')) {
+            iconHtml = '<img src="' + escapeHtml(tgAvatar) + '" alt="' + escapeHtml(item.title) + '" loading="lazy" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'block\';" />' +
+              '<svg style="display: none;" width="20" height="20" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>';
+          } else {
+            iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>';
+          }
+        } else if (item.icon) {
+          iconHtml = '<img src="' + escapeHtml(item.icon) + '" alt="' + escapeHtml(item.title) + '" loading="lazy" onerror="this.src=\'/favicon.ico\';" />';
+        } else {
+          iconHtml = '<span>🌐</span>';
+        }
+
+        var targetKey = item.id || item.url;
+        var pref = window.getNavMirrorPreference ? window.getNavMirrorPreference(targetKey) : null;
+        var finalUrl = (pref && pref.url) ? pref.url : item.url;
+        var prefBadgeHtml = (pref && pref.url && pref.url !== item.url)
+          ? '<span class="cmd-item-pref-pill" title="已启用加速优选路线: ' + escapeHtml(pref.url) + (pref.latency ? ' (' + pref.latency + 'ms)' : '') + '">⚡ 优选</span>'
+          : '';
+
+        a.href = finalUrl;
+
+        var isNsfw = Boolean(item.is_nsfw || (item.tags && item.tags.includes('NSFW')) || item.subcategory === 'nsfw');
+        var nsfwBadgeHtml = isNsfw ? '<span class="cmd-item-nsfw-pill" title="此资源属于成人/敏感类目">🔞 18+</span>' : '';
+        var favBadgeHtml = item._isFavorite ? '<span class="cmd-item-fav-pill">⭐ 常用</span>' : '';
+        var statusBadgeHtml = item.is_alive === false ? '<span class="cmd-item-status-pill status-offline" title="该资源当前状态受限或可能失联">⚠️ 可能失联</span>' : '';
+        var visitBadgeHtml = (item._visitCount && item._visitCount > 0) ? '<span class="cmd-item-visit-pill">🔥 ' + item._visitCount + '</span>' : '';
+
+        var mirrorBtnHtml = (item.mirror_urls && item.mirror_urls.length > 0)
+          ? '<button type="button" class="cmd-item-mirror-btn" title="查看并测速 ' + item.mirror_urls.length + ' 个加速镜像">🪞 测速</button>'
+          : '';
+
+        var feedUrl = item.feed_url || '';
+        if (!feedUrl && item.repo) {
+          feedUrl = 'https://github.com/' + item.repo + '/releases.atom';
+        } else if (!feedUrl && (item.item_type === 'github' || item.category === 'github') && item.url) {
+          var m = item.url.match(/github\.com\/([^\/]+\/[^\/]+)/);
+          if (m) feedUrl = 'https://github.com/' + m[1].replace(/\.git$/, '') + '/releases.atom';
+        }
+        if (!feedUrl && item.type === 'channel' && item.username) {
+          feedUrl = 'https://rsshub.app/telegram/channel/' + item.username;
+        }
+        var isGhFeed = feedUrl && (feedUrl.indexOf('releases.atom') !== -1 || feedUrl.indexOf('github.com') !== -1);
+        var feedBtnTitle = isGhFeed ? '查看最新动态 (Release Atom)' : '查看最新动态 (RSS/Atom)';
+        var feedBtnHtml = feedUrl
+          ? '<button type="button" class="cmd-item-feed-btn" title="' + feedBtnTitle + '">📰 动态</button>'
+          : '';
+
+        var descContent = (isNsfw && nsfwMode === 'blur') ? '🔒 此内容已启用隐私防窥保护，点击卡片直达' : item.description;
+
+        a.innerHTML = 
+          '<div class="cmd-item-left">' +
+            '<div class="cmd-item-icon">' + iconHtml + '</div>' +
+            '<div class="cmd-item-meta">' +
+              '<div class="cmd-item-title-row">' +
+                '<span class="cmd-item-title">' + highlightText(item.title, tokens) + '</span>' +
+                nsfwBadgeHtml +
+                favBadgeHtml +
+                prefBadgeHtml +
+                statusBadgeHtml +
+                '<span class="cmd-item-badge ' + badgeClass + '">' + badgeLabel + '</span>' +
+              '</div>' +
+              '<div class="cmd-item-desc">' + highlightText(descContent, tokens) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cmd-item-right">' +
+            visitBadgeHtml +
+            (item.stat ? '<span class="cmd-item-stat">' + escapeHtml(item.stat) + '</span>' : '') +
+            mirrorBtnHtml +
+            feedBtnHtml +
+            '<span class="cmd-item-action">↵ 直达</span>' +
+          '</div>';
+
+        var mirrorBtn = a.querySelector('.cmd-item-mirror-btn');
+        if (mirrorBtn) {
+          mirrorBtn.addEventListener('click', (function(targetItem) {
+            return function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (window.openNavMirrorModal) {
+                window.openNavMirrorModal({
+                  title: targetItem.title,
+                  url: targetItem.url,
+                  mirrors: targetItem.mirror_urls || []
+                });
+                closePalette();
+              }
+            };
+          })(item));
+        }
+
+        var feedBtn = a.querySelector('.cmd-item-feed-btn');
+        if (feedBtn) {
+          feedBtn.addEventListener('click', (function(targetItem, targetFeedUrl) {
+            return function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (window.openNavFeedPreview) {
+                window.openNavFeedPreview({
+                  title: targetItem.title,
+                  url: targetItem.url,
+                  feedUrl: targetFeedUrl
+                });
+                closePalette();
+              }
+            };
+          })(item, feedUrl));
+        }
+
+        fragment.appendChild(a);
+      }
+
+      resultsContainer.appendChild(fragment);
+
+      var btnClearHistory = resultsContainer.querySelector('#cmd-clear-history-btn');
+      if (btnClearHistory) {
+        btnClearHistory.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          clearRecentVisits();
+        });
+      }
+
+      // Ensure selected element is scrolled into view
+      var selectedEl = resultsContainer.querySelector('.is-selected');
+      if (selectedEl) {
+        selectedEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function doSearch() {
+      var rawQuery = input.value.trim().toLowerCase();
+      var tokens = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
+
+      if (!tokens.length && activeFilter === 'all') {
+        var recents = getRecentVisits();
+        var recentUrls = new Set(recents.map(function(r) { return r.url; }));
+        var userFavs = (typeof window.getNavFavorites === 'function') ? window.getNavFavorites() : [];
+
+        var favItems = [];
+        var favUrls = new Set();
+        for (var f = 0; f < userFavs.length; f++) {
+          var uFav = userFavs[f];
+          if (!recentUrls.has(uFav.url)) {
+            favItems.push(Object.assign({}, uFav, { _isFavorite: true }));
+            favUrls.add(uFav.url);
+          }
+        }
+
+        var exploreItems = [];
+        for (var n = 0; n < navItems.length; n++) {
+          var itemN = navItems[n];
+          if (!recentUrls.has(itemN.url) && !favUrls.has(itemN.url)) {
+            exploreItems.push(itemN);
+          }
+        }
+        exploreItems.sort(function(a, b) {
+          var aAlive = (a.is_alive !== false) ? 1 : 0;
+          var bAlive = (b.is_alive !== false) ? 1 : 0;
+          return bAlive - aAlive;
+        });
+        filteredResults = recents.concat(favItems).concat(exploreItems);
+        selectedIndex = 0;
+        renderResults();
+        return;
+      }
+
+      if (activeFilter === 'favorite') {
+        var userFavsList = (typeof window.getNavFavorites === 'function') ? window.getNavFavorites() : [];
+        if (!tokens.length) {
+          filteredResults = userFavsList.map(function(item) {
+            return Object.assign({}, item, { _isFavorite: true });
+          });
+        } else {
+          filteredResults = userFavsList.filter(function(item) {
+            var searchTarget = ((item.title || '') + ' ' + (item.description || '') + ' ' + (item.url || '')).toLowerCase();
+            return tokens.every(function(t) { return searchTarget.indexOf(t) !== -1; });
+          }).map(function(item) {
+            return Object.assign({}, item, { _isFavorite: true });
+          });
+        }
+        selectedIndex = 0;
+        renderResults();
+        return;
+      }
+
+      if (workerReady && searchWorker) {
+        searchWorker.postMessage({
+          action: 'SEARCH',
+          query: rawQuery,
+          filter: activeFilter,
+          limit: 50
+        });
+      }
+
+      // Fallback main-thread scoring matching worker
+      var metrics = getLocalMetrics();
+      var favSet = new Set(metrics.favorites || []);
+      var visitMap = metrics.visitCounts || {};
+
+      var candidates = navItems.filter(function(item) {
+        if (activeFilter === 'favorite') {
+          return favSet.has(item.id);
+        }
+        if (activeFilter !== 'all' && item.item_type !== activeFilter) {
+          return false;
+        }
+        return true;
+      });
+
+      var scored = [];
+      for (var k = 0; k < candidates.length; k++) {
+        var cand = candidates[k];
+        var itemSearchText = (cand.search_text || '').toLowerCase();
+        var itemTitleLower = (cand.title || '').toLowerCase();
+        var itemPyInit = cand.py_init || '';
+        var itemPyFull = cand.py_full || '';
+        var matchesAll = true;
+        var score = 0;
+
+        for (var j = 0; j < tokens.length; j++) {
+          var t = tokens[j];
+          if (itemSearchText.indexOf(t) === -1) {
+            matchesAll = false;
+            break;
+          }
+          if (itemTitleLower === t) {
+            score += 100;
+          } else if (itemTitleLower.startsWith(t)) {
+            score += 50;
+          } else if (itemPyInit && itemPyInit === t) {
+            score += 90;
+          } else if (itemPyFull && itemPyFull === t) {
+            score += 90;
+          } else if (itemPyInit && itemPyInit.startsWith(t)) {
+            score += 45;
+          } else if (itemPyFull && itemPyFull.startsWith(t)) {
+            score += 45;
+          } else if (itemTitleLower.indexOf(t) !== -1) {
+            score += 25;
+          } else if (itemPyInit && itemPyInit.indexOf(t) !== -1) {
+            score += 20;
+          } else if (itemPyFull && itemPyFull.indexOf(t) !== -1) {
+            score += 20;
+          } else {
+            score += 8;
+          }
+        }
+
+        if (matchesAll) {
+          var isFav = favSet.has(cand.id);
+          var visits = visitMap[cand.id] || 0;
+          if (isFav) score += 35;
+          if (visits > 0) score += Math.min(visits * 8, 80);
+          if (cand.is_alive === false) score -= 250;
+
+          scored.push({
+            item: Object.assign({}, cand, {
+              _isFavorite: isFav,
+              _visitCount: visits
+            }),
+            score: score
+          });
+        }
+      }
+
+      scored.sort(function(a, b) { return b.score - a.score; });
+      filteredResults = scored.slice(0, 50).map(function(s) { return s.item; });
+      selectedIndex = 0;
+      renderResults();
+    }
+
+    function openPalette(initialQuery) {
+      modal.style.display = 'flex';
+      if (typeof initialQuery === 'string') {
+        input.value = initialQuery;
+        clearBtn.style.display = initialQuery.trim() ? 'block' : 'none';
+      }
+      setTimeout(function() {
+        modal.classList.add('is-open');
+        input.focus();
+        if (typeof initialQuery === 'string' && initialQuery.length > 0) {
+          try {
+            input.setSelectionRange(initialQuery.length, initialQuery.length);
+          } catch (e) {}
+        }
+      }, 10);
+
+      loadNavIndex().then(function() {
+        doSearch();
+      });
+    }
+
+    function closePalette() {
+      modal.classList.remove('is-open');
+      setTimeout(function() {
+        modal.style.display = 'none';
+        input.value = '';
+        clearBtn.style.display = 'none';
+      }, 200);
+    }
+
+    // Bind Global Shortcuts
+    window.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (modal.classList.contains('is-open')) {
+          closePalette();
+        } else {
+          openPalette();
+        }
+        return;
+      }
+
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+        e.preventDefault();
+        closePalette();
+        return;
+      }
+
+      if (e.key === '/' && !modal.classList.contains('is-open')) {
+        var activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (activeTag !== 'input' && activeTag !== 'textarea') {
+          e.preventDefault();
+          openPalette();
+        }
+      }
+    });
+
+    // In-modal Keydown
+    modal.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closePalette();
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (filteredResults.length > 0) {
+          selectedIndex = (selectedIndex + 1) % Math.min(filteredResults.length, 50);
+          renderResults();
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (filteredResults.length > 0) {
+          selectedIndex = (selectedIndex - 1 + Math.min(filteredResults.length, 50)) % Math.min(filteredResults.length, 50);
+          renderResults();
+        }
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        var selectedItem = filteredResults[selectedIndex];
+        if (selectedItem) {
+          var targetKey = selectedItem.id || selectedItem.url;
+          var pref = window.getNavMirrorPreference ? window.getNavMirrorPreference(targetKey) : null;
+          var openUrl = (pref && pref.url) ? pref.url : selectedItem.url;
+          if (openUrl) {
+            recordRecentVisit(selectedItem);
+            window.open(openUrl, '_blank', 'noopener,noreferrer');
+            closePalette();
+          }
+        }
+      }
+    });
+
+    // Input events
+    input.addEventListener('input', function() {
+      clearBtn.style.display = input.value ? 'block' : 'none';
+      doSearch();
+    });
+
+    clearBtn.addEventListener('click', function() {
+      input.value = '';
+      clearBtn.style.display = 'none';
+      input.focus();
+      doSearch();
+    });
+
+    closeBtn.addEventListener('click', function() {
+      closePalette();
+    });
+
+    // Click outside backdrop
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closePalette();
+      }
+    });
+
+    // Filter pills click
+    filterPills.forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        filterPills.forEach(function(p) { p.classList.remove('is-active'); });
+        pill.classList.add('is-active');
+        activeFilter = pill.getAttribute('data-type') || 'all';
+        doSearch();
+      });
+    });
+
+    // Delegate hover selection
+    resultsContainer.addEventListener('mouseover', function(e) {
+      var itemEl = e.target.closest('.cmd-item');
+      if (itemEl) {
+        var idx = parseInt(itemEl.getAttribute('data-index'), 10);
+        if (!isNaN(idx) && idx !== selectedIndex) {
+          selectedIndex = idx;
+          var items = resultsContainer.querySelectorAll('.cmd-item');
+          items.forEach(function(it, i) {
+            it.classList.toggle('is-selected', i === selectedIndex);
+          });
+        }
+      }
+    });
+
+    window.addEventListener('xiu-nsfw-mode-changed', function() {
+      if (modal && modal.classList.contains('is-open')) {
+        renderResults();
+      }
+    });
+
+    // Expose global trigger for any button to open palette
+    window.openNavCommandPalette = openPalette;
+  })();
+</script>

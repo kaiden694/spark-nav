@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-admin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="100%" stop-color="#ff4757"/>
+    </linearGradient>
+    <clipPath id="circle-clip">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip)">
+    <rect width="120" height="120" fill="url(#bg-admin)"/>
+    <!-- Cute Blogger / Captain Bear -->
+    <!-- Ears -->
+    <circle cx="36" cy="38" r="14" fill="#f8c291"/>
+    <circle cx="36" cy="38" r="8" fill="#e55039"/>
+    <circle cx="84" cy="38" r="14" fill="#f8c291"/>
+    <circle cx="84" cy="38" r="8" fill="#e55039"/>
+    <!-- Head -->
+    <circle cx="60" cy="62" r="34" fill="#fed330"/>
+    <!-- Cheeks -->
+    <circle cx="40" cy="70" r="6" fill="#ff7675" opacity="0.6"/>
+    <circle cx="80" cy="70" r="6" fill="#ff7675" opacity="0.6"/>
+    <!-- Cool Sunglasses -->
+    <rect x="34" y="52" width="22" height="14" rx="4" fill="#2d3436"/>
+    <rect x="64" y="52" width="22" height="14" rx="4" fill="#2d3436"/>
+    <rect x="54" y="56" width="12" height="3" fill="#2d3436"/>
+    <line x1="36" y1="54" x2="44" y2="62" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+    <line x1="66" y1="54" x2="74" y2="62" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+    <!-- Snout & Smile -->
+    <ellipse cx="60" cy="72" rx="10" ry="7" fill="#ffffff"/>
+    <polygon points="56,69 64,69 60,73" fill="#2d3436"/>
+    <path d="M 57 74 Q 60 77 63 74" stroke="#2d3436" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Crown -->
+    <polygon points="46,30 50,38 60,32 70,38 74,30 68,40 52,40" fill="#ffa801"/>
+    <circle cx="60" cy="32" r="2.5" fill="#ffffff"/>
+    <!-- Body / Collar -->
+    <path d="M 32 106 C 32 88 88 88 88 106 Z" fill="#2c3e50"/>
+    <polygon points="60,94 54,104 66,104" fill="#e74c3c"/>
+  </g>
+</svg>

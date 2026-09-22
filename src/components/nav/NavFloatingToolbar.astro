@@ -1,0 +1,1198 @@
+---
+// NavFloatingToolbar.astro
+// Global Navigation Right-side Floating Toolbar
+// Includes: Quick Search, Online Submission, Telegram @xiunav_bot Hub, Broken Link Reporting, and Back to Top.
+---
+
+<aside class="nav-float-bar" id="nav-float-bar" aria-label="快捷工具栏">
+  <!-- Item 1: Quick Search -->
+  <div class="nav-float-item">
+    <button type="button" class="nav-float-btn" id="nav-float-search-btn" title="快速全局检索 (⌘K / /)" aria-label="快速检索">
+      <svg class="nav-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+    <span class="nav-float-tooltip">快速检索 <kbd>⌘K</kbd></span>
+  </div>
+
+  <!-- Item 2: Online Submission -->
+  <div class="nav-float-item">
+    <button type="button" class="nav-float-btn" id="nav-float-submit-btn" title="在线申请收录站点/工具" aria-label="在线收录">
+      <svg class="nav-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 4v16m8-8H4"></path>
+      </svg>
+    </button>
+    <span class="nav-float-tooltip">在线收录</span>
+  </div>
+
+  <!-- Item 3: Telegram Bot Hub -->
+  <div class="nav-float-item nav-float-bot-item">
+    <button type="button" class="nav-float-btn" id="nav-float-bot-btn" title="Telegram 机器人收录 (@xiunav_bot)" aria-label="Bot收录">
+      <svg class="nav-float-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/>
+      </svg>
+    </button>
+    <span class="nav-float-tooltip">Bot收录</span>
+
+    <!-- Hover / Click Dropdown Card for Bot Info -->
+    <div class="nav-float-bot-card" id="nav-float-bot-card">
+      <div class="nav-bot-header">
+        <div class="nav-bot-avatar">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
+        </div>
+        <div class="nav-bot-title-wrap">
+          <div class="nav-bot-name">xiunav 官方收录机器人</div>
+          <div class="nav-bot-handle">@xiunav_bot</div>
+        </div>
+      </div>
+      <p class="nav-bot-desc">支持频道、群组、开源项目及独立站点提交审核，7×24小时自动化初筛探活。</p>
+      <div class="nav-bot-actions">
+        <a href="https://t.me/xiunav_bot" target="_blank" rel="noopener noreferrer" class="nav-bot-cta-btn" id="nav-bot-open-btn">
+          <span>🚀 打开 Telegram 对话</span>
+        </a>
+        <button type="button" class="nav-bot-copy-btn" id="nav-bot-copy-handle-btn" title="复制用户名 @xiunav_bot">
+          📋 复制用户名
+        </button>
+      </div>
+      <div class="nav-bot-tip">
+        <span>💡 提示：也可以在 Telegram 中直接搜索 <strong>@xiunav_bot</strong> 发起提交</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item 4: Broken Link / Feedback -->
+  <div class="nav-float-item">
+    <button type="button" class="nav-float-btn" id="nav-float-report-btn" title="站点失效 / 纠错反馈" aria-label="失效纠错">
+      <svg class="nav-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </button>
+    <span class="nav-float-tooltip">失效纠错</span>
+  </div>
+
+  <!-- Item 5: Keyboard Shortcuts Guide (Desktop only) -->
+  <div class="nav-float-item nav-float-desktop-only">
+    <button type="button" class="nav-float-btn" id="nav-float-shortcuts-btn" title="全域快捷键漫游矩阵 (?)" aria-label="键盘快捷键">
+      <svg class="nav-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+        <line x1="6" y1="8" x2="6.01" y2="8"></line>
+        <line x1="10" y1="8" x2="10.01" y2="8"></line>
+        <line x1="14" y1="8" x2="14.01" y2="8"></line>
+        <line x1="18" y1="8" x2="18.01" y2="8"></line>
+        <line x1="6" y1="12" x2="6.01" y2="12"></line>
+        <line x1="10" y1="12" x2="10.01" y2="12"></line>
+        <line x1="14" y1="12" x2="14.01" y2="12"></line>
+        <line x1="18" y1="12" x2="18.01" y2="12"></line>
+        <line x1="7" y1="16" x2="17" y2="16"></line>
+      </svg>
+    </button>
+    <span class="nav-float-tooltip">键盘漫游 <kbd>?</kbd></span>
+  </div>
+
+  <!-- Item 6: Back to Top (Auto-hides when scrollTop < 300px) -->
+  <div class="nav-float-item nav-float-totop-item" id="nav-float-totop-wrap">
+    <button type="button" class="nav-float-btn nav-float-totop-btn" id="nav-float-totop-btn" title="平滑回到顶部" aria-label="回到顶部">
+      <svg class="nav-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    </button>
+    <span class="nav-float-tooltip">回到顶部</span>
+  </div>
+</aside>
+
+<!-- ============================================================
+     Modal 1: 在线收录模态框 (Online Submission Dialog)
+     ============================================================ -->
+<div class="nav-modal-backdrop" id="nav-submit-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="nav-submit-title">
+  <div class="nav-modal-dialog">
+    <div class="nav-modal-header">
+      <div class="nav-modal-title-row">
+        <span class="nav-modal-icon">📝</span>
+        <div>
+          <h3 class="nav-modal-title" id="nav-submit-title">在线申请收录</h3>
+          <p class="nav-modal-subtitle">推荐优质工具、开源仓库或 Telegram 社群，审核通过后即刻展示</p>
+        </div>
+      </div>
+      <button type="button" class="nav-modal-close" id="nav-submit-close" title="关闭 (Esc)">&times;</button>
+    </div>
+
+    <form class="nav-modal-body" id="nav-submit-form" onsubmit="return false;">
+      <div class="nav-form-group">
+        <label class="nav-form-label" for="sub-site-title">
+          <span>资源 / 站点名称</span>
+          <span class="nav-form-req">*</span>
+        </label>
+        <input type="text" id="sub-site-title" class="nav-form-input" placeholder="例如：Open WebUI、Mihomo、金十数据" required />
+      </div>
+
+      <div class="nav-form-group">
+        <label class="nav-form-label" for="sub-site-url">
+          <span>官网 / 仓库 / 频道链接</span>
+          <span class="nav-form-req">*</span>
+        </label>
+        <input type="url" id="sub-site-url" class="nav-form-input" placeholder="https://..." required />
+      </div>
+
+      <div class="nav-form-row">
+        <div class="nav-form-group" style="flex: 1;">
+          <label class="nav-form-label" for="sub-site-cat">
+            <span>所属专区分类</span>
+            <span class="nav-form-req">*</span>
+          </label>
+          <select id="sub-site-cat" class="nav-form-select">
+            <option value="featured">🌟 常用精选</option>
+            <option value="tools">🛠️ 实用工具</option>
+            <option value="github">💻 开源矩阵 (GitHub)</option>
+            <option value="telegram">✈️ 电报生态 (Telegram)</option>
+            <option value="creators">👤 优质博主 / 创作者</option>
+          </select>
+        </div>
+
+        <div class="nav-form-group" style="flex: 1;">
+          <label class="nav-form-label" for="sub-site-contact">
+            <span>联系方式 (选填)</span>
+          </label>
+          <input type="text" id="sub-site-contact" class="nav-form-input" placeholder="Telegram / 邮箱 / GitHub" />
+        </div>
+      </div>
+
+      <div class="nav-form-group">
+        <label class="nav-form-label" for="sub-site-desc">
+          <span>推荐理由 / 核心亮点简介</span>
+        </label>
+        <textarea id="sub-site-desc" class="nav-form-textarea" rows="3" placeholder="一两句话描述该资源的功能特色、受众群体或核心亮点..."></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="nav-modal-footer">
+        <button type="button" class="nav-btn-action nav-btn-bot" id="nav-submit-to-bot-btn">
+          <span>🚀 发送给 @xiunav_bot</span>
+        </button>
+        <button type="button" class="nav-btn-action nav-btn-copy" id="nav-submit-copy-btn">
+          <span>📋 复制申请文案</span>
+        </button>
+        <button type="button" class="nav-btn-action nav-btn-issue" id="nav-submit-issue-btn">
+          <span>🐙 GitHub Issue</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     Modal 2: 站点失效与纠错反馈模态框 (Broken Link / Feedback Dialog)
+     ============================================================ -->
+<div class="nav-modal-backdrop" id="nav-report-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="nav-report-title">
+  <div class="nav-modal-dialog">
+    <div class="nav-modal-header">
+      <div class="nav-modal-title-row">
+        <span class="nav-modal-icon">🚨</span>
+        <div>
+          <h3 class="nav-modal-title" id="nav-report-title">站点失效 / 纠错反馈</h3>
+          <p class="nav-modal-subtitle">发现打不开的死链、违规欺诈或描述有误？感谢你的守护</p>
+        </div>
+      </div>
+      <button type="button" class="nav-modal-close" id="nav-report-close" title="关闭 (Esc)">&times;</button>
+    </div>
+
+    <form class="nav-modal-body" id="nav-report-form" onsubmit="return false;">
+      <div class="nav-form-group">
+        <label class="nav-form-label" for="rep-site-target">
+          <span>出现问题的站点名称或网址</span>
+          <span class="nav-form-req">*</span>
+        </label>
+        <input type="text" id="rep-site-target" class="nav-form-input" placeholder="输入站点名称或粘贴目标 URL" required />
+      </div>
+
+      <div class="nav-form-group">
+        <label class="nav-form-label" for="rep-issue-type">
+          <span>问题类型</span>
+        </label>
+        <select id="rep-issue-type" class="nav-form-select">
+          <option value="broken">🔴 无法访问 / 域名已死 (404/DNS错误)</option>
+          <option value="changed">🔄 域名变更 / 跳转至其他地址</option>
+          <option value="scam">⚠️ 涉及钓鱼欺诈 / 违规内容</option>
+          <option value="cat_err">🏷️ 分类划分有误 (应调整业务分类/子类)</option>
+          <option value="info_err">✏️ 标题描述有误 / 图标失真</option>
+        </select>
+      </div>
+
+      <div class="nav-form-group">
+        <label class="nav-form-label" for="rep-issue-details">
+          <span>补充说明 (选填)</span>
+        </label>
+        <textarea id="rep-issue-details" class="nav-form-textarea" rows="3" placeholder="例如：新网址是 xxx.com，或者国内网络打不开..."></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="nav-modal-footer">
+        <button type="button" class="nav-btn-action nav-btn-bot" id="nav-report-to-bot-btn">
+          <span>🚀 发送给 @xiunav_bot 纠错</span>
+        </button>
+        <button type="button" class="nav-btn-action nav-btn-copy" id="nav-report-copy-btn">
+          <span>📋 复制报错文案</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style is:global>
+  /* ============================================================
+     Right-side Floating Toolbar Styles
+     ============================================================ */
+  .nav-float-bar {
+    position: fixed;
+    right: 22px;
+    bottom: 36px;
+    z-index: 990;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .nav-float-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-float-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(18, 22, 34, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    padding: 0;
+  }
+
+  .nav-float-btn:hover {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(56, 189, 248, 0.45);
+    color: var(--nav-accent, #38bdf8);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.2);
+  }
+
+  .nav-float-btn:active {
+    transform: translateY(0) scale(0.96);
+  }
+
+  .nav-float-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-float-btn:hover .nav-float-icon {
+    transform: scale(1.08);
+  }
+
+  /* Tooltip on Left */
+  .nav-float-tooltip {
+    position: absolute;
+    right: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(6px);
+    background: rgba(15, 23, 42, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f1f5f9;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-float-tooltip kbd {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--nav-accent, #38bdf8);
+  }
+
+  .nav-float-item:hover .nav-float-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  /* Back to top item */
+  .nav-float-totop-item {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .nav-float-totop-item.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  /* Telegram Bot Dropdown Card */
+  .nav-float-bot-card {
+    position: absolute;
+    right: calc(100% + 14px);
+    bottom: 0;
+    width: 280px;
+    background: rgba(18, 22, 34, 0.97);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 24px rgba(14, 165, 233, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(10px) scale(0.96);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+  }
+
+  .nav-float-bot-item.is-open .nav-float-bot-card,
+  .nav-float-bot-item:hover .nav-float-bot-card {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0) scale(1);
+  }
+
+  .nav-bot-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .nav-bot-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .nav-bot-title-wrap {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nav-bot-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-bot-handle {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--nav-accent, #38bdf8);
+    font-weight: 600;
+  }
+
+  .nav-bot-desc {
+    font-size: 11.5px;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+  }
+
+  .nav-bot-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nav-bot-cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+  }
+
+  .nav-bot-cta-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    color: #ffffff;
+  }
+
+  .nav-bot-copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #cbd5e1;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .nav-bot-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+
+  .nav-bot-tip {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    font-size: 10.5px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  /* ============================================================
+     Modals: Online Submit & Broken Link Report
+     ============================================================ */
+  .nav-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-modal-backdrop.is-open {
+    opacity: 1;
+  }
+
+  .nav-modal-dialog {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(18, 22, 34, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    transform: scale(0.96) translateY(10px);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 40px);
+  }
+
+  .nav-modal-backdrop.is-open .nav-modal-dialog {
+    transform: scale(1) translateY(0);
+  }
+
+  .nav-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .nav-modal-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .nav-modal-icon {
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .nav-modal-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+
+  .nav-modal-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .nav-modal-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 26px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+
+  .nav-modal-close:hover {
+    color: #ffffff;
+  }
+
+  .nav-modal-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .nav-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nav-form-row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .nav-form-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-form-req {
+    color: #f43f5e;
+    font-weight: 700;
+  }
+
+  .nav-form-input,
+  .nav-form-select,
+  .nav-form-textarea {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: #f1f5f9;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .nav-form-input:focus,
+  .nav-form-select:focus,
+  .nav-form-textarea:focus {
+    border-color: var(--nav-accent, #38bdf8);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+  }
+
+  .nav-form-textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .nav-modal-footer {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+  }
+
+  .nav-btn-action {
+    flex: 1;
+    min-width: 130px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    border: none;
+  }
+
+  .nav-btn-bot {
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+  }
+
+  .nav-btn-bot:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  .nav-btn-copy {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f1f5f9;
+  }
+
+  .nav-btn-copy:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+  }
+
+  .nav-btn-issue {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    color: #c084fc;
+  }
+
+  .nav-btn-issue:hover {
+    background: rgba(168, 85, 247, 0.25);
+    color: #ffffff;
+  }
+
+  /* ============================================================
+     Light Theme Overrides
+     ============================================================ */
+  [data-theme="light"] .nav-float-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #475569;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+
+  [data-theme="light"] .nav-float-btn:hover {
+    background: #ffffff;
+    color: #0284c7;
+    border-color: rgba(14, 165, 233, 0.45);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16), 0 0 16px rgba(14, 165, 233, 0.2);
+  }
+
+  [data-theme="light"] .nav-float-tooltip {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #0f172a;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  }
+
+  [data-theme="light"] .nav-float-tooltip kbd {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #0284c7;
+  }
+
+  [data-theme="light"] .nav-float-bot-card {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18);
+  }
+
+  [data-theme="light"] .nav-bot-name {
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .nav-bot-desc {
+    color: #64748b;
+  }
+
+  [data-theme="light"] .nav-bot-copy-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #334155;
+  }
+
+  [data-theme="light"] .nav-bot-copy-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .nav-bot-tip {
+    border-top-color: rgba(0, 0, 0, 0.08);
+    color: #94a3b8;
+  }
+
+  [data-theme="light"] .nav-modal-dialog {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  }
+
+  [data-theme="light"] .nav-modal-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  [data-theme="light"] .nav-modal-title {
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .nav-modal-subtitle {
+    color: #64748b;
+  }
+
+  [data-theme="light"] .nav-modal-close {
+    color: #64748b;
+  }
+
+  [data-theme="light"] .nav-modal-close:hover {
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .nav-form-label {
+    color: #334155;
+  }
+
+  [data-theme="light"] .nav-form-input,
+  [data-theme="light"] .nav-form-select,
+  [data-theme="light"] .nav-form-textarea {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #0f172a;
+  }
+
+  [data-theme="light"] .nav-modal-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+  }
+
+  [data-theme="light"] .nav-btn-copy {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #1e293b;
+  }
+
+  [data-theme="light"] .nav-btn-copy:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #0f172a;
+  }
+
+  /* ============================================================
+     Mobile Responsive (<768px)
+     ============================================================ */
+  @media (max-width: 768px) {
+    .nav-float-bar {
+      right: 14px;
+      bottom: 24px;
+      gap: 8px;
+    }
+
+    .nav-float-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+    }
+
+    .nav-float-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .nav-float-tooltip {
+      display: none !important;
+    }
+
+    .nav-float-desktop-only {
+      display: none !important;
+    }
+
+    .nav-float-bot-card {
+      right: 0;
+      bottom: calc(100% + 10px);
+      width: calc(100vw - 32px);
+      max-width: 320px;
+    }
+
+    .nav-modal-dialog {
+      max-height: 90vh;
+      border-radius: 16px;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    // 1. Back to Top Scroll Tracker
+    var totopWrap = document.getElementById('nav-float-totop-wrap');
+    var totopBtn = document.getElementById('nav-float-totop-btn');
+
+    function checkScrollTop() {
+      if (!totopWrap) return;
+      var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      if (scrollY > 300) {
+        totopWrap.classList.add('is-visible');
+      } else {
+        totopWrap.classList.remove('is-visible');
+      }
+    }
+
+    window.addEventListener('scroll', checkScrollTop, { passive: true });
+    checkScrollTop();
+
+    if (totopBtn) {
+      totopBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+
+    // 2. Quick Search Button Linkage
+    var searchBtn = document.getElementById('nav-float-search-btn');
+    if (searchBtn) {
+      searchBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (typeof window.openNavCommandPalette === 'function') {
+          window.openNavCommandPalette();
+        }
+      });
+    }
+
+    // 2b. Keyboard Shortcuts HUD Linkage
+    var shortcutsBtn = document.getElementById('nav-float-shortcuts-btn');
+    if (shortcutsBtn) {
+      shortcutsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (typeof window.openNavShortcutsModal === 'function') {
+          window.openNavShortcutsModal();
+        }
+      });
+    }
+
+    // 3. Telegram Bot Handle Copy
+    var botCopyBtn = document.getElementById('nav-bot-copy-handle-btn');
+    if (botCopyBtn) {
+      botCopyBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        copyText('@xiunav_bot', '已复制 Bot 用户名 @xiunav_bot');
+      });
+    }
+
+    // Toggle Bot Card on Touch / Click
+    var botBtn = document.getElementById('nav-float-bot-btn');
+    var botItem = document.querySelector('.nav-float-bot-item');
+    if (botBtn && botItem) {
+      botBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        botItem.classList.toggle('is-open');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!botItem.contains(e.target)) {
+          botItem.classList.remove('is-open');
+        }
+      });
+    }
+
+    // 4. Submit Modal Handler
+    var submitModal = document.getElementById('nav-submit-modal');
+    var submitBtn = document.getElementById('nav-float-submit-btn');
+    var submitClose = document.getElementById('nav-submit-close');
+
+    function openSubmitModal() {
+      if (!submitModal) return;
+      submitModal.style.display = 'flex';
+      setTimeout(function() {
+        submitModal.classList.add('is-open');
+        var input = document.getElementById('sub-site-title');
+        if (input) input.focus();
+      }, 10);
+    }
+
+    function closeSubmitModal() {
+      if (!submitModal) return;
+      submitModal.classList.remove('is-open');
+      setTimeout(function() {
+        submitModal.style.display = 'none';
+      }, 200);
+    }
+
+    if (submitBtn) submitBtn.addEventListener('click', openSubmitModal);
+    if (submitClose) submitClose.addEventListener('click', closeSubmitModal);
+    if (submitModal) {
+      submitModal.addEventListener('click', function(e) {
+        if (e.target === submitModal) closeSubmitModal();
+      });
+    }
+
+    // Build Submission Text
+    function getSubmissionText() {
+      var title = (document.getElementById('sub-site-title').value || '').trim();
+      var url = (document.getElementById('sub-site-url').value || '').trim();
+      var cat = document.getElementById('sub-site-cat').value || 'featured';
+      var contact = (document.getElementById('sub-site-contact').value || '').trim();
+      var desc = (document.getElementById('sub-site-desc').value || '').trim();
+
+      var catMap = {
+        'featured': '常用精选',
+        'tools': '实用工具',
+        'github': '开源矩阵',
+        'telegram': '电报生态',
+        'creators': '优质博主'
+      };
+      var catLabel = catMap[cat] || cat;
+
+      return {
+        title: title,
+        url: url,
+        cat: cat,
+        catLabel: catLabel,
+        contact: contact,
+        desc: desc,
+        formatted: '【站点收录申请】\n' +
+          '• 站点名称：' + (title || '未填写') + '\n' +
+          '• 访问地址：' + (url || '未填写') + '\n' +
+          '• 建议分类：' + catLabel + '\n' +
+          '• 推荐理由：' + (desc || '无') + '\n' +
+          '• 申请联系：' + (contact || '匿名')
+      };
+    }
+
+    // Submit Actions
+    var subToBotBtn = document.getElementById('nav-submit-to-bot-btn');
+    if (subToBotBtn) {
+      subToBotBtn.addEventListener('click', function() {
+        var data = getSubmissionText();
+        if (!data.title || !data.url) {
+          showToast('请至少填写站点名称与链接');
+          return;
+        }
+        var msg = encodeURIComponent('/submit ' + data.formatted);
+        var targetUrl = 'https://t.me/xiunav_bot?text=' + msg;
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        closeSubmitModal();
+      });
+    }
+
+    var subCopyBtn = document.getElementById('nav-submit-copy-btn');
+    if (subCopyBtn) {
+      subCopyBtn.addEventListener('click', function() {
+        var data = getSubmissionText();
+        if (!data.title || !data.url) {
+          showToast('请至少填写站点名称与链接');
+          return;
+        }
+        copyText(data.formatted, '已复制收录申请文案，可直接发送给站长');
+      });
+    }
+
+    var subIssueBtn = document.getElementById('nav-submit-issue-btn');
+    if (subIssueBtn) {
+      subIssueBtn.addEventListener('click', function() {
+        var data = getSubmissionText();
+        var issueTitle = encodeURIComponent('[站点收录申请] ' + (data.title || '新资源推荐'));
+        var issueBody = encodeURIComponent('### 资源信息\n\n' + data.formatted + '\n\n---\n*通过神站导航在线收录助手提交*');
+        var githubRepo = 'your-repo/your-nav'; // Default fallback or project repo
+        window.open('https://github.com/' + githubRepo + '/issues/new?title=' + issueTitle + '&body=' + issueBody, '_blank');
+      });
+    }
+
+    // 5. Broken Link Report Modal Handler
+    var reportModal = document.getElementById('nav-report-modal');
+    var reportBtn = document.getElementById('nav-float-report-btn');
+    var reportClose = document.getElementById('nav-report-close');
+
+    function openReportModal(defaultTarget, defaultIssueType) {
+      if (!reportModal) return;
+      var targetInput = document.getElementById('rep-site-target');
+      var typeSelect = document.getElementById('rep-issue-type');
+      var detailsTextarea = document.getElementById('rep-issue-details');
+
+      if (typeof defaultTarget === 'object' && defaultTarget !== null) {
+        if (targetInput && defaultTarget.target) targetInput.value = defaultTarget.target;
+        if (typeSelect && defaultTarget.issueType) typeSelect.value = defaultTarget.issueType;
+        if (detailsTextarea && defaultTarget.details) detailsTextarea.value = defaultTarget.details;
+      } else if (typeof defaultTarget === 'string' && targetInput) {
+        targetInput.value = defaultTarget;
+        if (typeSelect && defaultIssueType) typeSelect.value = defaultIssueType;
+      }
+
+      reportModal.style.display = 'flex';
+      setTimeout(function() {
+        reportModal.classList.add('is-open');
+        if (targetInput && !targetInput.value) {
+          targetInput.focus();
+        } else if (detailsTextarea) {
+          detailsTextarea.focus();
+        }
+      }, 10);
+    }
+
+    function closeReportModal() {
+      if (!reportModal) return;
+      reportModal.classList.remove('is-open');
+      setTimeout(function() {
+        reportModal.style.display = 'none';
+      }, 200);
+    }
+
+    if (reportBtn) reportBtn.addEventListener('click', function() { openReportModal(); });
+    if (reportClose) reportClose.addEventListener('click', closeReportModal);
+    if (reportModal) {
+      reportModal.addEventListener('click', function(e) {
+        if (e.target === reportModal) closeReportModal();
+      });
+    }
+
+    function getReportText() {
+      var target = (document.getElementById('rep-site-target').value || '').trim();
+      var type = document.getElementById('rep-issue-type').value || 'broken';
+      var details = (document.getElementById('rep-issue-details').value || '').trim();
+
+      var typeMap = {
+        'broken': '无法访问 / 死链',
+        'changed': '域名变更',
+        'scam': '涉及欺诈 / 违规',
+        'cat_err': '分类划分有误',
+        'info_err': '信息错误'
+      };
+      var typeLabel = typeMap[type] || type;
+
+      return {
+        target: target,
+        typeLabel: typeLabel,
+        details: details,
+        formatted: '【站点失效/纠错反馈】\n' +
+          '• 目标站点：' + (target || '未填写') + '\n' +
+          '• 异常类型：' + typeLabel + '\n' +
+          '• 详细说明：' + (details || '无')
+      };
+    }
+
+    var repToBotBtn = document.getElementById('nav-report-to-bot-btn');
+    if (repToBotBtn) {
+      repToBotBtn.addEventListener('click', function() {
+        var data = getReportText();
+        if (!data.target) {
+          showToast('请填写失效站点的名称或网址');
+          return;
+        }
+        var msg = encodeURIComponent('/report ' + data.formatted);
+        var targetUrl = 'https://t.me/xiunav_bot?text=' + msg;
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        closeReportModal();
+      });
+    }
+
+    var repCopyBtn = document.getElementById('nav-report-copy-btn');
+    if (repCopyBtn) {
+      repCopyBtn.addEventListener('click', function() {
+        var data = getReportText();
+        if (!data.target) {
+          showToast('请填写失效站点的名称或网址');
+          return;
+        }
+        copyText(data.formatted, '已复制纠错文案，可直接发送给站长');
+      });
+    }
+
+    // Global Esc Handler for Modals
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (submitModal && submitModal.classList.contains('is-open')) {
+          closeSubmitModal();
+        } else if (reportModal && reportModal.classList.contains('is-open')) {
+          closeReportModal();
+        }
+      }
+    });
+
+    // Clipboard Copy Helper
+    function copyText(text, successMsg) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function() {
+          showToast(successMsg);
+        }).catch(function() {
+          fallbackCopy(text, successMsg);
+        });
+      } else {
+        fallbackCopy(text, successMsg);
+      }
+    }
+
+    function fallbackCopy(text, successMsg) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (err) {
+        showToast('复制失败，请手动选择复制');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      if (typeof window.showNavToast === 'function') {
+        window.showNavToast(msg);
+      } else {
+        var c = document.getElementById('nav-toast-container');
+        if (!c) {
+          c = document.createElement('div');
+          c.id = 'nav-toast-container';
+          c.className = 'nav-toast-container';
+          document.body.appendChild(c);
+        }
+        var t = document.createElement('div');
+        t.className = 'nav-toast-item';
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(function() {
+          t.style.transition = 'opacity 0.2s, transform 0.2s';
+          t.style.opacity = '0';
+          t.style.transform = 'translateY(10px)';
+          setTimeout(function() { t.remove(); }, 200);
+        }, 2200);
+      }
+    }
+
+    // Expose global methods for other buttons to trigger submit/report with context
+    window.openNavSubmitModal = openSubmitModal;
+    window.openNavReportModal = openReportModal;
+  })();
+</script>

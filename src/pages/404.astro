@@ -1,0 +1,54 @@
+---
+import NavLayout from '../layouts/NavLayout.astro';
+---
+<NavLayout title="404 - 页面未找到 · SparkNav" description="抱歉，您访问的页面不存在或已被移除。">
+  <div class="nav-app" style="min-height: 100vh; display: flex; flex-direction: column;">
+    <!-- Top Sticky Header -->
+    <header class="nav-header">
+      <div class="nav-header-inner">
+        <div class="nav-brand-group">
+          <a href="/" class="nav-brand-title">
+            <span>⚡ SparkNav</span>
+            <span class="nav-brand-badge">OSS</span>
+          </a>
+        </div>
+        <nav class="nav-header-menu" aria-label="垂直专区导航">
+          <a href="/" class="nav-menu-link" title="精选总览首页">
+            <span>🧭 精选总览</span>
+          </a>
+          <a href="/github.html" class="nav-menu-link" title="开源矩阵专区">
+            <span>💻 开源矩阵</span>
+          </a>
+          <a href="/telegram.html" class="nav-menu-link" title="电报生态专区">
+            <span>✈️ 电报生态</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 404 Hero Section -->
+    <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 20px; text-align: center;">
+      <div style="max-width: 520px; background: var(--nav-surface); border: 1px solid var(--nav-border); border-radius: 16px; padding: 48px 32px; box-shadow: var(--nav-card-shadow); backdrop-filter: blur(16px);">
+        <div style="font-size: 88px; font-weight: 900; letter-spacing: -2px; line-height: 1; background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;">
+          404
+        </div>
+        <h1 style="font-size: 22px; font-weight: 700; color: var(--nav-text-main); margin-bottom: 12px;">
+          未找到此资源或页面
+        </h1>
+        <p style="font-size: 14px; color: var(--nav-text-secondary); line-height: 1.6; margin-bottom: 28px;">
+          您访问的链接可能已被迁移、删除，或由于路径输入有误导致。请返回大厅或通过快捷键全局检索。
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="/" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; background: var(--nav-accent); color: #fff; text-decoration: none; transition: opacity 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>返回导航首页</span>
+          </a>
+          <button type="button" onclick="window.dispatchEvent(new CustomEvent('nav-open-command-palette'))" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; background: var(--nav-surface-elevated); color: var(--nav-text-main); border: 1px solid var(--nav-border); cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>全网瞬时搜索 (Cmd+K)</span>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+</NavLayout>

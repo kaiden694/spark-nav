@@ -1,0 +1,1497 @@
+---
+import NavLayout from '../layouts/NavLayout.astro';
+import { navCategories, navGithubs } from '../utils/nav';
+
+const githubSubcats = navCategories.find(c => c.id === 'github')?.subcategories || [];
+
+// Extract distinct languages
+const allLanguages = Array.from(
+  new Set(navGithubs.map(g => g.language).filter(Boolean))
+).sort();
+
+const totalCount = navGithubs.length;
+const maxStars = Math.max(0, ...navGithubs.map(g => g.stars || 0));
+
+function formatFollowers(num: number) {
+  if (!num) return '0';
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
+const clientGithubJson = JSON.stringify(navGithubs);
+
+const githubJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "导航总览",
+          "item": "/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "开源矩阵",
+          "item": "/github.html"
+        }
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://sparknav.example.com/nav/github.html#webpage",
+      "name": "开源矩阵专区 · 全网高星开源项目与极客神器",
+      "description": "精选 GitHub 全球高星开源项目、前沿 AI 工具链与全栈开发框架，按编程语言与技术领域正交筛选，秒级直达。",
+      "url": "/github.html",
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": totalCount,
+        "itemListElement": navGithubs.map((g, idx) => ({
+          "@type": "SoftwareSourceCode",
+          "position": idx + 1,
+          "name": g.name || g.title,
+          "description": g.description,
+          "codeRepository": g.url,
+          "programmingLanguage": g.language || 'Various',
+          "author": {
+            "@type": "Organization",
+            "name": g.owner || 'Open Source'
+          }
+        }))
+      }
+    }
+  ]
+};
+---
+<NavLayout
+  title="开源矩阵专区 · 全网高星开源项目与极客神器"
+  description="精选 GitHub 全球高星开源项目、前沿 AI 工具链与全栈开发框架，按编程语言与技术领域正交筛选，秒级直达。"
+  canonical="/github.html"
+  jsonLd={githubJsonLd}
+>
+  <div class="nav-app">
+    <!-- Top Header -->
+    <header class="nav-header">
+      <div class="nav-header-inner">
+        <div class="nav-brand-group">
+          <a href="/" class="btn-nav-back" title="返回首页大厅">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <span>导航大厅</span>
+          </a>
+          <a href="/github.html" class="nav-brand-title">
+            <span>💻 开源矩阵</span>
+            <span class="nav-brand-badge">GitHub Pro</span>
+          </a>
+        </div>
+
+        <!-- Top Vertical Menu -->
+        <nav class="nav-header-menu" aria-label="垂直专区导航">
+          <a href="/" class="nav-menu-link" title="精选总览首页">
+            <span>🧭 精选总览</span>
+          </a>
+          <a href="/github.html" class="nav-menu-link is-active" title="开源矩阵专区">
+            <span>💻 开源矩阵</span>
+          </a>
+          <a href="/telegram.html" class="nav-menu-link" title="电报生态专区">
+            <span>✈️ 电报生态</span>
+          </a>
+          <a href="/category/tools.html" class="nav-menu-link" title="实用工具专区">
+            <span>🛠️ 实用工具</span>
+          </a>
+          <a href="/category/creators.html" class="nav-menu-link" title="优质博主专区">
+            <span>👤 优质博主</span>
+          </a>
+          
+        </nav>
+
+        <div class="nav-search-wrap">
+          <div class="nav-search-box" id="header-cmd-k-trigger" style="cursor: pointer;" title="按 Cmd+K 或 / 唤醒全局检索">
+            <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="gh-local-search-input" class="nav-search-input" placeholder="在开源矩阵中即时检索仓库、技术栈或功能..." autocomplete="off" spellcheck="false" />
+            <kbd class="nav-key-shortcut">⌘K</kbd>
+          </div>
+        </div>
+
+        <div class="nav-actions">
+          <span style="font-size: 12px; color: var(--nav-text-muted); font-weight: 600;">
+            共收录 <strong style="color: #a855f7;">{totalCount}</strong> 开源项目
+          </span>
+          <button class="theme-toggle-btn" id="nav-theme-btn" title="切换主题">
+            <svg id="nav-sun-icon" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg id="nav-moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="gh-hub-container">
+      <!-- Dual-Wing Enhanced Hero Section (Parity with Gallery) -->
+      <section class="thematic-hero-section">
+        <div class="thematic-hero-grid">
+          
+          <!-- Left Wing: Value Prop & Glass Capsule Strip -->
+          <div class="thematic-hero-left">
+            <div>
+              <div class="thematic-hero-eyebrow">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>OPEN SOURCE MATRIX</span>
+              </div>
+              <h1 class="thematic-hero-title"><span class="shiny-text">GitHub 极客开源项目矩阵</span></h1>
+              <p class="thematic-hero-desc">收录前沿人工智能、全栈工具链、自动化运维与极客开发框架。多维语言分类索引，实时追踪 Star 增长与前沿演进。</p>
+            </div>
+
+            <!-- Unified Glass Data Capsule Strip -->
+            <div class="hero-unified-capsule">
+              <div class="capsule-metric-item">
+                <div class="capsule-icon icon-wrap-blue">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="capsule-data">
+                  <span class="capsule-number" id="stat-total-chip">{totalCount}</span>
+                  <span class="capsule-label">开源项目</span>
+                </div>
+              </div>
+
+              <div class="capsule-divider"></div>
+
+              <div class="capsule-metric-item">
+                <div class="capsule-icon icon-wrap-purple">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                </div>
+                <div class="capsule-data">
+                  <span class="capsule-number" id="stat-lang-chip">{allLanguages.length}</span>
+                  <span class="capsule-label">涵盖语言</span>
+                </div>
+              </div>
+
+              <div class="capsule-divider"></div>
+
+              <div class="capsule-metric-item">
+                <div class="capsule-icon icon-wrap-gold">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <div class="capsule-data">
+                  <span class="capsule-number" id="stat-max-chip">{formatFollowers(maxStars)}</span>
+                  <span class="capsule-label">最高星标</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Wing: Spotlight Feature Card -->
+          <div class="hero-right-spotlight" id="hero-spotlight-card">
+            <div class="spotlight-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span class="shiny-gold">今日精选 Spotlight</span>
+            </div>
+            
+            <div class="spotlight-body" id="spotlight-dynamic-content">
+              <div class="spotlight-loading" style="color: var(--nav-text-muted); font-size: 13px;">正在挑选今日精选开源项目...</div>
+            </div>
+
+            <button class="btn-shuffle-spotlight" id="btn-shuffle-spotlight" title="换一个精选推荐">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+              <span>换一个推荐</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Vertical Layout: Dynamic Left Sidebar + Main Workspace -->
+      <div class="vertical-layout">
+        <!-- Left Dynamic Sidebar -->
+        <aside class="vertical-sidebar" id="vertical-sidebar">
+          <!-- Section 1: 技术领域 (Subcategories) -->
+          <div class="vertical-sidebar-section">
+            <div class="vertical-sidebar-title">
+              <span>🏷️ 技术领域</span>
+              <span class="vertical-sidebar-badge">{totalCount}</span>
+            </div>
+            <ul class="vertical-sidebar-menu" id="gh-subcat-filter-group">
+              <li>
+                <button type="button" class="vertical-sidebar-item is-active" data-sub="all">
+                  <span class="vertical-sidebar-item-left">
+                    <span>🌐</span>
+                    <span>全部领域</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" id="count-sub-all">{totalCount}</span>
+                </button>
+              </li>
+              {githubSubcats.map(sub => {
+                const count = navGithubs.filter(g => g.subcategory === sub.id).length;
+                return (
+                  <li>
+                    <button type="button" class="vertical-sidebar-item" data-sub={sub.id}>
+                      <span class="vertical-sidebar-item-left">
+                        <span>{sub.icon || '🏷️'}</span>
+                        <span>{sub.name}</span>
+                      </span>
+                      <span class="vertical-sidebar-badge" data-sub-badge={sub.id}>{count}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <!-- Section 2: 编程语言 (Languages) -->
+          <div class="vertical-sidebar-section">
+            <div class="vertical-sidebar-title">
+              <span>💻 编程语言</span>
+              <span class="vertical-sidebar-badge">{allLanguages.length}</span>
+            </div>
+            <ul class="vertical-sidebar-menu" id="gh-lang-filter-group">
+              <li>
+                <button type="button" class="vertical-sidebar-item is-active" data-lang="all">
+                  <span class="vertical-sidebar-item-left">
+                    <span>⚡</span>
+                    <span>全部语言</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" id="count-lang-all">{totalCount}</span>
+                </button>
+              </li>
+              {allLanguages.map(lang => {
+                const count = navGithubs.filter(g => g.language === lang).length;
+                return (
+                  <li>
+                    <button type="button" class="vertical-sidebar-item" data-lang={lang}>
+                      <span class="vertical-sidebar-item-left">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #c084fc; display: inline-block;"></span>
+                        <span>{lang}</span>
+                      </span>
+                      <span class="vertical-sidebar-badge" data-lang-badge={lang}>{count}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <!-- Section 3: 专区快捷导航 -->
+          <div class="vertical-sidebar-section">
+            <div class="vertical-sidebar-title">
+              <span>🧭 专区直达</span>
+            </div>
+            <ul class="vertical-sidebar-menu">
+              <li>
+                <a href="/" class="vertical-sidebar-item">
+                  <span class="vertical-sidebar-item-left">
+                    <span>🧭</span>
+                    <span>导航首页</span>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="/telegram.html" class="vertical-sidebar-item">
+                  <span class="vertical-sidebar-item-left">
+                    <span>✈️</span>
+                    <span>Telegram 专区</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" style="color: #38bdf8;">PRO</span>
+                </a>
+              </li>
+              <li>
+                <a href="/category/tools.html" class="vertical-sidebar-item">
+                  <span class="vertical-sidebar-item-left">
+                    <span>🛠️</span>
+                    <span>实用工具箱</span>
+                  </span>
+                </a>
+              </li>
+              <li>
+                
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- Right Main Workspace -->
+        <main class="vertical-main">
+          <!-- Compact Live Count & Active Query / Sort Bar -->
+          <div class="vertical-status-bar">
+            <div class="vertical-status-left">
+              <span>筛选结果：</span>
+              <strong id="gh-filtered-count" style="color: #a855f7;">{totalCount}</strong> 项
+              <span id="gh-query-tag" class="gh-query-tag" style="display: none;">
+                包含关键词: "<span id="gh-query-text"></span>"
+                <button type="button" id="gh-clear-query-btn">&times;</button>
+              </span>
+            </div>
+            <div class="vertical-status-right">
+              <div class="vertical-sort-wrap">
+                <span class="gh-sort-label">排序：</span>
+                <select id="gh-sort-select" class="vertical-sort-select" aria-label="GitHub 开源项目排序方式">
+                  <option value="stars">Star 数量最多</option>
+                  <option value="forks">Fork 数量最多</option>
+                  <option value="title">项目名称排序</option>
+                </select>
+              </div>
+              <button type="button" id="gh-reset-all-filters" class="gh-reset-btn" style="display: none;">
+                重置筛选
+              </button>
+            </div>
+          </div>
+
+      <!-- Card Grid Area (Incremental Chunked Lazy Append) -->
+      <div class="nav-grid" id="gh-card-grid">
+        {Array.from({ length: 8 }).map(() => (
+          <div class="nav-card-skeleton" aria-hidden="true">
+            <div class="skeleton-header">
+              <div class="skeleton-icon"></div>
+              <div class="skeleton-title-wrap">
+                <div class="skeleton-line skeleton-line-title"></div>
+                <div class="skeleton-line" style="width: 40%;"></div>
+              </div>
+            </div>
+            <div class="skeleton-line skeleton-line-desc"></div>
+            <div class="skeleton-line skeleton-line-desc-short"></div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Load more -->
+      <div class="gh-load-more-wrap" id="gh-load-more-wrap">
+        <button type="button" id="gh-load-more-btn" class="gh-load-more-btn">
+          <span>加载更多</span>
+          <span id="gh-remaining-count" class="gh-remaining-count"></span>
+        </button>
+        <div id="gh-scroll-sentinel" style="height: 20px; width: 100%;"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="gh-empty-state" class="nav-empty-grid" style="display: none;">
+        <span class="nav-empty-grid-icon">🛸</span>
+        <div class="nav-empty-grid-text">当前技术栈下暂无收录项目</div>
+        <div id="gh-empty-fuzzy-wrap" class="nav-empty-fuzzy-wrap" style="display: none;">
+          <span class="nav-empty-fuzzy-label">🔍 您是否在找以下热门收录：</span>
+          <div id="gh-empty-fuzzy-list" class="nav-empty-fuzzy-list"></div>
+        </div>
+        <button type="button" class="nav-empty-grid-btn" id="gh-empty-reset-btn">重置所有筛选条件</button>
+      </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline id="gh-raw-data" type="application/json" set:html={clientGithubJson}></script>
+
+  <style>
+    .gh-hub-container {
+      width: 100%;
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 24px 20px 80px 20px;
+      box-sizing: border-box;
+    }
+
+    #gh-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 580px) {
+      #gh-card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+    .gh-filter-toolbar {
+      background: rgba(18, 22, 34, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .gh-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .gh-filter-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--nav-text-muted, #94a3b8);
+      white-space: nowrap;
+      min-width: 65px;
+    }
+
+    .gh-filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .gh-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--nav-text-muted, #94a3b8);
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .gh-pill:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--nav-text-main, #f8fafc);
+    }
+
+    .gh-pill.is-active {
+      background: rgba(168, 85, 247, 0.16);
+      border-color: rgba(168, 85, 247, 0.45);
+      color: #c084fc;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+    }
+
+    .gh-pill-count {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gh-pill.is-active .gh-pill-count {
+      background: rgba(168, 85, 247, 0.25);
+      color: #c084fc;
+    }
+
+    .gh-sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .gh-sort-label {
+      font-size: 12px;
+      color: var(--nav-text-muted, #94a3b8);
+      white-space: nowrap;
+    }
+
+    .gh-sort-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: hsla(222, 47%, 12%, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--nav-text-main, #f8fafc);
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 500;
+      padding: 5px 28px 5px 10px;
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+      color-scheme: dark;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .gh-sort-select:hover,
+    .gh-sort-select:focus {
+      border-color: var(--nav-accent, #c084fc);
+    }
+
+    .gh-sort-select option {
+      background-color: #121723 !important;
+      color: #f8fafc !important;
+    }
+
+    .gh-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--nav-text-muted, #94a3b8);
+    }
+
+    .gh-status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gh-query-tag {
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: #c084fc;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gh-query-tag button {
+      background: none;
+      border: none;
+      color: #c084fc;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .gh-reset-btn {
+      background: none;
+      border: none;
+      color: #c084fc;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .gh-load-more-wrap {
+      text-align: center;
+      padding: 32px 0 20px 0;
+    }
+
+    .gh-load-more-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--nav-text-main, #f8fafc);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 24px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .gh-load-more-btn:hover {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+      transform: translateY(-2px);
+    }
+
+    .gh-remaining-count {
+      font-size: 11px;
+      color: var(--nav-text-muted, #94a3b8);
+      font-weight: normal;
+    }
+
+    @media (max-width: 768px) {
+      .gh-filter-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .gh-sort-wrap {
+        margin-left: 0;
+        margin-top: 6px;
+      }
+    }
+
+    /* Light Theme Adaptation */
+    :global([data-theme="light"]) .gh-filter-toolbar {
+      background: rgba(255, 255, 255, 0.88);
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    }
+    :global([data-theme="light"]) .gh-pill {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.08);
+      color: #475569;
+    }
+    :global([data-theme="light"]) .gh-pill:hover {
+      background: rgba(0, 0, 0, 0.07);
+      color: #0f172a;
+    }
+    :global([data-theme="light"]) .gh-pill-count {
+      background: rgba(0, 0, 0, 0.06);
+      color: #64748b;
+    }
+    :global([data-theme="light"]) .gh-sort-select {
+      color-scheme: light;
+      background-color: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      color: #0f172a;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    }
+    :global([data-theme="light"]) .gh-sort-select option {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+    }
+    :global([data-theme="light"]) .gh-load-more-btn {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #334155;
+    }
+  </style>
+
+  <script is:inline>
+    (function() {
+      var rawDataEl = document.getElementById('gh-raw-data');
+      var allItems = [];
+      try {
+        allItems = JSON.parse(rawDataEl ? rawDataEl.textContent : '[]');
+      } catch (e) {
+        allItems = [];
+      }
+
+      var langButtons = document.querySelectorAll('#gh-lang-filter-group [data-lang]');
+      var subcatButtons = document.querySelectorAll('#gh-subcat-filter-group [data-sub]');
+      var searchInput = document.getElementById('gh-local-search-input');
+      var sortSelect = document.getElementById('gh-sort-select');
+      var cardGrid = document.getElementById('gh-card-grid');
+      var loadMoreWrap = document.getElementById('gh-load-more-wrap');
+      var loadMoreBtn = document.getElementById('gh-load-more-btn');
+      var remainingEl = document.getElementById('gh-remaining-count');
+      var emptyState = document.getElementById('gh-empty-state');
+      var filteredCountEl = document.getElementById('gh-filtered-count');
+      var queryTag = document.getElementById('gh-query-tag');
+      var queryText = document.getElementById('gh-query-text');
+      var clearQueryBtn = document.getElementById('gh-clear-query-btn');
+      var resetBtn = document.getElementById('gh-reset-all-filters');
+      var emptyResetBtn = document.getElementById('gh-empty-reset-btn');
+      var sentinel = document.getElementById('gh-scroll-sentinel');
+      var fuzzyWrap = document.getElementById('gh-empty-fuzzy-wrap');
+      var fuzzyList = document.getElementById('gh-empty-fuzzy-list');
+
+      var currentLang = 'all';
+      var currentSub = 'all';
+      var currentQuery = '';
+      var currentSort = 'stars';
+
+      function computeFuzzySuggestions(query, items, maxResults) {
+        if (!query || !items || !items.length) return [];
+        var q = query.toLowerCase().trim();
+        if (!q) return [];
+        var max = maxResults || 3;
+        var candidates = [];
+        var seen = {};
+
+        for (var i = 0; i < items.length; i++) {
+          var title = (items[i].title || items[i].repo || '').trim();
+          if (!title || seen[title.toLowerCase()]) continue;
+          seen[title.toLowerCase()] = true;
+          
+          var tLower = title.toLowerCase();
+          var score = 0;
+          if (tLower === q) continue;
+
+          if (tLower.indexOf(q) === 0) {
+            score = 100 - (tLower.length - q.length);
+          } else if (tLower.indexOf(q) !== -1) {
+            score = 70 - tLower.indexOf(q);
+          } else {
+            var matches = 0;
+            var qChars = q.split('');
+            var lastIdx = -1;
+            for (var c = 0; c < qChars.length; c++) {
+              var idx = tLower.indexOf(qChars[c], lastIdx + 1);
+              if (idx > lastIdx) {
+                matches++;
+                lastIdx = idx;
+              }
+            }
+            var ratio = matches / q.length;
+            if (ratio >= 0.5) {
+              score = Math.round(ratio * 50);
+            }
+          }
+
+          if (score > 10) {
+            candidates.push({ title: title, score: score });
+          }
+        }
+
+        candidates.sort(function(a, b) { return b.score - a.score; });
+        return candidates.slice(0, max).map(function(c) { return c.title; });
+      }
+
+      var filteredItems = [];
+      var renderedCount = 0;
+      var BATCH_SIZE = 40;
+
+      // Spotlight Engine
+      var btnShuffleSpotlight = document.getElementById('btn-shuffle-spotlight');
+      var lastSpotlightIndex = -1;
+
+      function pickSpotlightGithub() {
+        if (!allItems.length) return;
+        var candidates = allItems.filter(function(g) { return (g.stars || 0) >= 10000 || g.is_featured; });
+        var pool = candidates.length > 0 ? candidates : allItems;
+        var idx;
+        if (pool.length > 1) {
+          do {
+            idx = Math.floor(Math.random() * pool.length);
+          } while (idx === lastSpotlightIndex);
+        } else {
+          idx = 0;
+        }
+        lastSpotlightIndex = idx;
+        renderSpotlightGithub(pool[idx]);
+      }
+
+      function renderSpotlightGithub(item) {
+        var el = document.getElementById('spotlight-dynamic-content');
+        if (!el || !item) return;
+
+        var avatarUrl = item.avatar_url || (item.owner ? 'https://github.com/' + encodeURIComponent(item.owner) + '.png?size=96' : '');
+        var avatarHtml = '';
+        if (avatarUrl) {
+          avatarHtml = '<img class="spotlight-avatar" src="' + escapeHtml(avatarUrl) + '" alt="' + escapeHtml(item.title) + '" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'flex\';" />' +
+            '<div class="spotlight-avatar-fallback" style="display: none;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div>';
+        } else {
+          avatarHtml = '<div class="spotlight-avatar-fallback"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div>';
+        }
+
+        el.style.opacity = '0';
+        setTimeout(function() {
+          el.innerHTML =
+            '<div class="spotlight-avatar-wrap" onclick="window.open(\'' + escapeHtml(item.url) + '\', \'_blank\');">' +
+              avatarHtml +
+            '</div>' +
+            '<div class="spotlight-meta">' +
+              '<div class="spotlight-name-row">' +
+                '<span class="spotlight-name" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</span>' +
+                '<span class="spotlight-type-badge badge-gh-lang">' + escapeHtml(item.language || 'Code') + '</span>' +
+              '</div>' +
+              '<a class="spotlight-handle" href="' + escapeHtml(item.url) + '" target="_blank">' + escapeHtml(item.repo) + ' · ⭐ ' + formatNum(item.stars) + '</a>' +
+              '<div class="spotlight-bio-snippet">' + escapeHtml(item.description || item.repo) + '</div>' +
+            '</div>';
+          el.style.opacity = '1';
+        }, 120);
+      }
+
+      function formatNum(num) {
+        if (num === undefined || num === null || num === '') return '0';
+        var n = Number(num);
+        if (isNaN(n)) return '0';
+        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+        return String(n);
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      var VIBRANT_ACCENTS = [
+        '168, 85, 247', '129, 140, 248', '14, 165, 233',
+        '20, 184, 166', '16, 185, 129', '245, 158, 11',
+        '236, 72, 153', '244, 63, 94'
+      ];
+
+      function getAccent(key) {
+        var hash = 0;
+        var s = String(key || 'item');
+        for (var i = 0; i < s.length; i++) {
+          hash = (hash << 5) - hash + s.charCodeAt(i);
+          hash |= 0;
+        }
+        return VIBRANT_ACCENTS[Math.abs(hash) % VIBRANT_ACCENTS.length];
+      }
+
+      var hasHover = !window.matchMedia || window.matchMedia('(hover: hover)').matches;
+
+      function updateCardGlow(el, e) {
+        if (!hasHover) return;
+        var rect = el.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        el.style.setProperty('--mouse-x', x + 'px');
+        el.style.setProperty('--mouse-y', y + 'px');
+      }
+
+      var attach3DTilt = window.attach3DTilt || function(el, tilt) {};
+
+      function triggerClickSpark(e, sparkCount, color) {
+        var x = e ? (e.clientX || window.innerWidth / 2) : window.innerWidth / 2;
+        var y = e ? (e.clientY || window.innerHeight / 2) : window.innerHeight / 2;
+        var targetColor = color || '#38bdf8';
+
+        for (var i = 0; i < (sparkCount || 8); i++) {
+          var spark = document.createElement('div');
+          spark.className = 'click-spark-particle';
+          spark.style.left = x + 'px';
+          spark.style.top = y + 'px';
+          spark.style.background = targetColor;
+
+          var angle = (Math.PI * 2 * i) / (sparkCount || 8) + (Math.random() - 0.5);
+          var velocity = 35 + Math.random() * 40;
+          var dx = Math.cos(angle) * velocity;
+          var dy = Math.sin(angle) * velocity;
+
+          spark.style.setProperty('--dx', dx + 'px');
+          spark.style.setProperty('--dy', dy + 'px');
+          var size = 4 + Math.random() * 4;
+          spark.style.width = size + 'px';
+          spark.style.height = size + 'px';
+
+          document.body.appendChild(spark);
+          setTimeout((function(s) { return function() { s.remove(); }; })(spark), 650);
+        }
+      }
+
+      function copyToClipboard(text, onSuccess) {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+            fallbackCopy(text, onSuccess);
+          });
+        } else {
+          fallbackCopy(text, onSuccess);
+        }
+      }
+
+      function fallbackCopy(text, onSuccess) {
+        var textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          if (onSuccess) onSuccess();
+        } catch (err) {
+          console.warn('Copy failed', err);
+        }
+        document.body.removeChild(textArea);
+      }
+
+      function showNavToast(message) {
+        var container = document.getElementById('nav-toast-container');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'nav-toast-container';
+          container.className = 'nav-toast-container';
+          document.body.appendChild(container);
+        }
+        var toast = document.createElement('div');
+        toast.className = 'nav-toast-item';
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(function() {
+          toast.style.transition = 'opacity 0.2s, transform 0.2s';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(10px)';
+          setTimeout(function() { toast.remove(); }, 200);
+        }, 2200);
+      }
+
+      function renderCard(item) {
+        var accentRgb = getAccent(item.id || item.repo);
+        var cardId = item.id || ('gh-' + item.name);
+        var tagsHtml = '';
+        if (Array.isArray(item.tags)) {
+          item.tags.slice(0, 2).forEach(function(tag) {
+            tagsHtml += '<span class="nav-tag-pill">' + escapeHtml(tag) + '</span>';
+          });
+        }
+
+        var a = document.createElement('a');
+        a.id = cardId;
+        a.href = item.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'nav-card';
+        if (item.is_alive === false) {
+          a.classList.add('is-offline');
+          a.setAttribute('data-is-alive', 'false');
+        } else {
+          a.setAttribute('data-is-alive', 'true');
+        }
+        if (item.mirror_urls && item.mirror_urls.length > 0) {
+          a.setAttribute('data-mirrors', item.mirror_urls.join(','));
+        }
+        a.setAttribute('data-id', cardId);
+        a.setAttribute('data-type', 'github');
+        if (item.repo) a.setAttribute('data-repo', item.repo);
+        a.setAttribute('data-title', item.title || item.repo || '');
+        a.setAttribute('data-url', item.url || '');
+        a.style.cssText = '--card-accent-rgb: ' + accentRgb + '; --card-accent: rgb(' + accentRgb + ');';
+
+        a.addEventListener('mousemove', function(e) {
+          updateCardGlow(a, e);
+        });
+        a.addEventListener('mouseenter', function(e) {
+          updateCardGlow(a, e);
+        });
+
+        var avatarUrl = item.avatar_url || (item.owner ? 'https://github.com/' + encodeURIComponent(item.owner) + '.png?size=96' : '');
+        var avatarHtml = '';
+        if (avatarUrl) {
+          avatarHtml = '<img src="' + escapeHtml(avatarUrl) + '" alt="' + escapeHtml(item.title) + '" loading="lazy" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'block\';" />' +
+            '<svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>';
+        } else {
+          avatarHtml = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>';
+        }
+
+        var ghFeedUrl = item.feed_url || (item.repo ? 'https://github.com/' + item.repo + '/releases.atom' : '');
+        if (!ghFeedUrl && item.url) {
+          var gm = item.url.match(/github\.com\/([^\/]+\/[^\/]+)/);
+          if (gm) ghFeedUrl = 'https://github.com/' + gm[1].replace(/\.git$/, '') + '/releases.atom';
+        }
+        if (ghFeedUrl) {
+          a.setAttribute('data-feed-url', ghFeedUrl);
+        }
+
+        var feedBtnHtml = ghFeedUrl ? (
+          '<button type="button" class="nav-card-feed-btn" title="查看最新动态 (Release Atom)" data-feed-url="' + escapeHtml(ghFeedUrl) + '" data-title="' + escapeHtml(item.title || item.repo) + '">' +
+            '<svg viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>' +
+          '</button>'
+        ) : '';
+
+        var copyBtnHtml = '<button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id="' + escapeHtml(cardId) + '">' +
+          '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>' +
+        '</button>';
+
+        var isFav = false;
+        if (typeof window !== 'undefined' && typeof window.isNavFavorite === 'function') {
+          isFav = window.isNavFavorite(cardId);
+        } else {
+          try {
+            var rawFavs = localStorage.getItem('xiu_nav_user_favorites');
+            var parsedFavs = rawFavs ? JSON.parse(rawFavs) : [];
+            isFav = parsedFavs.some(function(x) { return x.id === cardId; });
+          } catch (e) {
+            isFav = false;
+          }
+        }
+        var pinBtnHtml = '<button type="button" class="nav-card-pin-btn' + (isFav ? ' is-pinned' : '') + '" title="' + (isFav ? '从常用中移除' : '收藏至我的常用') + '" data-id="' + escapeHtml(cardId) + '">' +
+          '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>' +
+        '</button>';
+
+        var actionsHtml = '<div class="nav-card-actions-group">' + feedBtnHtml + pinBtnHtml + copyBtnHtml + '</div>';
+        var offlineBadge = (item.is_alive === false) ? '<span class="nav-card-offline-pill" title="该仓库当前网络状态受限">⚠️ 状态受限</span>' : '';
+
+        a.innerHTML = 
+          '<div>' +
+            '<div class="nav-card-header">' +
+              '<div class="nav-card-avatar icon-small" style="background: #181717; color: #fff;">' +
+                avatarHtml +
+              '</div>' +
+              '<div class="nav-card-info">' +
+                '<div class="nav-card-title-row">' +
+                  '<span class="nav-card-title" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</span>' +
+                  offlineBadge +
+                  '<span class="nav-badge badge-github">' + escapeHtml(item.language || 'Code') + '</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<p class="nav-card-desc">' + escapeHtml(item.description || item.repo) + '</p>' +
+          '</div>' +
+          '<div class="nav-card-footer">' +
+            '<div class="nav-card-tags">' + tagsHtml + '</div>' +
+            '<div class="nav-card-stat">' +
+              '<div class="gh-stats-group">' +
+                '<span class="gh-stat-badge" title="Stars: ' + (item.stars || 0) + '">⭐ ' + formatNum(item.stars) + '</span>' +
+                ((typeof item.forks === 'number' || item.forks) ? (
+                  '<span class="gh-stat-badge gh-stat-fork" title="Forks: ' + (item.forks || 0) + '">' +
+                    '<svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align: -1px; margin-right: 2px;"><path d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"/></svg>' +
+                    formatNum(item.forks) +
+                  '</span>'
+                ) : '') +
+              '</div>' +
+              actionsHtml +
+            '</div>' +
+          '</div>';
+
+        var pinBtn = a.querySelector('.nav-card-pin-btn');
+        if (pinBtn) {
+          var doPin = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (window.toggleNavFavorite) {
+              var isNowPinned = window.toggleNavFavorite({
+                id: cardId,
+                title: item.title,
+                url: item.url,
+                description: item.description || item.repo,
+                icon: item.icon_url || '',
+                item_type: 'github'
+              });
+              if (isNowPinned) {
+                pinBtn.classList.add('is-pinned');
+                pinBtn.setAttribute('title', '从常用中移除');
+                showNavToast('✓ 已添加至我的常用收藏');
+              } else {
+                pinBtn.classList.remove('is-pinned');
+                pinBtn.setAttribute('title', '收藏至我的常用');
+                showNavToast('✓ 已从我的常用中移除');
+              }
+            }
+          };
+          pinBtn.addEventListener('click', doPin);
+          pinBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') doPin(e);
+          });
+        }
+
+        var copyBtn = a.querySelector('.nav-card-copy-btn');
+        if (copyBtn) {
+          var doCopy = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var deepLink = window.location.origin + window.location.pathname + '#' + cardId;
+            copyToClipboard(deepLink, function() {
+              var oldHtml = copyBtn.innerHTML;
+              copyBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+              copyBtn.classList.add('is-copied');
+              setTimeout(function() {
+                copyBtn.innerHTML = oldHtml;
+                copyBtn.classList.remove('is-copied');
+              }, 1600);
+              showNavToast('✓ 直达链接已复制到剪贴板');
+              history.replaceState(null, '', '#' + cardId);
+              a.classList.remove('card-anchor-highlight');
+              void a.offsetWidth;
+              a.classList.add('card-anchor-highlight');
+              setTimeout(function() { a.classList.remove('card-anchor-highlight'); }, 3000);
+            });
+          };
+
+          copyBtn.addEventListener('click', doCopy);
+          copyBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              doCopy(e);
+            }
+          });
+        }
+
+        attach3DTilt(a, 6);
+        return a;
+      }
+
+      function appendBatch() {
+        if (renderedCount >= filteredItems.length) {
+          loadMoreWrap.style.display = 'none';
+          return;
+        }
+
+        var nextBatch = filteredItems.slice(renderedCount, renderedCount + BATCH_SIZE);
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < nextBatch.length; i++) {
+          fragment.appendChild(renderCard(nextBatch[i]));
+        }
+        cardGrid.appendChild(fragment);
+        renderedCount += nextBatch.length;
+
+        if (typeof window.applyNavCustomFeeds === 'function') {
+          window.applyNavCustomFeeds();
+        }
+        if (typeof window.refreshNavFeedCardBadges === 'function') {
+          window.refreshNavFeedCardBadges();
+        }
+        if (typeof window.scheduleNavFeedPrefetch === 'function') {
+          window.scheduleNavFeedPrefetch();
+        }
+
+        var remaining = filteredItems.length - renderedCount;
+        if (remaining > 0) {
+          loadMoreWrap.style.display = 'block';
+          if (remainingEl) remainingEl.textContent = '(剩余 ' + remaining + ' 个)';
+        } else {
+          loadMoreWrap.style.display = 'none';
+        }
+      }
+
+      function updateDynamicBadges() {
+        // Dynamic counts for languages
+        var langCounts = { all: 0 };
+        var langBadges = document.querySelectorAll('[data-lang-badge]');
+        for (var i = 0; i < allItems.length; i++) {
+          var it = allItems[i];
+          var matchSub = (currentSub === 'all' || it.subcategory === currentSub);
+          var matchQ = !currentQuery || (it.title + ' ' + it.repo + ' ' + (it.description || '')).toLowerCase().indexOf(currentQuery) !== -1;
+          if (matchSub && matchQ) {
+            langCounts.all++;
+            if (it.language) {
+              langCounts[it.language] = (langCounts[it.language] || 0) + 1;
+            }
+          }
+        }
+
+        var cLangAll = document.getElementById('count-lang-all');
+        if (cLangAll) cLangAll.textContent = langCounts.all;
+        langBadges.forEach(function(badge) {
+          var l = badge.getAttribute('data-lang-badge');
+          badge.textContent = langCounts[l] || 0;
+        });
+
+        // Dynamic counts for subcategories
+        var subCounts = { all: 0 };
+        var subBadges = document.querySelectorAll('[data-sub-badge]');
+        for (var j = 0; j < allItems.length; j++) {
+          var item = allItems[j];
+          var matchLang = (currentLang === 'all' || item.language === currentLang);
+          var matchQry = !currentQuery || (item.title + ' ' + item.repo + ' ' + (item.description || '')).toLowerCase().indexOf(currentQuery) !== -1;
+          if (matchLang && matchQry) {
+            subCounts.all++;
+            if (item.subcategory) {
+              subCounts[item.subcategory] = (subCounts[item.subcategory] || 0) + 1;
+            }
+          }
+        }
+
+        var cSubAll = document.getElementById('count-sub-all');
+        if (cSubAll) cSubAll.textContent = subCounts.all;
+        subBadges.forEach(function(badge) {
+          var s = badge.getAttribute('data-sub-badge');
+          badge.textContent = subCounts[s] || 0;
+        });
+      }
+
+      function applyFilters(shouldSyncUrl) {
+        var q = currentQuery.trim().toLowerCase();
+
+        filteredItems = allItems.filter(function(item) {
+          var matchesLang = (currentLang === 'all' || item.language === currentLang);
+          var matchesSub = (currentSub === 'all' || item.subcategory === currentSub);
+          var text = (item.title + ' ' + item.repo + ' ' + (item.description || '') + ' ' + (item.tags ? item.tags.join(' ') : '')).toLowerCase();
+          var matchesQuery = !q || text.indexOf(q) !== -1;
+          return matchesLang && matchesSub && matchesQuery;
+        });
+
+        if (currentSort === 'stars') {
+          filteredItems.sort(function(a, b) { return (b.stars || 0) - (a.stars || 0); });
+        } else if (currentSort === 'forks') {
+          filteredItems.sort(function(a, b) { return (b.forks || 0) - (a.forks || 0); });
+        } else if (currentSort === 'title') {
+          filteredItems.sort(function(a, b) { return (a.title || a.repo).localeCompare(b.title || b.repo); });
+        }
+
+        if (filteredCountEl) filteredCountEl.textContent = filteredItems.length;
+        updateDynamicBadges();
+
+        if (q) {
+          if (queryTag) queryTag.style.display = 'inline-flex';
+          if (queryText) queryText.textContent = q;
+        } else {
+          if (queryTag) queryTag.style.display = 'none';
+        }
+
+        var isModified = (currentLang !== 'all' || currentSub !== 'all' || !!q || currentSort !== 'stars');
+        if (resetBtn) resetBtn.style.display = isModified ? 'inline-block' : 'none';
+
+        cardGrid.innerHTML = '';
+        renderedCount = 0;
+
+        if (filteredItems.length === 0) {
+          emptyState.style.display = 'block';
+          loadMoreWrap.style.display = 'none';
+
+          if (fuzzyWrap && fuzzyList) {
+            if (currentQuery) {
+              var suggestions = computeFuzzySuggestions(currentQuery, allItems, 3);
+              if (suggestions.length > 0) {
+                fuzzyList.innerHTML = '';
+                suggestions.forEach(function(title) {
+                  var chip = document.createElement('button');
+                  chip.type = 'button';
+                  chip.className = 'nav-empty-fuzzy-chip';
+                  chip.textContent = title;
+                  chip.addEventListener('click', function() {
+                    currentQuery = title;
+                    if (searchInput) searchInput.value = title;
+                    applyFilters(true);
+                  });
+                  fuzzyList.appendChild(chip);
+                });
+                fuzzyWrap.style.display = 'flex';
+              } else {
+                fuzzyWrap.style.display = 'none';
+              }
+            } else {
+              fuzzyWrap.style.display = 'none';
+            }
+          }
+        } else {
+          emptyState.style.display = 'none';
+          if (fuzzyWrap) fuzzyWrap.style.display = 'none';
+          appendBatch();
+        }
+
+        if (shouldSyncUrl !== false) {
+          syncUrlState();
+        }
+      }
+
+      function syncUrlState() {
+        if (!window.history || !window.history.replaceState) return;
+        var params = new URLSearchParams();
+        if (currentLang !== 'all') params.set('lang', currentLang);
+        if (currentSub !== 'all') params.set('sub', currentSub);
+        if (currentSort !== 'stars') params.set('sort', currentSort);
+        if (currentQuery) params.set('q', currentQuery);
+
+        var qs = params.toString();
+        var newUrl = window.location.pathname + (qs ? '?' + qs : '');
+        if (newUrl !== window.location.pathname + window.location.search) {
+          window.history.replaceState(null, '', newUrl);
+        }
+      }
+
+      function restoreStateFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        currentLang = params.get('lang') || 'all';
+        currentSub = params.get('sub') || 'all';
+        currentSort = params.get('sort') || 'stars';
+        currentQuery = params.get('q') || '';
+
+        if (searchInput) searchInput.value = currentQuery;
+        if (sortSelect) sortSelect.value = currentSort;
+
+        langButtons.forEach(function(btn) {
+          btn.classList.toggle('is-active', btn.getAttribute('data-lang') === currentLang);
+        });
+
+        subcatButtons.forEach(function(btn) {
+          btn.classList.toggle('is-active', btn.getAttribute('data-sub') === currentSub);
+        });
+
+        applyFilters(false);
+      }
+
+      langButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var l = btn.getAttribute('data-lang');
+          if (l === currentLang) return;
+          langButtons.forEach(function(b) { b.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+          currentLang = l;
+          applyFilters(true);
+        });
+      });
+
+      subcatButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var s = btn.getAttribute('data-sub');
+          if (s === currentSub) return;
+          subcatButtons.forEach(function(b) { b.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+          currentSub = s;
+          applyFilters(true);
+        });
+      });
+
+      if (searchInput) {
+        var debounceTimer = null;
+        searchInput.addEventListener('input', function() {
+          currentQuery = searchInput.value;
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function() {
+            applyFilters(true);
+          }, 150);
+        });
+      }
+
+      if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+          currentSort = sortSelect.value;
+          applyFilters(true);
+        });
+      }
+
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+          appendBatch();
+        });
+      }
+
+      function resetAll() {
+        currentLang = 'all';
+        currentSub = 'all';
+        currentQuery = '';
+        currentSort = 'stars';
+        if (searchInput) searchInput.value = '';
+        if (sortSelect) sortSelect.value = 'stars';
+
+        langButtons.forEach(function(b) { b.classList.toggle('is-active', b.getAttribute('data-lang') === 'all'); });
+        subcatButtons.forEach(function(b) { b.classList.toggle('is-active', b.getAttribute('data-sub') === 'all'); });
+
+        applyFilters(true);
+      }
+
+      if (resetBtn) resetBtn.addEventListener('click', resetAll);
+      if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAll);
+      if (clearQueryBtn) {
+        clearQueryBtn.addEventListener('click', function() {
+          currentQuery = '';
+          if (searchInput) searchInput.value = '';
+          applyFilters(true);
+        });
+      }
+
+      if ('IntersectionObserver' in window && sentinel) {
+        var observer = new IntersectionObserver(function(entries) {
+          if (entries[0].isIntersecting && renderedCount < filteredItems.length) {
+            appendBatch();
+          }
+        }, { rootMargin: '400px 0px' });
+        observer.observe(sentinel);
+      }
+
+      window.addEventListener('popstate', restoreStateFromUrl);
+
+      if (btnShuffleSpotlight) {
+        btnShuffleSpotlight.addEventListener('click', function(e) {
+          triggerClickSpark(e, 8, '#38bdf8');
+          pickSpotlightGithub();
+        });
+      }
+
+      var heroSpotlightCard = document.getElementById('hero-spotlight-card');
+      if (heroSpotlightCard) {
+        attach3DTilt(heroSpotlightCard, 5);
+        heroSpotlightCard.addEventListener('mousemove', function(e) {
+          updateCardGlow(heroSpotlightCard, e);
+        });
+        heroSpotlightCard.addEventListener('mouseenter', function(e) {
+          updateCardGlow(heroSpotlightCard, e);
+        });
+      }
+
+      if (cardGrid) {
+        cardGrid.addEventListener('mousemove', function(e) {
+          var card = e.target.closest('.nav-card');
+          if (card) updateCardGlow(card, e);
+        });
+      }
+
+      var cmdTriggerBadge = document.querySelector('.nav-key-shortcut');
+      if (cmdTriggerBadge) {
+        cmdTriggerBadge.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (window.openNavCommandPalette) {
+            window.openNavCommandPalette();
+          }
+        });
+      }
+
+      var cmdSearchIcon = document.querySelector('.nav-search-icon');
+      if (cmdSearchIcon) {
+        cmdSearchIcon.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (window.openNavCommandPalette) {
+            window.openNavCommandPalette();
+          }
+        });
+      }
+
+      function appendUntilTarget(targetId) {
+        var targetIdx = -1;
+        for (var i = 0; i < filteredItems.length; i++) {
+          var it = filteredItems[i];
+          if ((it.id && it.id === targetId) || ('gh-' + it.name) === targetId) {
+            targetIdx = i;
+            break;
+          }
+        }
+        if (targetIdx >= 0) {
+          while (renderedCount <= targetIdx && renderedCount < filteredItems.length) {
+            appendBatch();
+          }
+        }
+      }
+
+      function handleHashDeepLink() {
+        var hash = window.location.hash;
+        if (!hash || hash.length <= 1) return;
+        var targetId = decodeURIComponent(hash.slice(1));
+
+        appendUntilTarget(targetId);
+
+        var el = document.getElementById(targetId);
+        if (el) {
+          setTimeout(function() {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.remove('card-anchor-highlight');
+            void el.offsetWidth;
+            el.classList.add('card-anchor-highlight');
+            setTimeout(function() { el.classList.remove('card-anchor-highlight'); }, 3000);
+          }, 150);
+        }
+      }
+
+      window.addEventListener('hashchange', handleHashDeepLink);
+
+      // Initialize
+      restoreStateFromUrl();
+      pickSpotlightGithub();
+      setTimeout(handleHashDeepLink, 350);
+
+      function syncGithubPinButtons(favList) {
+        var favs = favList;
+        if (!favs) {
+          if (typeof window.getNavFavorites === 'function') {
+            favs = window.getNavFavorites();
+          } else {
+            try {
+              var raw = localStorage.getItem('xiu_nav_user_favorites');
+              favs = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+              favs = [];
+            }
+          }
+        }
+        var favSet = new Set((favs || []).map(function(x) { return x.id; }));
+        document.querySelectorAll('.nav-card-pin-btn').forEach(function(btn) {
+          var id = btn.getAttribute('data-id');
+          if (favSet.has(id)) {
+            btn.classList.add('is-pinned');
+            btn.setAttribute('title', '从常用中移除');
+          } else {
+            btn.classList.remove('is-pinned');
+            btn.setAttribute('title', '收藏至我的常用');
+          }
+        });
+      }
+
+      window.addEventListener('nav-favorites-updated', function(e) {
+        syncGithubPinButtons(e.detail && e.detail.favorites);
+      });
+
+      window.addEventListener('nav-favorites-ready', function(e) {
+        syncGithubPinButtons(e.detail && e.detail.favorites);
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { syncGithubPinButtons(); });
+      } else {
+        syncGithubPinButtons();
+      }
+    })();
+  </script>
+</NavLayout>

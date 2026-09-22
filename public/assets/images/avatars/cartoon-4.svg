@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-shiba" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6d365"/>
+      <stop offset="100%" stop-color="#fda085"/>
+    </linearGradient>
+    <clipPath id="circle-clip-4">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-4)">
+    <rect width="120" height="120" fill="url(#bg-shiba)"/>
+    <!-- Ears -->
+    <polygon points="26,45 38,15 54,38" fill="#e17055"/>
+    <polygon points="32,40 38,23 48,36" fill="#ffffff"/>
+    <polygon points="94,45 82,15 66,38" fill="#e17055"/>
+    <polygon points="88,40 82,23 72,36" fill="#ffffff"/>
+    <!-- Head -->
+    <circle cx="60" cy="62" r="34" fill="#e17055"/>
+    <!-- Eyebrows white spots -->
+    <ellipse cx="46" cy="46" rx="4" ry="3" fill="#ffffff"/>
+    <ellipse cx="74" cy="46" rx="4" ry="3" fill="#ffffff"/>
+    <!-- White Muzzle -->
+    <path d="M 34 68 Q 60 56 86 68 Q 80 92 60 92 Q 40 92 34 68 Z" fill="#ffffff"/>
+    <!-- Eyes -->
+    <ellipse cx="46" cy="56" rx="3.5" ry="4" fill="#2d3436"/>
+    <circle cx="45" cy="54.5" r="1.5" fill="#ffffff"/>
+    <ellipse cx="74" cy="56" rx="3.5" ry="4" fill="#2d3436"/>
+    <circle cx="73" cy="54.5" r="1.5" fill="#ffffff"/>
+    <!-- Nose & Mouth & Tongue -->
+    <ellipse cx="60" cy="67" rx="5" ry="3.5" fill="#2d3436"/>
+    <path d="M 55 72 Q 60 76 65 72" stroke="#2d3436" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M 57 74 Q 60 82 63 74 Z" fill="#ff7675"/>
+    <!-- Cheeks -->
+    <circle cx="36" cy="71" r="5.5" fill="#ff7675" opacity="0.6"/>
+    <circle cx="84" cy="71" r="5.5" fill="#ff7675" opacity="0.6"/>
+    <!-- Green Bandana -->
+    <path d="M 32 98 Q 60 110 88 98 L 60 118 Z" fill="#00b894"/>
+  </g>
+</svg>

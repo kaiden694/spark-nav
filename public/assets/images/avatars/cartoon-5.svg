@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-bear" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#cd9cf2"/>
+      <stop offset="100%" stop-color="#f6f3ff"/>
+    </linearGradient>
+    <clipPath id="circle-clip-5">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-5)">
+    <rect width="120" height="120" fill="url(#bg-bear)"/>
+    <!-- Ears -->
+    <circle cx="34" cy="36" r="13" fill="#8c7ae6"/>
+    <circle cx="34" cy="36" r="7" fill="#f8c291"/>
+    <circle cx="86" cy="36" r="13" fill="#8c7ae6"/>
+    <circle cx="86" cy="36" r="7" fill="#f8c291"/>
+    <!-- Head -->
+    <circle cx="60" cy="62" r="34" fill="#8c7ae6"/>
+    <!-- Snout -->
+    <ellipse cx="60" cy="70" rx="14" ry="10" fill="#f5f6fa"/>
+    <ellipse cx="60" cy="66" rx="6" ry="4" fill="#2f3640"/>
+    <path d="M 56 71 Q 60 75 64 71" stroke="#2f3640" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Eyes -->
+    <circle cx="44" cy="56" r="3.5" fill="#2f3640"/>
+    <circle cx="43" cy="54.5" r="1.2" fill="#ffffff"/>
+    <circle cx="76" cy="56" r="3.5" fill="#2f3640"/>
+    <circle cx="75" cy="54.5" r="1.2" fill="#ffffff"/>
+    <!-- Cheeks -->
+    <circle cx="38" cy="68" r="5" fill="#e056fd" opacity="0.6"/>
+    <circle cx="82" cy="68" r="5" fill="#e056fd" opacity="0.6"/>
+    <!-- Scarf -->
+    <path d="M 34 94 C 34 88 86 88 86 94 L 82 108 L 38 108 Z" fill="#f0932b"/>
+    <rect x="52" y="98" width="16" height="18" fill="#f0932b" rx="2"/>
+  </g>
+</svg>

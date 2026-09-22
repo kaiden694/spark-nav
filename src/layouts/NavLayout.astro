@@ -1,0 +1,247 @@
+---
+import '../styles/nav.css';
+import CommandPalette from '../components/nav/CommandPalette.astro';
+import CardActionSheet from '../components/nav/CardActionSheet.astro';
+import KeyboardNavigation from '../components/nav/KeyboardNavigation.astro';
+import MirrorSwitcherModal from '../components/nav/MirrorSwitcherModal.astro';
+import FeedPreviewPopover from '../components/nav/FeedPreviewPopover.astro';
+import NavFloatingToolbar from '../components/nav/NavFloatingToolbar.astro';
+import NavCoreStore from '../components/nav/NavCoreStore.astro';
+import TiltEngine from '../components/nav/TiltEngine.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  jsonLd?: Record<string, any> | Array<Record<string, any>>;
+}
+
+const {
+  title = "SparkNav · 极客智汇导航与开源矩阵",
+  description = "全网优质资源精选导航：深度收录优质工具网站、GitHub开源高星项目、Telegram精选频道机器人及全球技术创作者。",
+  canonical = "/",
+  jsonLd
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="oled">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Immediate Theme Resolution (Anti-Flicker & System Preference Detection) -->
+  <script is:inline>
+    (function() {
+      try {
+        var theme = localStorage.getItem('nav_theme');
+        if (!theme) {
+          theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'oled';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Immediate Global Navigation Core Store (Favorites, Metrics, Mirrors, Custom Feeds) -->
+  <NavCoreStore />
+
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="canonical" href={canonical}>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+  <!-- OpenGraph Metadata -->
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:type" content="website">
+  {canonical && <meta property="og:url" content={canonical}>}
+
+  <!-- JSON-LD Structured Data -->
+  {jsonLd && (
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  )}
+  
+  <!-- Typography Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Interactive Canvas Starfield Particles Background (Ported from Gallery) -->
+  <canvas id="bg-particles-canvas" style="position: fixed !important; inset: 0 !important; width: 100% !important; height: 100% !important; pointer-events: none !important; z-index: 0 !important; opacity: 0.68; display: block;"></canvas>
+
+  <slot />
+
+  <CommandPalette />
+  <CardActionSheet />
+  <KeyboardNavigation />
+  <MirrorSwitcherModal />
+  <FeedPreviewPopover />
+  <NavFloatingToolbar />
+  <TiltEngine />
+
+  <!-- Global Navigation Theme Controller & Starfield Particles Background Engine -->
+  <script is:inline>
+    (function() {
+      // 1. Icon state synchronizer
+      function syncThemeIcons(theme) {
+        var sunIcons = document.querySelectorAll('#nav-sun-icon');
+        var moonIcons = document.querySelectorAll('#nav-moon-icon');
+        if (theme === 'light') {
+          sunIcons.forEach(function(el) { el.style.display = 'block'; });
+          moonIcons.forEach(function(el) { el.style.display = 'none'; });
+        } else {
+          sunIcons.forEach(function(el) { el.style.display = 'none'; });
+          moonIcons.forEach(function(el) { el.style.display = 'block'; });
+        }
+      }
+
+      // 2. Global theme switcher with document-level delegation & system preference listener
+      function initNavTheme() {
+        var currentTheme = document.documentElement.getAttribute('data-theme') || 'oled';
+        syncThemeIcons(currentTheme);
+
+        // Listen for OS system dark/light preference changes when user hasn't explicitly set a preference
+        if (window.matchMedia) {
+          var sysColorMedia = window.matchMedia('(prefers-color-scheme: light)');
+          var handleSysColorChange = function(e) {
+            if (!localStorage.getItem('nav_theme')) {
+              var newTheme = e.matches ? 'light' : 'oled';
+              document.documentElement.setAttribute('data-theme', newTheme);
+              syncThemeIcons(newTheme);
+              window.dispatchEvent(new CustomEvent('nav-theme-changed', { detail: { theme: newTheme } }));
+            }
+          };
+          if (typeof sysColorMedia.addEventListener === 'function') {
+            sysColorMedia.addEventListener('change', handleSysColorChange);
+          } else if (typeof sysColorMedia.addListener === 'function') {
+            sysColorMedia.addListener(handleSysColorChange);
+          }
+        }
+
+        document.addEventListener('click', function(e) {
+          var btn = e.target && e.target.closest('#nav-theme-btn');
+          if (!btn) return;
+          var now = document.documentElement.getAttribute('data-theme') || 'oled';
+          var next = (now === 'oled') ? 'light' : 'oled';
+          document.documentElement.setAttribute('data-theme', next);
+          try {
+            localStorage.setItem('nav_theme', next);
+          } catch (err) {}
+          syncThemeIcons(next);
+          window.dispatchEvent(new CustomEvent('nav-theme-changed', { detail: { theme: next } }));
+        });
+      }
+
+      // 3. Canvas Starfield Particles Background
+      function initCanvasParticles() {
+        var canvas = document.getElementById('bg-particles-canvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        var width = canvas.width = window.innerWidth;
+        var height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', function() {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        });
+
+        var numParticles = Math.min(Math.floor((width * height) / 24000), 45);
+        var particles = [];
+
+        for (var i = 0; i < numParticles; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 1.4 + 0.6,
+            vx: (Math.random() - 0.5) * 0.35,
+            vy: (Math.random() - 0.5) * 0.35,
+            alpha: Math.random() * 0.5 + 0.2
+          });
+        }
+
+        function render() {
+          ctx.clearRect(0, 0, width, height);
+          var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+          var particleRgb = isLight ? '37, 99, 235' : '56, 189, 248';
+
+          for (var i = 0; i < particles.length; i++) {
+            var p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(' + particleRgb + ', ' + p.alpha + ')';
+            ctx.fill();
+
+            for (var j = i + 1; j < particles.length; j++) {
+              var p2 = particles[j];
+              var dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+              if (dist < 110) {
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = 'rgba(' + particleRgb + ', ' + ((1 - dist / 110) * 0.12) + ')';
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+              }
+            }
+          }
+
+          requestAnimationFrame(render);
+        }
+
+        render();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          initNavTheme();
+          initCanvasParticles();
+        });
+      } else {
+        initNavTheme();
+        initCanvasParticles();
+      }
+    })();
+  </script>
+  
+  <!-- PWA Service Worker Registration & Localhost Self-Healing Cache Cleaner -->
+  <script is:inline>
+    if ('serviceWorker' in navigator) {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // 本地开发环境：自动注销旧 SW 并清空本地缓存池，彻底避免 Vite 热更新模块与 CSS 样式被陈旧缓存劫持
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var reg of registrations) {
+            reg.unregister();
+          }
+        });
+        if (window.caches) {
+          caches.keys().then(function(names) {
+            for (var name of names) {
+              caches.delete(name);
+            }
+          });
+        }
+      } else if (window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            reg.update();
+          }).catch(function(err) {
+            console.warn('Nav ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    }
+  </script>
+</body>
+</html>

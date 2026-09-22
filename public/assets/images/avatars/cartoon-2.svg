@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-fox" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd3a5"/>
+      <stop offset="100%" stop-color="#fd6585"/>
+    </linearGradient>
+    <clipPath id="circle-clip-2">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-2)">
+    <rect width="120" height="120" fill="url(#bg-fox)"/>
+    <!-- Ears -->
+    <polygon points="26,48 40,16 54,42" fill="#e67e22"/>
+    <polygon points="32,44 40,24 48,40" fill="#ffffff"/>
+    <polygon points="94,48 80,16 66,42" fill="#e67e22"/>
+    <polygon points="88,44 80,24 72,40" fill="#ffffff"/>
+    <!-- Head -->
+    <ellipse cx="60" cy="62" rx="34" ry="30" fill="#e67e22"/>
+    <!-- White Snout mask -->
+    <path d="M 28 62 Q 60 48 92 62 Q 88 88 60 92 Q 32 88 28 62 Z" fill="#ffffff"/>
+    <!-- Eyes -->
+    <ellipse cx="44" cy="58" rx="3" ry="4.5" fill="#2d3436"/>
+    <circle cx="43" cy="56" r="1.5" fill="#ffffff"/>
+    <ellipse cx="76" cy="58" rx="3" ry="4.5" fill="#2d3436"/>
+    <circle cx="75" cy="56" r="1.5" fill="#ffffff"/>
+    <!-- Cheeks -->
+    <circle cx="36" cy="68" r="5" fill="#ff7675" opacity="0.6"/>
+    <circle cx="84" cy="68" r="5" fill="#ff7675" opacity="0.6"/>
+    <!-- Nose & Mouth -->
+    <ellipse cx="60" cy="74" rx="4" ry="3" fill="#2d3436"/>
+    <path d="M 57 79 Q 60 82 63 79" stroke="#2d3436" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Body -->
+    <path d="M 32 108 C 32 94 88 94 88 108 Z" fill="#d35400"/>
+    <path d="M 52 108 C 52 98 68 98 68 108 Z" fill="#ffffff"/>
+  </g>
+</svg>

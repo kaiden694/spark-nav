@@ -1,0 +1,71 @@
+name: Scheduled Creator Mutation Sync Pipeline
+
+on:
+  schedule:
+    # Run every Monday at 03:00 UTC (11:00 AM CST)
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      remote_url:
+        description: 'Optional Remote JSON URL to sync from'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run without committing changes'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync-and-commit:
+    name: Sync Creators, Capture Mutations & Update Search
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Execute Creator Synchronization
+        id: sync
+        run: |
+          ARGS="--rebuild-search"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ -n "${{ github.event.inputs.remote_url }}" ]; then
+            ARGS="$ARGS --url ${{ github.event.inputs.remote_url }}"
+          fi
+          node src/scripts/sync-creators.mjs $ARGS
+
+      - name: Run Integrity Unit Tests
+        run: npm run test:unit
+
+      - name: Commit & Push Mutation Snapshots
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if [ -n "$(git status --porcelain src/data/ public/search-index.json)" ]; then
+            echo "[SYNC] Detected changes in creator dataset or search index. Creating commit..."
+            git add src/data/creators.json src/data/creators.backup.json src/data/creators.meta.json public/search-index.json dist/search-index.json
+            git commit -m "chore(creators): sync creator metrics and update mutation snapshots [skip ci]"
+            git push
+          else
+            echo "[SYNC] No changes detected in creator records. Workspace is clean."
+          fi

@@ -1,0 +1,1676 @@
+---
+import NavLayout from '../layouts/NavLayout.astro';
+import { navCategories, navTelegrams } from '../utils/nav';
+
+const telegramSubcats = navCategories.find(c => c.id === 'telegram')?.subcategories || [];
+
+const totalCount = navTelegrams.length;
+const channelCount = navTelegrams.filter(t => t.type === 'channel').length;
+const botCount = navTelegrams.filter(t => t.type === 'bot').length;
+const groupCount = navTelegrams.filter(t => t.type === 'group').length;
+const maxMembers = Math.max(0, ...navTelegrams.map(t => t.member_count || 0));
+
+function formatFollowers(num: number) {
+  if (!num) return '0';
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
+// Pre-serialized JSON for high-performance chunked client-side filtering & lazy append
+const clientTelegramsJson = JSON.stringify(navTelegrams);
+
+const telegramJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "导航总览",
+          "item": "/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Telegram 专区",
+          "item": "/telegram.html"
+        }
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://sparknav.example.com/nav/telegram.html#webpage",
+      "name": "Telegram 资源专区 · 中文高品质频道、超级群组与实用机器人导航",
+      "description": "深度收录 Telegram 中文高品质频道、实用机器人与超级群组，全面探活防诈，支持多维正交筛选与毫秒级即时检索。",
+      "url": "/telegram.html",
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": totalCount,
+        "itemListElement": navTelegrams.slice(0, 50).map((t, idx) => ({
+          "@type": "ListItem",
+          "position": idx + 1,
+          "name": t.title || t.username,
+          "description": t.description || t.title,
+          "url": t.url
+        }))
+      }
+    }
+  ]
+};
+---
+<NavLayout
+  title="Telegram 资源专区 · 中文高品质频道、超级群组与实用机器人导航"
+  description="深度收录 Telegram 中文高品质频道、实用机器人与超级群组，全面探活防诈，支持多维正交筛选与毫秒级即时检索。"
+  canonical="/telegram.html"
+  jsonLd={telegramJsonLd}
+>
+  <div class="nav-app">
+    <!-- Top Sticky Header -->
+    <header class="nav-header">
+      <div class="nav-header-inner">
+        <!-- Brand & Breadcrumbs -->
+        <div class="nav-brand-group">
+          <a href="/" class="btn-nav-back" title="返回首页大厅">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <span>导航大厅</span>
+          </a>
+          <a href="/telegram.html" class="nav-brand-title">
+            <span>✈️ Telegram 专区</span>
+            <span class="nav-brand-badge">Pro Hub</span>
+          </a>
+        </div>
+
+        <!-- Top Vertical Menu -->
+        <nav class="nav-header-menu" aria-label="垂直专区导航">
+          <a href="/" class="nav-menu-link" title="精选总览首页">
+            <span>🧭 精选总览</span>
+          </a>
+          <a href="/github.html" class="nav-menu-link" title="开源矩阵专区">
+            <span>💻 开源矩阵</span>
+          </a>
+          <a href="/telegram.html" class="nav-menu-link is-active" title="电报生态专区">
+            <span>✈️ 电报生态</span>
+          </a>
+          <a href="/category/tools.html" class="nav-menu-link" title="实用工具专区">
+            <span>🛠️ 实用工具</span>
+          </a>
+          <a href="/category/creators.html" class="nav-menu-link" title="优质博主专区">
+            <span>👤 优质博主</span>
+          </a>
+          
+        </nav>
+
+        <!-- Global Search Bar with Cmd+K Trigger -->
+        <div class="nav-search-wrap">
+          <div class="nav-search-box" id="header-cmd-k-trigger" style="cursor: pointer;" title="点击或按快捷键唤醒全局命令搜索中心">
+            <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="tg-local-search-input" class="nav-search-input" placeholder="在 Telegram 专区内即时检索频道、群组、Bot 或业务..." autocomplete="off" spellcheck="false" />
+            <kbd class="nav-key-shortcut" title="按 Cmd+K 或 / 唤出全局检索">⌘K</kbd>
+          </div>
+        </div>
+
+        <!-- Right Controls -->
+        <div class="nav-actions">
+          <span style="font-size: 12px; color: var(--nav-text-muted); font-weight: 600;">
+            收录 <strong style="color: #38bdf8;">{totalCount}</strong> 项资源
+          </span>
+          <button class="theme-toggle-btn" id="nav-theme-btn" title="切换主题 (Light / OLED)">
+            <svg id="nav-sun-icon" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg id="nav-moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="tg-hub-container">
+      <!-- Dual-Wing Enhanced Hero Section (Parity with Gallery) -->
+      <section class="thematic-hero-section">
+        <div class="thematic-hero-grid">
+          
+          <!-- Left Wing: Value Prop & Glass Capsule Strip -->
+          <div class="thematic-hero-left">
+            <div>
+              <div class="thematic-hero-eyebrow">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>TELEGRAM ECOSYSTEM MATRIX</span>
+              </div>
+              <h1 class="thematic-hero-title"><span class="shiny-text">Telegram 中文高品质资源大厅</span></h1>
+              <p class="thematic-hero-desc">收录深度探活的电报频道、超级群组与实用机器人。已过滤广告死链与恶意诈骗，保障极速秒达与高质交流。</p>
+            </div>
+
+            <!-- Unified Glass Data Capsule Strip -->
+            <div class="hero-unified-capsule">
+              <div class="capsule-metric-item">
+                <div class="capsule-icon icon-wrap-blue">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="capsule-data">
+                  <span class="capsule-number" id="stat-total-chip">{totalCount}</span>
+                  <span class="capsule-label">归档总数</span>
+                </div>
+              </div>
+
+              <div class="capsule-divider"></div>
+
+              <div class="capsule-metric-item">
+                <div class="capsule-icon icon-wrap-verified">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 11 18-5-5 18-4-8-9-5z"/></svg>
+                </div>
+                <div class="capsule-data">
+                  <span class="capsule-number" id="stat-channel-chip">{channelCount}</span>
+                  <span class="capsule-label">优质频道</span>
+                </div>
+              </div>
+
+              <div class="capsule-divider"></div>
+
+              <div class="capsule-metric-item">
+                <div class="capsule-icon icon-wrap-gold">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <div class="capsule-data">
+                  <span class="capsule-number" id="stat-max-chip">{formatFollowers(maxMembers)}</span>
+                  <span class="capsule-label">最高关注</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Wing: Spotlight Feature Card -->
+          <div class="hero-right-spotlight" id="hero-spotlight-card">
+            <div class="spotlight-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span class="shiny-gold">今日精选 Spotlight</span>
+            </div>
+            
+            <div class="spotlight-body" id="spotlight-dynamic-content">
+              <div class="spotlight-loading" style="color: var(--nav-text-muted); font-size: 13px;">正在挑选今日精选资源...</div>
+            </div>
+
+            <button class="btn-shuffle-spotlight" id="btn-shuffle-spotlight" title="换一个精选推荐">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+              <span>换一位推荐</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Vertical Layout: Dynamic Left Sidebar + Right Main Workspace -->
+      <div class="vertical-layout">
+        <!-- Left Dynamic Sidebar -->
+        <aside class="vertical-sidebar" id="vertical-sidebar">
+          <!-- Section 1: 实体形态 (Channel / Bot / Group) -->
+          <div class="vertical-sidebar-section">
+            <div class="vertical-sidebar-title">
+              <span>✈️ 实体形态</span>
+              <span class="vertical-sidebar-badge">{totalCount}</span>
+            </div>
+            <ul class="vertical-sidebar-menu" id="tg-type-filter-group">
+              <li>
+                <button type="button" class="vertical-sidebar-item is-active" data-type="all">
+                  <span class="vertical-sidebar-item-left">
+                    <span>🌐</span>
+                    <span>全部形态</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" id="count-type-all">{totalCount}</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="vertical-sidebar-item" data-type="channel">
+                  <span class="vertical-sidebar-item-left">
+                    <span>📢</span>
+                    <span>优质频道</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" id="count-type-channel">{channelCount}</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="vertical-sidebar-item" data-type="bot">
+                  <span class="vertical-sidebar-item-left">
+                    <span>🤖</span>
+                    <span>实用机器人</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" id="count-type-bot">{botCount}</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="vertical-sidebar-item" data-type="group">
+                  <span class="vertical-sidebar-item-left">
+                    <span>👥</span>
+                    <span>极客群组</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" id="count-type-group">{groupCount}</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Section 2: 业务细分类目 (Topics) -->
+          <div class="vertical-sidebar-section">
+            <div class="vertical-sidebar-title">
+              <span>🏷️ 业务分类</span>
+              <span class="vertical-sidebar-badge">{telegramSubcats.length}</span>
+            </div>
+            <ul class="vertical-sidebar-menu" id="tg-subcat-filter-group">
+              <li>
+                <button type="button" class="vertical-sidebar-item is-active" data-sub="all">
+                  <span class="vertical-sidebar-item-left">
+                    <span>⚡</span>
+                    <span>全部分类</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" id="count-sub-all">{totalCount}</span>
+                </button>
+              </li>
+              {telegramSubcats.map(sub => {
+                const count = navTelegrams.filter(t => t.subcategory === sub.id).length;
+                return (
+                  <li>
+                    <button type="button" class="vertical-sidebar-item" data-sub={sub.id}>
+                      <span class="vertical-sidebar-item-left">
+                        <span>{sub.icon || '🏷️'}</span>
+                        <span>{sub.name}</span>
+                      </span>
+                      <span class="vertical-sidebar-badge" data-sub-badge={sub.id}>{count}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <!-- Section 3: 专区快捷直达 -->
+          <div class="vertical-sidebar-section">
+            <div class="vertical-sidebar-title">
+              <span>🧭 专区直达</span>
+            </div>
+            <ul class="vertical-sidebar-menu">
+              <li>
+                <a href="/" class="vertical-sidebar-item">
+                  <span class="vertical-sidebar-item-left">
+                    <span>🧭</span>
+                    <span>导航首页</span>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="/github.html" class="vertical-sidebar-item">
+                  <span class="vertical-sidebar-item-left">
+                    <span>💻</span>
+                    <span>开源矩阵大厅</span>
+                  </span>
+                  <span class="vertical-sidebar-badge" style="color: #c084fc;">PRO</span>
+                </a>
+              </li>
+              <li>
+                <a href="/category/tools.html" class="vertical-sidebar-item">
+                  <span class="vertical-sidebar-item-left">
+                    <span>🛠️</span>
+                    <span>实用工具箱</span>
+                  </span>
+                </a>
+              </li>
+              <li>
+                
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- Right Main Workspace -->
+        <main class="vertical-main">
+          <!-- Compact Status Bar -->
+          <div class="vertical-status-bar">
+            <div class="vertical-status-left">
+              <span>筛选结果：</span>
+              <strong id="tg-filtered-count" style="color: #38bdf8;">{totalCount}</strong> 项
+              <span id="tg-query-tag" class="tg-query-tag" style="display: none;">
+                包含关键词: "<span id="tg-query-text"></span>"
+                <button type="button" id="tg-clear-query-btn">&times;</button>
+              </span>
+            </div>
+            <div class="vertical-status-right">
+              <div class="vertical-nsfw-wrap" id="tg-nsfw-control-wrap" title="成人敏感内容隐私防窥控制">
+                <span class="tg-nsfw-label">🔞 隐私防窥：</span>
+                <div class="tg-nsfw-pill-group" role="radiogroup" aria-label="NSFW 隐私防窥设置">
+                  <button type="button" class="tg-nsfw-mode-btn is-active" data-nsfw-mode="blur" title="防窥模式：敏感封面与文字默认模糊遮罩，点击解锁查看 (推荐)">
+                    <span>🛡️ 防窥</span>
+                  </button>
+                  <button type="button" class="tg-nsfw-mode-btn" data-nsfw-mode="show" title="显示模式：直接完整展示敏感内容">
+                    <span>👁️ 显示</span>
+                  </button>
+                  <button type="button" class="tg-nsfw-mode-btn" data-nsfw-mode="hide" title="隐藏模式：从列表与搜索中彻底隐藏成人敏感内容">
+                    <span>🚫 隐藏</span>
+                  </button>
+                </div>
+              </div>
+              <div class="vertical-sort-wrap">
+                <span class="tg-sort-label">排序：</span>
+                <select id="tg-sort-select" class="vertical-sort-select" aria-label="Telegram 资源排序方式">
+                  <option value="default">默认推荐</option>
+                  <option value="members">订阅/成员数最多</option>
+                  <option value="title">名称字母排序</option>
+                </select>
+              </div>
+              <button type="button" id="tg-reset-all-filters" class="tg-reset-btn" style="display: none;">
+                重置筛选
+              </button>
+            </div>
+          </div>
+
+      <!-- Card Grid Area (Incremental Chunked Lazy Append) -->
+      <div class="nav-grid" id="tg-card-grid">
+        {Array.from({ length: 8 }).map(() => (
+          <div class="nav-card-skeleton" aria-hidden="true">
+            <div class="skeleton-header">
+              <div class="skeleton-icon"></div>
+              <div class="skeleton-title-wrap">
+                <div class="skeleton-line skeleton-line-title"></div>
+                <div class="skeleton-line" style="width: 40%;"></div>
+              </div>
+            </div>
+            <div class="skeleton-line skeleton-line-desc"></div>
+            <div class="skeleton-line skeleton-line-desc-short"></div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Bottom Sentinel & Load More Trigger -->
+      <div class="tg-load-more-wrap" id="tg-load-more-wrap">
+        <button type="button" id="tg-load-more-btn" class="tg-load-more-btn">
+          <span>加载更多</span>
+          <span id="tg-remaining-count" class="tg-remaining-count"></span>
+        </button>
+        <div id="tg-scroll-sentinel" style="height: 20px; width: 100%;"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="tg-empty-state" class="nav-empty-grid" style="display: none;">
+        <span class="nav-empty-grid-icon">🛸</span>
+        <div class="nav-empty-grid-text">当前筛选组合下暂无收录内容</div>
+        <div id="tg-empty-fuzzy-wrap" class="nav-empty-fuzzy-wrap" style="display: none;">
+          <span class="nav-empty-fuzzy-label">🔍 您是否在找以下热门收录：</span>
+          <div id="tg-empty-fuzzy-list" class="nav-empty-fuzzy-list"></div>
+        </div>
+        <button type="button" class="nav-empty-grid-btn" id="tg-empty-reset-btn">重置所有筛选条件</button>
+      </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Raw Data Store for Ultra-Fast Client Virtualization -->
+  <script is:inline id="tg-raw-data" type="application/json" set:html={clientTelegramsJson}></script>
+
+  <style>
+    .tg-hub-container {
+      width: 100%;
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 24px 20px 80px 20px;
+      box-sizing: border-box;
+    }
+
+    #tg-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 580px) {
+      #tg-card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+
+    /* Filter Toolbar */
+    .tg-filter-toolbar {
+      background: rgba(18, 22, 34, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tg-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tg-filter-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--nav-text-muted, #94a3b8);
+      white-space: nowrap;
+      min-width: 65px;
+    }
+
+    .tg-filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .tg-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--nav-text-muted, #94a3b8);
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .tg-pill:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--nav-text-main, #f8fafc);
+    }
+
+    .tg-pill.is-active {
+      background: rgba(14, 165, 233, 0.16);
+      border-color: rgba(14, 165, 233, 0.45);
+      color: #38bdf8;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
+    }
+
+    .tg-pill-count {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .tg-pill.is-active .tg-pill-count {
+      background: rgba(14, 165, 233, 0.25);
+      color: #38bdf8;
+    }
+
+    .tg-sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .tg-sort-label {
+      font-size: 12px;
+      color: var(--nav-text-muted, #94a3b8);
+      white-space: nowrap;
+    }
+
+    .tg-sort-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: hsla(222, 47%, 12%, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--nav-text-main, #f8fafc);
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 500;
+      padding: 5px 28px 5px 10px;
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+      color-scheme: dark;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .tg-sort-select:hover,
+    .tg-sort-select:focus {
+      border-color: var(--nav-accent, #38bdf8);
+    }
+
+    .tg-sort-select option {
+      background-color: #121723 !important;
+      color: #f8fafc !important;
+    }
+
+    /* Status Bar */
+    .tg-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--nav-text-muted, #94a3b8);
+    }
+
+    .tg-status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tg-query-tag {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tg-query-tag button {
+      background: none;
+      border: none;
+      color: #38bdf8;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .tg-reset-btn {
+      background: none;
+      border: none;
+      color: #38bdf8;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Load more */
+    .tg-load-more-wrap {
+      text-align: center;
+      padding: 32px 0 20px 0;
+    }
+
+    .tg-load-more-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--nav-text-main, #f8fafc);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 24px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .tg-load-more-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      transform: translateY(-2px);
+    }
+
+    .tg-remaining-count {
+      font-size: 11px;
+      color: var(--nav-text-muted, #94a3b8);
+      font-weight: normal;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .tg-filter-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .tg-sort-wrap {
+        margin-left: 0;
+        margin-top: 6px;
+      }
+    }
+
+    /* Light Theme Adaptation */
+    :global([data-theme="light"]) .tg-filter-toolbar {
+      background: rgba(255, 255, 255, 0.88);
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    }
+    :global([data-theme="light"]) .tg-pill {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.08);
+      color: #475569;
+    }
+    :global([data-theme="light"]) .tg-pill:hover {
+      background: rgba(0, 0, 0, 0.07);
+      color: #0f172a;
+    }
+    :global([data-theme="light"]) .tg-pill-count {
+      background: rgba(0, 0, 0, 0.06);
+      color: #64748b;
+    }
+    :global([data-theme="light"]) .tg-sort-select {
+      color-scheme: light;
+      background-color: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      color: #0f172a;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    }
+    :global([data-theme="light"]) .tg-sort-select option {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+    }
+    :global([data-theme="light"]) .tg-load-more-btn {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #334155;
+    }
+  </style>
+
+  <script is:inline>
+    (function() {
+      var rawDataEl = document.getElementById('tg-raw-data');
+      var allItems = [];
+      try {
+        allItems = JSON.parse(rawDataEl ? rawDataEl.textContent : '[]');
+      } catch (e) {
+        allItems = [];
+      }
+
+      var typeButtons = document.querySelectorAll('#tg-type-filter-group [data-type]');
+      var subcatButtons = document.querySelectorAll('#tg-subcat-filter-group [data-sub]');
+      var searchInput = document.getElementById('tg-local-search-input');
+      var sortSelect = document.getElementById('tg-sort-select');
+      var cardGrid = document.getElementById('tg-card-grid');
+      var loadMoreWrap = document.getElementById('tg-load-more-wrap');
+      var loadMoreBtn = document.getElementById('tg-load-more-btn');
+      var remainingEl = document.getElementById('tg-remaining-count');
+      var emptyState = document.getElementById('tg-empty-state');
+      var filteredCountEl = document.getElementById('tg-filtered-count');
+      var queryTag = document.getElementById('tg-query-tag');
+      var queryText = document.getElementById('tg-query-text');
+      var clearQueryBtn = document.getElementById('tg-clear-query-btn');
+      var resetBtn = document.getElementById('tg-reset-all-filters');
+      var emptyResetBtn = document.getElementById('tg-empty-reset-btn');
+      var sentinel = document.getElementById('tg-scroll-sentinel');
+      var fuzzyWrap = document.getElementById('tg-empty-fuzzy-wrap');
+      var fuzzyList = document.getElementById('tg-empty-fuzzy-list');
+
+      // State
+      var currentType = 'all';
+      var currentSub = 'all';
+      var currentQuery = '';
+      var currentSort = 'default';
+      var currentNsfwMode = 'blur';
+      try {
+        var savedMode = localStorage.getItem('xiu_nav_nsfw_mode');
+        if (savedMode === 'show' || savedMode === 'hide' || savedMode === 'blur') {
+          currentNsfwMode = savedMode;
+        }
+      } catch (e) {}
+
+      var nsfwModeButtons = document.querySelectorAll('#tg-nsfw-control-wrap [data-nsfw-mode]');
+      function updateNsfwUiState() {
+        nsfwModeButtons.forEach(function(btn) {
+          var m = btn.getAttribute('data-nsfw-mode');
+          btn.classList.toggle('is-active', m === currentNsfwMode);
+        });
+        var nsfwSubBtn = document.querySelector('#tg-subcat-filter-group [data-sub="nsfw"]');
+        if (nsfwSubBtn) {
+          var li = nsfwSubBtn.closest('li');
+          if (li) {
+            li.style.display = (currentNsfwMode === 'hide') ? 'none' : '';
+          }
+        }
+      }
+
+      function computeFuzzySuggestions(query, items, maxResults) {
+        if (!query || !items || !items.length) return [];
+        var q = query.toLowerCase().trim();
+        if (!q) return [];
+        var max = maxResults || 3;
+        var candidates = [];
+        var seen = {};
+
+        for (var i = 0; i < items.length; i++) {
+          var title = (items[i].title || '').trim();
+          if (!title || seen[title.toLowerCase()]) continue;
+          seen[title.toLowerCase()] = true;
+          
+          var tLower = title.toLowerCase();
+          var score = 0;
+          if (tLower === q) continue;
+
+          if (tLower.indexOf(q) === 0) {
+            score = 100 - (tLower.length - q.length);
+          } else if (tLower.indexOf(q) !== -1) {
+            score = 70 - tLower.indexOf(q);
+          } else {
+            var matches = 0;
+            var qChars = q.split('');
+            var lastIdx = -1;
+            for (var c = 0; c < qChars.length; c++) {
+              var idx = tLower.indexOf(qChars[c], lastIdx + 1);
+              if (idx > lastIdx) {
+                matches++;
+                lastIdx = idx;
+              }
+            }
+            var ratio = matches / q.length;
+            if (ratio >= 0.5) {
+              score = Math.round(ratio * 50);
+            }
+          }
+
+          if (score > 10) {
+            candidates.push({ title: title, score: score });
+          }
+        }
+
+        candidates.sort(function(a, b) { return b.score - a.score; });
+        return candidates.slice(0, max).map(function(c) { return c.title; });
+      }
+
+      var filteredItems = [];
+      var renderedCount = 0;
+      var BATCH_SIZE = 40;
+
+      // Spotlight Engine
+      var btnShuffleSpotlight = document.getElementById('btn-shuffle-spotlight');
+      var lastSpotlightIndex = -1;
+
+      function pickSpotlightItem() {
+        if (!allItems.length) return;
+        var candidates = allItems.filter(function(t) { return (t.member_count || 0) >= 3000 || t.is_featured; });
+        var pool = candidates.length > 0 ? candidates : allItems;
+        var idx;
+        if (pool.length > 1) {
+          do {
+            idx = Math.floor(Math.random() * pool.length);
+          } while (idx === lastSpotlightIndex);
+        } else {
+          idx = 0;
+        }
+        lastSpotlightIndex = idx;
+        renderSpotlight(pool[idx]);
+      }
+
+      function renderSpotlight(item) {
+        var el = document.getElementById('spotlight-dynamic-content');
+        if (!el || !item) return;
+
+        var typeBadge = item.type === 'bot' ? '🤖 机器人' : (item.type === 'group' ? '👥 群组' : '📢 频道');
+        var memberText = item.member_count ? ' · ' + formatNum(item.member_count) + ' 成员' : '';
+        var avatarHtml = '';
+        if (item.avatar_url && !item.avatar_url.includes('default-avatar')) {
+          avatarHtml = '<img class="spotlight-avatar" src="' + escapeHtml(item.avatar_url) + '" alt="' + escapeHtml(item.title) + '" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'flex\';" />' +
+            '<div class="spotlight-avatar-fallback" style="display: none;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg></div>';
+        } else {
+          avatarHtml = '<div class="spotlight-avatar-fallback"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg></div>';
+        }
+
+        el.style.opacity = '0';
+        setTimeout(function() {
+          el.innerHTML =
+            '<div class="spotlight-avatar-wrap" onclick="window.open(\'' + escapeHtml(item.url) + '\', \'_blank\');">' +
+              avatarHtml +
+            '</div>' +
+            '<div class="spotlight-meta">' +
+              '<div class="spotlight-name-row">' +
+                '<span class="spotlight-name" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</span>' +
+                '<span class="spotlight-type-badge">' + typeBadge + '</span>' +
+              '</div>' +
+              '<a class="spotlight-handle" href="' + escapeHtml(item.url) + '" target="_blank">@' + escapeHtml(item.username) + memberText + '</a>' +
+              '<div class="spotlight-bio-snippet">' + escapeHtml(item.description || item.username) + '</div>' +
+            '</div>';
+          el.style.opacity = '1';
+        }, 120);
+      }
+
+      function formatNum(num) {
+        if (!num) return '';
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return String(num);
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      var VIBRANT_ACCENTS = [
+        '14, 165, 233', '20, 184, 166', '168, 85, 247',
+        '236, 72, 153', '245, 158, 11', '16, 185, 129',
+        '129, 140, 248', '249, 115, 22'
+      ];
+
+      function getAccent(key) {
+        var hash = 0;
+        var s = String(key || 'item');
+        for (var i = 0; i < s.length; i++) {
+          hash = (hash << 5) - hash + s.charCodeAt(i);
+          hash |= 0;
+        }
+        return VIBRANT_ACCENTS[Math.abs(hash) % VIBRANT_ACCENTS.length];
+      }
+
+      var hasHover = !window.matchMedia || window.matchMedia('(hover: hover)').matches;
+
+      function updateCardGlow(el, e) {
+        if (!hasHover) return;
+        var rect = el.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        el.style.setProperty('--mouse-x', x + 'px');
+        el.style.setProperty('--mouse-y', y + 'px');
+      }
+
+      var attach3DTilt = window.attach3DTilt || function(el, tilt) {};
+
+      function triggerClickSpark(e, sparkCount, color) {
+        var x = e ? (e.clientX || window.innerWidth / 2) : window.innerWidth / 2;
+        var y = e ? (e.clientY || window.innerHeight / 2) : window.innerHeight / 2;
+        var targetColor = color || '#f59e0b';
+
+        for (var i = 0; i < (sparkCount || 8); i++) {
+          var spark = document.createElement('div');
+          spark.className = 'click-spark-particle';
+          spark.style.left = x + 'px';
+          spark.style.top = y + 'px';
+          spark.style.background = targetColor;
+
+          var angle = (Math.PI * 2 * i) / (sparkCount || 8) + (Math.random() - 0.5);
+          var velocity = 35 + Math.random() * 40;
+          var dx = Math.cos(angle) * velocity;
+          var dy = Math.sin(angle) * velocity;
+
+          spark.style.setProperty('--dx', dx + 'px');
+          spark.style.setProperty('--dy', dy + 'px');
+          var size = 4 + Math.random() * 4;
+          spark.style.width = size + 'px';
+          spark.style.height = size + 'px';
+
+          document.body.appendChild(spark);
+          setTimeout((function(s) { return function() { s.remove(); }; })(spark), 650);
+        }
+      }
+
+      function copyToClipboard(text, onSuccess) {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+            fallbackCopy(text, onSuccess);
+          });
+        } else {
+          fallbackCopy(text, onSuccess);
+        }
+      }
+
+      function fallbackCopy(text, onSuccess) {
+        var textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          if (onSuccess) onSuccess();
+        } catch (err) {
+          console.warn('Copy failed', err);
+        }
+        document.body.removeChild(textArea);
+      }
+
+      function showNavToast(message) {
+        var container = document.getElementById('nav-toast-container');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'nav-toast-container';
+          container.className = 'nav-toast-container';
+          document.body.appendChild(container);
+        }
+        var toast = document.createElement('div');
+        toast.className = 'nav-toast-item';
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(function() {
+          toast.style.transition = 'opacity 0.2s, transform 0.2s';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(10px)';
+          setTimeout(function() { toast.remove(); }, 200);
+        }, 2200);
+      }
+
+      function renderCard(item) {
+        var accentRgb = getAccent(item.id || item.username);
+        var typeBadge = item.type === 'bot' ? '🤖 机器人' : (item.type === 'group' ? '👥 群组' : '📢 频道');
+        var countText = item.member_count ? '👥 ' + formatNum(item.member_count) : '';
+        var cardId = item.id || ('tg-' + item.username);
+        var isNsfw = Boolean(item.is_nsfw || (item.tags && item.tags.includes('NSFW')) || item.subcategory === 'nsfw');
+
+        var avatarHtml = '';
+        if (item.avatar_url && !item.avatar_url.includes('default-avatar')) {
+          avatarHtml = '<img src="' + escapeHtml(item.avatar_url) + '" alt="' + escapeHtml(item.title) + '" loading="lazy" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'block\';" />' +
+            '<svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>';
+        } else {
+          avatarHtml = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>';
+        }
+
+        var tagsHtml = '';
+        if (Array.isArray(item.tags)) {
+          item.tags.slice(0, 2).forEach(function(tag) {
+            tagsHtml += '<span class="nav-tag-pill">' + escapeHtml(tag) + '</span>';
+          });
+        }
+
+        var a = document.createElement('a');
+        a.id = cardId;
+        a.href = item.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'nav-card';
+        if (isNsfw) {
+          a.classList.add('nav-card-nsfw');
+          a.setAttribute('data-is-nsfw', 'true');
+          if (currentNsfwMode === 'blur') {
+            a.classList.add('is-blurred');
+          }
+        }
+        if (item.is_alive === false) {
+          a.classList.add('is-offline');
+          a.setAttribute('data-is-alive', 'false');
+        } else {
+          a.setAttribute('data-is-alive', 'true');
+        }
+        if (item.mirror_urls && item.mirror_urls.length > 0) {
+          a.setAttribute('data-mirrors', item.mirror_urls.join(','));
+        }
+        a.setAttribute('data-id', cardId);
+        a.setAttribute('data-type', 'telegram');
+        a.setAttribute('data-title', item.title || item.username || '');
+        a.setAttribute('data-url', item.url || '');
+        a.style.cssText = '--card-accent-rgb: ' + accentRgb + '; --card-accent: rgb(' + accentRgb + ');';
+
+        a.addEventListener('mousemove', function(e) {
+          updateCardGlow(a, e);
+        });
+        a.addEventListener('mouseenter', function(e) {
+          updateCardGlow(a, e);
+        });
+
+        var tgFeedUrl = item.feed_url || '';
+        if (!tgFeedUrl && item.type === 'channel' && item.username) {
+          tgFeedUrl = 'https://rsshub.app/telegram/channel/' + item.username;
+        }
+        if (tgFeedUrl) {
+          a.setAttribute('data-feed-url', tgFeedUrl);
+        }
+
+        var feedBtnHtml = tgFeedUrl ? (
+          '<button type="button" class="nav-card-feed-btn" title="查看最新动态 (RSS/Atom)" data-feed-url="' + escapeHtml(tgFeedUrl) + '" data-title="' + escapeHtml(item.title || item.username) + '">' +
+            '<svg viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>' +
+          '</button>'
+        ) : '';
+
+        var copyBtnHtml = '<button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id="' + escapeHtml(cardId) + '">' +
+          '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>' +
+        '</button>';
+
+        var isFav = false;
+        if (typeof window !== 'undefined' && typeof window.isNavFavorite === 'function') {
+          isFav = window.isNavFavorite(cardId);
+        } else {
+          try {
+            var rawFavs = localStorage.getItem('xiu_nav_user_favorites');
+            var parsedFavs = rawFavs ? JSON.parse(rawFavs) : [];
+            isFav = parsedFavs.some(function(x) { return x.id === cardId; });
+          } catch (e) {
+            isFav = false;
+          }
+        }
+        var pinBtnHtml = '<button type="button" class="nav-card-pin-btn' + (isFav ? ' is-pinned' : '') + '" title="' + (isFav ? '从常用中移除' : '收藏至我的常用') + '" data-id="' + escapeHtml(cardId) + '">' +
+          '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>' +
+        '</button>';
+
+        var relockBtnHtml = isNsfw ? (
+          '<button type="button" class="nav-card-nsfw-relock-btn" title="重新启用防窥遮罩" style="' + (currentNsfwMode === 'blur' && !a.classList.contains('is-blurred') ? '' : 'display: none;') + '">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
+          '</button>'
+        ) : '';
+
+        var reportBtnHtml = '<button type="button" class="nav-card-report-btn" title="反馈失联或分类纠错" data-title="' + escapeHtml(item.title || item.username) + '" data-url="' + escapeHtml(item.url || '') + '" data-alive="' + (item.is_alive !== false ? 'true' : 'false') + '">' +
+          '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>' +
+        '</button>';
+
+        var actionsHtml = '<div class="nav-card-actions-group">' + relockBtnHtml + feedBtnHtml + pinBtnHtml + copyBtnHtml + reportBtnHtml + '</div>';
+        var offlineBadge = (item.is_alive === false) ? '<span class="nav-card-offline-pill" title="该频道当前可能已注销、被封禁或长期失联">⚠️ 可能失联</span>' : '';
+        var nsfwBadge = isNsfw ? '<span class="nav-badge badge-nsfw" title="此内容属于成人敏感类目 (NSFW)">🔞 18+</span>' : '';
+
+        var overlayHtml = isNsfw ? (
+          '<div class="nav-card-nsfw-overlay">' +
+            '<div class="nav-card-nsfw-badge">🔞 敏感内容 · 隐私防窥</div>' +
+            '<div class="nav-card-nsfw-title">' + escapeHtml(item.title || item.username) + '</div>' +
+            '<div class="nav-card-nsfw-hint">公共场合已启用防窥遮罩，点击解锁查看</div>' +
+            '<button type="button" class="nav-card-nsfw-unlock-btn" title="临时解锁查看敏感内容">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>' +
+              '<span>点击解锁查看</span>' +
+            '</button>' +
+          '</div>'
+        ) : '';
+
+        a.innerHTML = 
+          overlayHtml +
+          '<div>' +
+            '<div class="nav-card-header">' +
+              '<div class="nav-card-avatar icon-small" style="background: #0088cc; color: #fff;">' +
+                avatarHtml +
+              '</div>' +
+              '<div class="nav-card-info">' +
+                '<div class="nav-card-title-row">' +
+                  '<span class="nav-card-title" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</span>' +
+                  offlineBadge +
+                  nsfwBadge +
+                  '<span class="nav-badge badge-tg">' + typeBadge + '</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<p class="nav-card-desc">' + escapeHtml(item.description || item.username) + '</p>' +
+          '</div>' +
+          '<div class="nav-card-footer">' +
+            '<div class="nav-card-tags">' + tagsHtml + '</div>' +
+            '<div class="nav-card-stat">' +
+              (countText ? '<span>' + countText + '</span>' : '<span class="nav-card-action">访问 &rarr;</span>') +
+              actionsHtml +
+            '</div>' +
+          '</div>';
+
+        if (isNsfw) {
+          a.addEventListener('click', function(e) {
+            if (a.classList.contains('is-blurred')) {
+              e.preventDefault();
+              e.stopPropagation();
+              a.classList.remove('is-blurred');
+              var relock = a.querySelector('.nav-card-nsfw-relock-btn');
+              if (relock && currentNsfwMode === 'blur') {
+                relock.style.display = 'inline-flex';
+              }
+              showNavToast('🔓 已临时解锁该敏感内容 (再次点击即可直达)');
+            }
+          });
+
+          var relockBtn = a.querySelector('.nav-card-nsfw-relock-btn');
+          if (relockBtn) {
+            relockBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              a.classList.add('is-blurred');
+              relockBtn.style.display = 'none';
+              showNavToast('🔒 已重新启用防窥遮罩');
+            });
+          }
+        }
+
+        var pinBtn = a.querySelector('.nav-card-pin-btn');
+        if (pinBtn) {
+          var doPin = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (window.toggleNavFavorite) {
+              var isNowPinned = window.toggleNavFavorite({
+                id: cardId,
+                title: item.title,
+                url: item.url,
+                description: item.description || item.username,
+                icon: item.icon_url || '',
+                item_type: 'telegram'
+              });
+              if (isNowPinned) {
+                pinBtn.classList.add('is-pinned');
+                pinBtn.setAttribute('title', '从常用中移除');
+                showNavToast('✓ 已添加至我的常用收藏');
+              } else {
+                pinBtn.classList.remove('is-pinned');
+                pinBtn.setAttribute('title', '收藏至我的常用');
+                showNavToast('✓ 已从我的常用中移除');
+              }
+            }
+          };
+          pinBtn.addEventListener('click', doPin);
+          pinBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') doPin(e);
+          });
+        }
+
+        var copyBtn = a.querySelector('.nav-card-copy-btn');
+        if (copyBtn) {
+          var doCopy = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var deepLink = window.location.origin + window.location.pathname + '#' + cardId;
+            copyToClipboard(deepLink, function() {
+              var oldHtml = copyBtn.innerHTML;
+              copyBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+              copyBtn.classList.add('is-copied');
+              setTimeout(function() {
+                copyBtn.innerHTML = oldHtml;
+                copyBtn.classList.remove('is-copied');
+              }, 1600);
+              showNavToast('✓ 直达链接已复制到剪贴板');
+              history.replaceState(null, '', '#' + cardId);
+              a.classList.remove('card-anchor-highlight');
+              void a.offsetWidth;
+              a.classList.add('card-anchor-highlight');
+              setTimeout(function() { a.classList.remove('card-anchor-highlight'); }, 3000);
+            });
+          };
+
+          copyBtn.addEventListener('click', doCopy);
+          copyBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              doCopy(e);
+            }
+          });
+        }
+
+        var reportBtn = a.querySelector('.nav-card-report-btn');
+        if (reportBtn) {
+          reportBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var targetTitle = reportBtn.getAttribute('data-title');
+            var targetUrl = reportBtn.getAttribute('data-url');
+            var isAlive = reportBtn.getAttribute('data-alive') === 'true';
+            if (typeof window.openNavReportModal === 'function') {
+              window.openNavReportModal({
+                target: targetTitle + (targetUrl ? ' (' + targetUrl + ')' : ''),
+                issueType: !isAlive ? 'broken' : 'cat_err',
+                details: ''
+              });
+            }
+          });
+        }
+
+        attach3DTilt(a, 6);
+        return a;
+      }
+
+      function appendBatch() {
+        if (renderedCount >= filteredItems.length) {
+          loadMoreWrap.style.display = 'none';
+          return;
+        }
+
+        var nextBatch = filteredItems.slice(renderedCount, renderedCount + BATCH_SIZE);
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < nextBatch.length; i++) {
+          fragment.appendChild(renderCard(nextBatch[i]));
+        }
+        cardGrid.appendChild(fragment);
+        renderedCount += nextBatch.length;
+
+        if (typeof window.applyNavCustomFeeds === 'function') {
+          window.applyNavCustomFeeds();
+        }
+        if (typeof window.refreshNavFeedCardBadges === 'function') {
+          window.refreshNavFeedCardBadges();
+        }
+        if (typeof window.scheduleNavFeedPrefetch === 'function') {
+          window.scheduleNavFeedPrefetch();
+        }
+
+        var remaining = filteredItems.length - renderedCount;
+        if (remaining > 0) {
+          loadMoreWrap.style.display = 'block';
+          if (remainingEl) remainingEl.textContent = '(剩余 ' + remaining + ' 条)';
+        } else {
+          loadMoreWrap.style.display = 'none';
+        }
+      }
+
+      function updateDynamicBadges() {
+        // Count for type pills under currentSub, currentQuery and currentNsfwMode
+        var typeCounts = { all: 0, channel: 0, bot: 0, group: 0 };
+        for (var i = 0; i < allItems.length; i++) {
+          var it = allItems[i];
+          var isItemNsfw = Boolean(it.is_nsfw || (it.tags && it.tags.includes('NSFW')) || it.subcategory === 'nsfw');
+          if (currentNsfwMode === 'hide' && isItemNsfw) continue;
+
+          var matchSub = (currentSub === 'all' || it.subcategory === currentSub);
+          var matchQ = !currentQuery || (it.title + ' ' + it.username + ' ' + (it.description || '')).toLowerCase().indexOf(currentQuery) !== -1;
+          if (matchSub && matchQ) {
+            typeCounts.all++;
+            if (it.type === 'channel') typeCounts.channel++;
+            else if (it.type === 'bot') typeCounts.bot++;
+            else if (it.type === 'group') typeCounts.group++;
+          }
+        }
+
+        var cAll = document.getElementById('count-type-all');
+        var cCh = document.getElementById('count-type-channel');
+        var cBot = document.getElementById('count-type-bot');
+        var cGrp = document.getElementById('count-type-group');
+        if (cAll) cAll.textContent = typeCounts.all;
+        if (cCh) cCh.textContent = typeCounts.channel;
+        if (cBot) cBot.textContent = typeCounts.bot;
+        if (cGrp) cGrp.textContent = typeCounts.group;
+
+        // Count for subcat pills under currentType, currentQuery and currentNsfwMode
+        var subCounts = { all: 0 };
+        var subBadges = document.querySelectorAll('[data-sub-badge]');
+        for (var k = 0; k < allItems.length; k++) {
+          var item = allItems[k];
+          var isNsfwK = Boolean(item.is_nsfw || (item.tags && item.tags.includes('NSFW')) || item.subcategory === 'nsfw');
+          if (currentNsfwMode === 'hide' && isNsfwK) continue;
+
+          var matchType = (currentType === 'all' || item.type === currentType);
+          var matchQuery = !currentQuery || (item.title + ' ' + item.username + ' ' + (item.description || '')).toLowerCase().indexOf(currentQuery) !== -1;
+          if (matchType && matchQuery) {
+            subCounts.all++;
+            var s = item.subcategory || 'other';
+            subCounts[s] = (subCounts[s] || 0) + 1;
+          }
+        }
+
+        var cSubAll = document.getElementById('count-sub-all');
+        if (cSubAll) cSubAll.textContent = subCounts.all;
+
+        subBadges.forEach(function(badge) {
+          var sid = badge.getAttribute('data-sub-badge');
+          badge.textContent = subCounts[sid] || 0;
+        });
+      }
+
+      function applyFilters(shouldSyncUrl) {
+        var q = currentQuery.trim().toLowerCase();
+
+        filteredItems = allItems.filter(function(item) {
+          var isItemNsfw = Boolean(item.is_nsfw || (item.tags && item.tags.includes('NSFW')) || item.subcategory === 'nsfw');
+          if (currentNsfwMode === 'hide' && isItemNsfw) {
+            return false;
+          }
+          var matchesType = (currentType === 'all' || item.type === currentType);
+          var matchesSub = (currentSub === 'all' || item.subcategory === currentSub);
+          var text = (item.title + ' ' + item.username + ' ' + (item.description || '') + ' ' + (item.tags ? item.tags.join(' ') : '')).toLowerCase();
+          var matchesQuery = !q || text.indexOf(q) !== -1;
+          return matchesType && matchesSub && matchesQuery;
+        });
+
+        // Apply Health-Aware Sorting (Active items first, offline/dead items sink to bottom)
+        filteredItems.sort(function(a, b) {
+          var aAlive = (a.is_alive !== false) ? 1 : 0;
+          var bAlive = (b.is_alive !== false) ? 1 : 0;
+          if (aAlive !== bAlive) {
+            return bAlive - aAlive;
+          }
+          if (currentSort === 'members') {
+            return (b.member_count || 0) - (a.member_count || 0);
+          } else if (currentSort === 'title') {
+            return (a.title || a.username).localeCompare(b.title || b.username, 'zh-CN');
+          }
+          return 0;
+        });
+
+        // Update counts
+        if (filteredCountEl) filteredCountEl.textContent = filteredItems.length;
+        updateDynamicBadges();
+
+        // Query tag display
+        if (q) {
+          if (queryTag) queryTag.style.display = 'inline-flex';
+          if (queryText) queryText.textContent = q;
+        } else {
+          if (queryTag) queryTag.style.display = 'none';
+        }
+
+        var isModified = (currentType !== 'all' || currentSub !== 'all' || !!q || currentSort !== 'default');
+        if (resetBtn) resetBtn.style.display = isModified ? 'inline-block' : 'none';
+
+        // Reset grid and progressive append
+        cardGrid.innerHTML = '';
+        renderedCount = 0;
+
+        if (filteredItems.length === 0) {
+          emptyState.style.display = 'block';
+          loadMoreWrap.style.display = 'none';
+
+          if (fuzzyWrap && fuzzyList) {
+            if (currentQuery) {
+              var suggestions = computeFuzzySuggestions(currentQuery, allItems, 3);
+              if (suggestions.length > 0) {
+                fuzzyList.innerHTML = '';
+                suggestions.forEach(function(title) {
+                  var chip = document.createElement('button');
+                  chip.type = 'button';
+                  chip.className = 'nav-empty-fuzzy-chip';
+                  chip.textContent = title;
+                  chip.addEventListener('click', function() {
+                    currentQuery = title;
+                    if (searchInput) searchInput.value = title;
+                    applyFilters(true);
+                  });
+                  fuzzyList.appendChild(chip);
+                });
+                fuzzyWrap.style.display = 'flex';
+              } else {
+                fuzzyWrap.style.display = 'none';
+              }
+            } else {
+              fuzzyWrap.style.display = 'none';
+            }
+          }
+        } else {
+          emptyState.style.display = 'none';
+          if (fuzzyWrap) fuzzyWrap.style.display = 'none';
+          appendBatch();
+        }
+
+        if (shouldSyncUrl !== false) {
+          syncUrlState();
+        }
+      }
+
+      function syncUrlState() {
+        if (!window.history || !window.history.replaceState) return;
+        var params = new URLSearchParams();
+        if (currentType !== 'all') params.set('type', currentType);
+        if (currentSub !== 'all') params.set('sub', currentSub);
+        if (currentSort !== 'default') params.set('sort', currentSort);
+        if (currentQuery) params.set('q', currentQuery);
+
+        var qs = params.toString();
+        var newUrl = window.location.pathname + (qs ? '?' + qs : '');
+        if (newUrl !== window.location.pathname + window.location.search) {
+          window.history.replaceState(null, '', newUrl);
+        }
+      }
+
+      function restoreStateFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        currentType = params.get('type') || 'all';
+        currentSub = params.get('sub') || 'all';
+        currentSort = params.get('sort') || 'default';
+        currentQuery = params.get('q') || '';
+
+        if (searchInput) searchInput.value = currentQuery;
+        if (sortSelect) sortSelect.value = currentSort;
+
+        typeButtons.forEach(function(btn) {
+          btn.classList.toggle('is-active', btn.getAttribute('data-type') === currentType);
+        });
+
+        subcatButtons.forEach(function(btn) {
+          btn.classList.toggle('is-active', btn.getAttribute('data-sub') === currentSub);
+        });
+
+        applyFilters(false);
+      }
+
+      // Event bindings
+      typeButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var t = btn.getAttribute('data-type');
+          if (t === currentType) return;
+          typeButtons.forEach(function(b) { b.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+          currentType = t;
+          applyFilters(true);
+        });
+      });
+
+      subcatButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var s = btn.getAttribute('data-sub');
+          if (s === currentSub) return;
+          subcatButtons.forEach(function(b) { b.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+          currentSub = s;
+          applyFilters(true);
+        });
+      });
+
+      nsfwModeButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var m = btn.getAttribute('data-nsfw-mode');
+          if (m === currentNsfwMode) return;
+          currentNsfwMode = m;
+          try {
+            localStorage.setItem('xiu_nav_nsfw_mode', m);
+          } catch (e) {}
+          updateNsfwUiState();
+
+          if (m === 'hide') {
+            if (currentSub === 'nsfw') {
+              currentSub = 'all';
+              subcatButtons.forEach(function(b) {
+                b.classList.toggle('is-active', b.getAttribute('data-sub') === 'all');
+              });
+            }
+            applyFilters(true);
+            showNavToast('🚫 已隐藏所有成人敏感内容');
+          } else if (m === 'show') {
+            applyFilters(true);
+            showNavToast('👁️ 已切换为完全显示模式');
+          } else {
+            applyFilters(true);
+            showNavToast('🛡️ 已启用隐私防窥保护 (默认高斯模糊遮罩)');
+          }
+
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('xiu-nsfw-mode-changed', { detail: { mode: m } }));
+          }
+        });
+      });
+
+      if (searchInput) {
+        var debounceTimer = null;
+        searchInput.addEventListener('input', function() {
+          currentQuery = searchInput.value;
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function() {
+            applyFilters(true);
+          }, 150);
+        });
+      }
+
+      if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+          currentSort = sortSelect.value;
+          applyFilters(true);
+        });
+      }
+
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+          appendBatch();
+        });
+      }
+
+      function resetAll() {
+        currentType = 'all';
+        currentSub = 'all';
+        currentQuery = '';
+        currentSort = 'default';
+        if (searchInput) searchInput.value = '';
+        if (sortSelect) sortSelect.value = 'default';
+
+        typeButtons.forEach(function(b) { b.classList.toggle('is-active', b.getAttribute('data-type') === 'all'); });
+        subcatButtons.forEach(function(b) { b.classList.toggle('is-active', b.getAttribute('data-sub') === 'all'); });
+
+        applyFilters(true);
+      }
+
+      if (resetBtn) resetBtn.addEventListener('click', resetAll);
+      if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAll);
+      if (clearQueryBtn) {
+        clearQueryBtn.addEventListener('click', function() {
+          currentQuery = '';
+          if (searchInput) searchInput.value = '';
+          applyFilters(true);
+        });
+      }
+
+      // IntersectionObserver for seamless infinite append
+      if ('IntersectionObserver' in window && sentinel) {
+        var observer = new IntersectionObserver(function(entries) {
+          if (entries[0].isIntersecting && renderedCount < filteredItems.length) {
+            appendBatch();
+          }
+        }, { rootMargin: '400px 0px' });
+        observer.observe(sentinel);
+      }
+
+      // Listen for browser popstate
+      window.addEventListener('popstate', restoreStateFromUrl);
+
+      if (btnShuffleSpotlight) {
+        btnShuffleSpotlight.addEventListener('click', function(e) {
+          triggerClickSpark(e, 8, '#f59e0b');
+          pickSpotlightItem();
+        });
+      }
+
+      var heroSpotlightCard = document.getElementById('hero-spotlight-card');
+      if (heroSpotlightCard) {
+        attach3DTilt(heroSpotlightCard, 5);
+        heroSpotlightCard.addEventListener('mousemove', function(e) {
+          updateCardGlow(heroSpotlightCard, e);
+        });
+        heroSpotlightCard.addEventListener('mouseenter', function(e) {
+          updateCardGlow(heroSpotlightCard, e);
+        });
+      }
+
+      if (cardGrid) {
+        cardGrid.addEventListener('mousemove', function(e) {
+          var card = e.target.closest('.nav-card');
+          if (card) updateCardGlow(card, e);
+        });
+      }
+
+      var cmdTriggerBadge = document.querySelector('.nav-key-shortcut');
+      if (cmdTriggerBadge) {
+        cmdTriggerBadge.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (window.openNavCommandPalette) {
+            window.openNavCommandPalette();
+          }
+        });
+      }
+
+      var cmdSearchIcon = document.querySelector('.nav-search-icon');
+      if (cmdSearchIcon) {
+        cmdSearchIcon.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (window.openNavCommandPalette) {
+            window.openNavCommandPalette();
+          }
+        });
+      }
+
+      function appendUntilTarget(targetId) {
+        var targetIdx = -1;
+        for (var i = 0; i < filteredItems.length; i++) {
+          var it = filteredItems[i];
+          if ((it.id && it.id === targetId) || ('tg-' + it.username) === targetId) {
+            targetIdx = i;
+            break;
+          }
+        }
+        if (targetIdx >= 0) {
+          while (renderedCount <= targetIdx && renderedCount < filteredItems.length) {
+            appendBatch();
+          }
+        }
+      }
+
+      function handleHashDeepLink() {
+        var hash = window.location.hash;
+        if (!hash || hash.length <= 1) return;
+        var targetId = decodeURIComponent(hash.slice(1));
+
+        appendUntilTarget(targetId);
+
+        var el = document.getElementById(targetId);
+        if (el) {
+          setTimeout(function() {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.remove('card-anchor-highlight');
+            void el.offsetWidth;
+            el.classList.add('card-anchor-highlight');
+            setTimeout(function() { el.classList.remove('card-anchor-highlight'); }, 3000);
+          }, 150);
+        }
+      }
+
+      window.addEventListener('hashchange', handleHashDeepLink);
+
+      // Initialize
+      updateNsfwUiState();
+      restoreStateFromUrl();
+      pickSpotlightItem();
+      setTimeout(handleHashDeepLink, 350);
+
+      function syncTelegramPinButtons(favList) {
+        var favs = favList;
+        if (!favs) {
+          if (typeof window.getNavFavorites === 'function') {
+            favs = window.getNavFavorites();
+          } else {
+            try {
+              var raw = localStorage.getItem('xiu_nav_user_favorites');
+              favs = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+              favs = [];
+            }
+          }
+        }
+        var favSet = new Set((favs || []).map(function(x) { return x.id; }));
+        document.querySelectorAll('.nav-card-pin-btn').forEach(function(btn) {
+          var id = btn.getAttribute('data-id');
+          if (favSet.has(id)) {
+            btn.classList.add('is-pinned');
+            btn.setAttribute('title', '从常用中移除');
+          } else {
+            btn.classList.remove('is-pinned');
+            btn.setAttribute('title', '收藏至我的常用');
+          }
+        });
+      }
+
+      window.addEventListener('nav-favorites-updated', function(e) {
+        syncTelegramPinButtons(e.detail && e.detail.favorites);
+      });
+
+      window.addEventListener('nav-favorites-ready', function(e) {
+        syncTelegramPinButtons(e.detail && e.detail.favorites);
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { syncTelegramPinButtons(); });
+      } else {
+        syncTelegramPinButtons();
+      }
+    })();
+  </script>
+</NavLayout>

@@ -1,0 +1,1391 @@
+---
+// FeedPreviewPopover.astro
+// Floating RSS / Atom / OPML Dynamic Feed Article Preview Engine for XIU Nav Ecosystem
+---
+
+<div id="nav-feed-backdrop" class="nav-feed-backdrop" style="display: none;" aria-hidden="true"></div>
+
+<div
+  id="nav-feed-popover"
+  class="nav-feed-popover"
+  style="display: none;"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="nav-feed-title"
+>
+  <div class="nav-feed-arrow" id="nav-feed-arrow"></div>
+
+  <!-- Header -->
+  <div class="nav-feed-header">
+    <div class="nav-feed-title-wrap">
+      <div class="nav-feed-icon-box">
+        <svg class="nav-feed-broadcast-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <circle cx="6.18" cy="17.82" r="2.18"/>
+          <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+        </svg>
+      </div>
+      <div class="nav-feed-titles">
+        <div class="nav-feed-title-row">
+          <span id="nav-feed-title" class="nav-feed-title">最新动态预览</span>
+          <span id="nav-feed-protocol-badge" class="nav-feed-badge">RSS 2.0</span>
+        </div>
+        <div class="nav-feed-meta-row">
+          <span id="nav-feed-domain" class="nav-feed-domain">rss.hub.preview</span>
+          <span class="nav-feed-meta-dot">&bull;</span>
+          <span id="nav-feed-status-text" class="nav-feed-status-text">正在连接订阅源...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-feed-actions-top">
+      <button type="button" id="nav-feed-copy-digest-btn" class="nav-feed-icon-btn" title="导出/复制 Markdown 动态摘要">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+      </button>
+      <button type="button" id="nav-feed-mark-read-btn" class="nav-feed-icon-btn" title="全部标为已读">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </button>
+      <button type="button" id="nav-feed-refresh-btn" class="nav-feed-icon-btn" title="强制刷新动态">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+          <path d="M16 16h5v5"/>
+        </svg>
+      </button>
+      <button type="button" id="nav-feed-close-btn" class="nav-feed-icon-btn" title="关闭预览 (Esc)">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Body Content -->
+  <div class="nav-feed-body" id="nav-feed-body">
+    <!-- Skeleton Loading State -->
+    <div id="nav-feed-loading" class="nav-feed-loading">
+      <div class="nav-feed-skeleton-card">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line skeleton-date"></div>
+        <div class="skeleton-line skeleton-desc"></div>
+      </div>
+      <div class="nav-feed-skeleton-card">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line skeleton-date"></div>
+        <div class="skeleton-line skeleton-desc"></div>
+      </div>
+      <div class="nav-feed-skeleton-card">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line skeleton-date"></div>
+        <div class="skeleton-line skeleton-desc"></div>
+      </div>
+    </div>
+
+    <!-- Article List -->
+    <div id="nav-feed-list" class="nav-feed-list" style="display: none;"></div>
+
+    <!-- Error State -->
+    <div id="nav-feed-error" class="nav-feed-error" style="display: none;">
+      <span class="nav-feed-error-icon">📡</span>
+      <div class="nav-feed-error-msg" id="nav-feed-error-msg">未能直接获取动态内容</div>
+      <div class="nav-feed-error-desc">该站点订阅源可能设置了同源限制 (CORS)，或暂时无法连通。</div>
+      <div class="nav-feed-error-btns">
+        <button type="button" id="nav-feed-retry-btn" class="nav-feed-btn nav-feed-btn-retry">重试连通</button>
+        <a id="nav-feed-raw-link" href="#" target="_blank" rel="noopener noreferrer" class="nav-feed-btn nav-feed-btn-raw">浏览器直开 RSS</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="nav-feed-footer">
+    <div class="nav-feed-footer-left">
+      <a id="nav-feed-visit-site" href="#" target="_blank" rel="noopener noreferrer" class="nav-feed-footer-link" title="访问站点首页">
+        <span>🌐 访问主页</span>
+      </a>
+      <button type="button" id="nav-feed-copy-rss-btn" class="nav-feed-footer-link" title="复制订阅源 URL 到剪贴板">
+        <span>📋 复制 RSS</span>
+      </button>
+    </div>
+    <div class="nav-feed-footer-right">
+      <kbd class="nav-feed-esc-chip">Esc</kbd>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  /* Backdrop */
+  .nav-feed-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-feed-backdrop.is-open {
+    opacity: 1;
+  }
+
+  /* Popover Box */
+  .nav-feed-popover {
+    position: fixed;
+    z-index: 9999;
+    width: 420px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 48px);
+    background: rgba(18, 22, 34, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+  }
+
+  .nav-feed-popover.is-open {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  :global([data-theme="light"]) .nav-feed-popover {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Pointer Arrow */
+  .nav-feed-arrow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: inherit;
+    border: inherit;
+    transform: rotate(45deg);
+    z-index: -1;
+    display: none;
+  }
+
+  /* Header */
+  .nav-feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    flex-shrink: 0;
+  }
+
+  :global([data-theme="light"]) .nav-feed-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .nav-feed-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nav-feed-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(249, 115, 22, 0.18);
+    color: #f97316;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .nav-feed-titles {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nav-feed-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .nav-feed-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f1f5f9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :global([data-theme="light"]) .nav-feed-title {
+    color: #0f172a;
+  }
+
+  .nav-feed-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(249, 115, 22, 0.2);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.35);
+    flex-shrink: 0;
+  }
+
+  .nav-feed-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  .nav-feed-domain {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav-feed-status-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-feed-actions-top {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .nav-feed-icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+  }
+
+  .nav-feed-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    transform: scale(1.05);
+  }
+
+  .nav-feed-icon-btn.is-spinning svg {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Body */
+  .nav-feed-body {
+    padding: 12px;
+    overflow-y: auto;
+    max-height: 380px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  /* Skeleton Loading */
+  .nav-feed-loading {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-feed-skeleton-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-line {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .skeleton-title { height: 14px; width: 80%; margin-bottom: 8px; }
+  .skeleton-date { height: 10px; width: 35%; margin-bottom: 10px; }
+  .skeleton-desc { height: 12px; width: 95%; }
+
+  /* Article List */
+  .nav-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-feed-item {
+    display: block;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-feed-item:hover {
+    background: rgba(249, 115, 22, 0.06);
+    border-color: rgba(249, 115, 22, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  :global([data-theme="light"]) .nav-feed-item {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  :global([data-theme="light"]) .nav-feed-item:hover {
+    background: rgba(249, 115, 22, 0.08);
+  }
+
+  .nav-feed-item-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .nav-feed-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f1f5f9;
+    line-height: 1.4;
+    transition: color 0.15s ease;
+  }
+
+  .nav-feed-item:hover .nav-feed-item-title {
+    color: #f97316;
+  }
+
+  :global([data-theme="light"]) .nav-feed-item-title {
+    color: #1e293b;
+  }
+
+  .nav-feed-unread-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+    border-radius: 4px;
+    background: rgba(249, 115, 22, 0.2);
+    border: 1px solid rgba(249, 115, 22, 0.45);
+    color: #f97316;
+    margin-left: 6px;
+    flex-shrink: 0;
+  }
+
+  .nav-feed-item-arrow {
+    color: #64748b;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+
+  .nav-feed-item:hover .nav-feed-item-arrow {
+    color: #f97316;
+    transform: translateX(2px);
+  }
+
+  .nav-feed-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+  }
+
+  .nav-feed-item-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-feed-item-snippet {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :global([data-theme="light"]) .nav-feed-item-snippet {
+    color: #64748b;
+  }
+
+  /* Error State */
+  .nav-feed-error {
+    text-align: center;
+    padding: 24px 16px;
+  }
+
+  .nav-feed-error-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .nav-feed-error-msg {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f43f5e;
+    margin-bottom: 4px;
+  }
+
+  .nav-feed-error-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .nav-feed-error-btns {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .nav-feed-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .nav-feed-btn-retry {
+    background: rgba(249, 115, 22, 0.2);
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    color: #f97316;
+  }
+
+  .nav-feed-btn-retry:hover {
+    background: rgba(249, 115, 22, 0.3);
+  }
+
+  .nav-feed-btn-raw {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+  }
+
+  .nav-feed-btn-raw:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+  }
+
+  /* Footer */
+  .nav-feed-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+
+  :global([data-theme="light"]) .nav-feed-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .nav-feed-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-feed-footer-link {
+    color: #94a3b8;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s ease;
+  }
+
+  .nav-feed-footer-link:hover {
+    color: #f97316;
+  }
+
+  .nav-feed-esc-chip {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 4px;
+    color: #94a3b8;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Responsive Adjustments for Mobile */
+  @media (max-width: 640px) {
+    .nav-feed-popover {
+      width: 100vw;
+      max-width: 100vw;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      top: auto !important;
+      border-radius: 20px 20px 0 0;
+      border-bottom: none;
+      transform: translateY(100%);
+    }
+
+    .nav-feed-popover.is-open {
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var backdrop = document.getElementById('nav-feed-backdrop');
+    var popover = document.getElementById('nav-feed-popover');
+    var titleEl = document.getElementById('nav-feed-title');
+    var protoEl = document.getElementById('nav-feed-protocol-badge');
+    var domainEl = document.getElementById('nav-feed-domain');
+    var statusTextEl = document.getElementById('nav-feed-status-text');
+    var markReadBtn = document.getElementById('nav-feed-mark-read-btn');
+    var refreshBtn = document.getElementById('nav-feed-refresh-btn');
+    var closeBtn = document.getElementById('nav-feed-close-btn');
+    var loadingEl = document.getElementById('nav-feed-loading');
+    var listEl = document.getElementById('nav-feed-list');
+    var errorEl = document.getElementById('nav-feed-error');
+    var errorMsgEl = document.getElementById('nav-feed-error-msg');
+    var retryBtn = document.getElementById('nav-feed-retry-btn');
+    var rawLinkEl = document.getElementById('nav-feed-raw-link');
+    var visitSiteEl = document.getElementById('nav-feed-visit-site');
+    var copyRssBtn = document.getElementById('nav-feed-copy-rss-btn');
+    var copyDigestBtn = document.getElementById('nav-feed-copy-digest-btn');
+
+    var currentFeedOptions = null;
+    var currentArticles = null;
+    var currentAbortController = null;
+    var feedCache = new Map();
+    var PERSISTENT_CACHE_KEY = 'xiu_nav_feed_cache_v1';
+    var READ_STATE_KEY = 'xiu_nav_feed_read_state_v1';
+    var CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function cleanSnippet(htmlStr) {
+      if (!htmlStr) return '';
+      try {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = htmlStr;
+        var txt = tmp.textContent || tmp.innerText || '';
+        return txt.replace(/\s+/g, ' ').trim().slice(0, 140);
+      } catch (e) {
+        return String(htmlStr).replace(/<[^>]+>/g, '').trim().slice(0, 140);
+      }
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      try {
+        var d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        var diff = Math.floor((Date.now() - d.getTime()) / 1000);
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
+        if (diff < 86400 * 30) return Math.floor(diff / 86400) + ' 天前';
+        return d.toISOString().slice(0, 10);
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    function copyToClipboard(text, onSuccess) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+          fallbackCopy(text, onSuccess);
+        });
+      } else {
+        fallbackCopy(text, onSuccess);
+      }
+    }
+
+    function fallbackCopy(text, onSuccess) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        if (onSuccess) onSuccess();
+      } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      if (typeof window.showNavToast === 'function') {
+        window.showNavToast(msg);
+      }
+    }
+
+    // Storage: Persistent Feed Cache
+    function getPersistentFeed(url) {
+      if (!url) return null;
+      if (feedCache.has(url)) {
+        var mem = feedCache.get(url);
+        if (Date.now() - mem.timestamp < CACHE_TTL_MS) {
+          return mem;
+        }
+      }
+      try {
+        var raw = localStorage.getItem(PERSISTENT_CACHE_KEY);
+        if (!raw) return null;
+        var all = JSON.parse(raw);
+        var entry = all[url];
+        if (entry && (Date.now() - entry.timestamp < CACHE_TTL_MS)) {
+          feedCache.set(url, entry);
+          return entry;
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setPersistentFeed(url, parsedData) {
+      if (!url || !parsedData) return;
+      var entry = { data: parsedData, timestamp: Date.now() };
+      feedCache.set(url, entry);
+      try {
+        var raw = localStorage.getItem(PERSISTENT_CACHE_KEY);
+        var all = raw ? JSON.parse(raw) : {};
+        var keys = Object.keys(all);
+        if (keys.length > 25) {
+          var oldestKey = keys[0];
+          var oldestTime = all[oldestKey].timestamp || 0;
+          for (var i = 1; i < keys.length; i++) {
+            var t = all[keys[i]].timestamp || 0;
+            if (t < oldestTime) {
+              oldestTime = t;
+              oldestKey = keys[i];
+            }
+          }
+          delete all[oldestKey];
+        }
+        all[url] = entry;
+        localStorage.setItem(PERSISTENT_CACHE_KEY, JSON.stringify(all));
+      } catch (e) {}
+    }
+
+    // Storage: Read State Tracking
+    function getReadState(url) {
+      if (!url) return { lastViewedAt: 0, readGuids: [] };
+      try {
+        var raw = localStorage.getItem(READ_STATE_KEY);
+        var all = raw ? JSON.parse(raw) : {};
+        var entry = all[url];
+        return entry || { lastViewedAt: 0, readGuids: [] };
+      } catch (e) {
+        return { lastViewedAt: 0, readGuids: [] };
+      }
+    }
+
+    function markArticleAsRead(url, articleGuid) {
+      if (!url || !articleGuid) return;
+      try {
+        var raw = localStorage.getItem(READ_STATE_KEY);
+        var all = raw ? JSON.parse(raw) : {};
+        var entry = all[url] || { lastViewedAt: Date.now(), readGuids: [] };
+        if (entry.readGuids.indexOf(articleGuid) === -1) {
+          entry.readGuids.push(articleGuid);
+          if (entry.readGuids.length > 60) entry.readGuids.shift();
+        }
+        entry.lastViewedAt = Date.now();
+        all[url] = entry;
+        localStorage.setItem(READ_STATE_KEY, JSON.stringify(all));
+        refreshFeedCardBadges(url);
+      } catch (e) {}
+    }
+
+    function markAllArticlesAsRead(url, articleGuids) {
+      if (!url) return;
+      try {
+        var raw = localStorage.getItem(READ_STATE_KEY);
+        var all = raw ? JSON.parse(raw) : {};
+        var entry = all[url] || { lastViewedAt: Date.now(), readGuids: [] };
+        if (Array.isArray(articleGuids)) {
+          for (var i = 0; i < articleGuids.length; i++) {
+            var g = articleGuids[i];
+            if (g && entry.readGuids.indexOf(g) === -1) {
+              entry.readGuids.push(g);
+            }
+          }
+          if (entry.readGuids.length > 60) entry.readGuids = entry.readGuids.slice(-60);
+        }
+        entry.lastViewedAt = Date.now();
+        all[url] = entry;
+        localStorage.setItem(READ_STATE_KEY, JSON.stringify(all));
+        refreshFeedCardBadges(url);
+      } catch (e) {}
+    }
+
+    function checkFeedHasUnread(feedUrl, articles) {
+      if (!feedUrl || !Array.isArray(articles) || articles.length === 0) return false;
+      var state = getReadState(feedUrl);
+      if (!state.lastViewedAt) return true;
+      for (var i = 0; i < articles.length; i++) {
+        var g = articles[i].guid || articles[i].link || articles[i].title;
+        if (state.readGuids.indexOf(g) === -1) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function refreshFeedCardBadges(feedUrl) {
+      var btns = document.querySelectorAll('.nav-card-feed-btn');
+      btns.forEach(function(btn) {
+        var bUrl = btn.getAttribute('data-feed-url');
+        if (!bUrl) return;
+        if (feedUrl && bUrl !== feedUrl) return;
+
+        var isGh = bUrl.indexOf('releases.atom') !== -1 || bUrl.indexOf('github.com') !== -1;
+        var defaultTitle = isGh ? '查看最新动态 (Release Atom)' : '查看最新动态 (RSS/Atom)';
+
+        var cached = getPersistentFeed(bUrl);
+        if (cached && cached.data && Array.isArray(cached.data.articles)) {
+          var hasUnread = checkFeedHasUnread(bUrl, cached.data.articles);
+          if (hasUnread) {
+            btn.classList.add('has-unread');
+            btn.title = '查看最新动态 (有新内容)';
+          } else {
+            btn.classList.remove('has-unread');
+            btn.title = defaultTitle;
+          }
+        } else if (!btn.title) {
+          btn.title = defaultTitle;
+        }
+      });
+    }
+
+    // Multi-format Parser: RSS 2.0, Atom 1.0, JSON Feed
+    function parseFeedString(rawString, targetUrl) {
+      var trimmed = (rawString || '').trim();
+      
+      // 1. JSON Feed check
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        try {
+          var jsonData = JSON.parse(trimmed);
+          if (jsonData && Array.isArray(jsonData.items)) {
+            var jsonArticles = jsonData.items.slice(0, 5).map(function(it) {
+              return {
+                guid: it.id || it.url || it.title || targetUrl,
+                title: it.title || '无标题动态',
+                link: it.url || it.external_url || targetUrl,
+                date: formatDate(it.date_published || it.date_modified || ''),
+                snippet: cleanSnippet(it.content_text || it.summary || it.content_html || '')
+              };
+            });
+            return {
+              protocol: 'JSON Feed',
+              title: jsonData.title || '',
+              homeUrl: jsonData.home_page_url || targetUrl,
+              articles: jsonArticles
+            };
+          }
+        } catch (e) {}
+      }
+
+      // 2. XML / Atom Parser via DOMParser
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(trimmed, 'application/xml');
+      if (doc.querySelector('parsererror')) {
+        doc = parser.parseFromString(trimmed, 'text/html');
+      }
+
+      // 2a. Atom Feed
+      var feedNode = doc.querySelector('feed');
+      if (feedNode) {
+        var atomTitle = feedNode.querySelector('title');
+        var altLinkNode = feedNode.querySelector('link[rel="alternate"]') || feedNode.querySelector('link');
+        var atomHome = altLinkNode ? (altLinkNode.getAttribute('href') || '') : targetUrl;
+        var entries = feedNode.querySelectorAll('entry');
+        var atomArticles = [];
+
+        for (var i = 0; i < Math.min(entries.length, 5); i++) {
+          var entry = entries[i];
+          var eTitle = entry.querySelector('title');
+          var eLinkEl = entry.querySelector('link[rel="alternate"]') || entry.querySelector('link');
+          var eLink = eLinkEl ? (eLinkEl.getAttribute('href') || eLinkEl.textContent.trim()) : atomHome;
+          var eId = entry.querySelector('id');
+          var eGuid = eId ? eId.textContent.trim() : (eLink || (eTitle ? eTitle.textContent.trim() : 'atom-' + i));
+          var eDate = entry.querySelector('updated, published, pubDate');
+          var eSummary = entry.querySelector('summary, content');
+
+          atomArticles.push({
+            guid: eGuid,
+            title: eTitle ? eTitle.textContent.trim() : '无标题条目',
+            link: eLink,
+            date: formatDate(eDate ? eDate.textContent.trim() : ''),
+            snippet: cleanSnippet(eSummary ? eSummary.textContent.trim() : '')
+          });
+        }
+
+        return {
+          protocol: 'Atom 1.0',
+          title: atomTitle ? atomTitle.textContent.trim() : '',
+          homeUrl: atomHome || targetUrl,
+          articles: atomArticles
+        };
+      }
+
+      // 2b. RSS 2.0 / 0.91
+      var channel = doc.querySelector('channel');
+      if (channel) {
+        var rTitle = channel.querySelector('title');
+        var rLink = channel.querySelector('link');
+        var rssHome = rLink ? rLink.textContent.trim() : targetUrl;
+        var items = channel.querySelectorAll('item');
+        var rssArticles = [];
+
+        for (var j = 0; j < Math.min(items.length, 5); j++) {
+          var it = items[j];
+          var itTitle = it.querySelector('title');
+          var itLink = it.querySelector('link');
+          var itGuid = it.querySelector('guid');
+          var itDate = it.querySelector('pubDate, date');
+          var itDesc = it.querySelector('description, content\\:encoded');
+
+          var realLink = itLink ? itLink.textContent.trim() : rssHome;
+          var realGuid = itGuid ? itGuid.textContent.trim() : (realLink || (itTitle ? itTitle.textContent.trim() : 'rss-' + j));
+
+          rssArticles.push({
+            guid: realGuid,
+            title: itTitle ? itTitle.textContent.trim() : '无标题动态',
+            link: realLink,
+            date: formatDate(itDate ? itDate.textContent.trim() : ''),
+            snippet: cleanSnippet(itDesc ? itDesc.textContent.trim() : '')
+          });
+        }
+
+        return {
+          protocol: 'RSS 2.0',
+          title: rTitle ? rTitle.textContent.trim() : '',
+          homeUrl: rssHome || targetUrl,
+          articles: rssArticles
+        };
+      }
+
+      throw new Error('未识别到标准的 RSS 2.0、Atom 或 JSON Feed 数据格式');
+    }
+
+    // Multi-tier fetch pipeline with CORS fallbacks
+    function fetchFeedWithFallback(feedUrl, signal) {
+      var cached = getPersistentFeed(feedUrl);
+      if (cached) {
+        return Promise.resolve({ data: cached.data, isCached: true });
+      }
+
+      // Step 1: Direct fetch
+      return fetch(feedUrl, { signal: signal, cache: 'no-cache' })
+        .then(function(res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.text();
+        })
+        .then(function(text) {
+          var parsed = parseFeedString(text, feedUrl);
+          setPersistentFeed(feedUrl, parsed);
+          refreshFeedCardBadges(feedUrl);
+          return { data: parsed, isCached: false };
+        })
+        .catch(function(directErr) {
+          if (signal && signal.aborted) throw directErr;
+
+          // Cascading CORS Proxies (Layer 1 -> Layer 2 -> Layer 3)
+          var proxies = [
+            'https://api.allorigins.win/raw?url=' + encodeURIComponent(feedUrl),
+            'https://corsproxy.io/?' + encodeURIComponent(feedUrl),
+            'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(feedUrl)
+          ];
+
+          function tryProxy(index) {
+            if (index >= proxies.length) {
+              throw new Error('订阅源直连及跨域代理通道均未能成功读取内容，可能源站已设置严格防火墙。');
+            }
+            return fetch(proxies[index], { signal: signal })
+              .then(function(res) {
+                if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
+                return res.text();
+              })
+              .then(function(text) {
+                var parsed = parseFeedString(text, feedUrl);
+                setPersistentFeed(feedUrl, parsed);
+                refreshFeedCardBadges(feedUrl);
+                return { data: parsed, isCached: false, viaProxy: true };
+              })
+              .catch(function(proxyErr) {
+                if (signal && signal.aborted) throw proxyErr;
+                return tryProxy(index + 1);
+              });
+          }
+
+          return tryProxy(0);
+        });
+    }
+
+    function renderArticles(parsed, isCached, viaProxy) {
+      loadingEl.style.display = 'none';
+      errorEl.style.display = 'none';
+      listEl.style.display = 'flex';
+      listEl.innerHTML = '';
+      currentArticles = parsed.articles || [];
+
+      if (protoEl) protoEl.textContent = parsed.protocol || 'RSS';
+      if (statusTextEl) {
+        var countStr = parsed.articles.length + ' 篇最新动态';
+        if (isCached) countStr += ' · ⚡ 缓存直出';
+        else if (viaProxy) countStr += ' · 🛡️ 跨域代理接入';
+        statusTextEl.textContent = countStr;
+      }
+
+      if (!parsed.articles.length) {
+        listEl.innerHTML = '<div style="text-align: center; padding: 24px; color: #94a3b8; font-size: 13px;">该订阅源暂无已发布的文章动态</div>';
+        return;
+      }
+
+      var feedUrl = currentFeedOptions ? currentFeedOptions.feedUrl : '';
+      var readState = getReadState(feedUrl);
+      var fragment = document.createDocumentFragment();
+
+      parsed.articles.forEach(function(art) {
+        var a = document.createElement('a');
+        a.className = 'nav-feed-item';
+        a.href = art.link || '#';
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+
+        var guid = art.guid || art.link || art.title;
+        var isRead = readState.readGuids.indexOf(guid) !== -1;
+        var unreadBadgeHtml = !isRead ? '<span class="nav-feed-unread-badge">未读</span>' : '';
+
+        a.innerHTML =
+          '<div class="nav-feed-item-title-row">' +
+            '<span class="nav-feed-item-title">' + escapeHtml(art.title) + '</span>' +
+            unreadBadgeHtml +
+            '<span class="nav-feed-item-arrow">&rarr;</span>' +
+          '</div>' +
+          '<div class="nav-feed-item-meta">' +
+            '<span class="nav-feed-item-date">' +
+              '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+              escapeHtml(art.date || '近期动态') +
+            '</span>' +
+          '</div>' +
+          (art.snippet ? '<div class="nav-feed-item-snippet">' + escapeHtml(art.snippet) + '</div>' : '');
+
+        a.addEventListener('click', function() {
+          markArticleAsRead(feedUrl, guid);
+          var badge = a.querySelector('.nav-feed-unread-badge');
+          if (badge) badge.remove();
+        });
+
+        fragment.appendChild(a);
+      });
+
+      listEl.appendChild(fragment);
+    }
+
+    function renderError(err) {
+      loadingEl.style.display = 'none';
+      listEl.style.display = 'none';
+      errorEl.style.display = 'block';
+      if (statusTextEl) statusTextEl.textContent = '❌ 连接订阅源失败';
+      if (errorMsgEl) errorMsgEl.textContent = err.message || '订阅源解析失败';
+    }
+
+    function positionPopover(targetEl) {
+      if (!popover) return;
+      var isMobile = window.innerWidth <= 640;
+      if (isMobile) {
+        popover.style.left = '0px';
+        popover.style.top = 'auto';
+        popover.style.bottom = '0px';
+        return;
+      }
+
+      if (!targetEl) {
+        var x = Math.max(16, (window.innerWidth - 420) / 2);
+        var y = Math.max(16, (window.innerHeight - 440) / 2);
+        popover.style.left = x + 'px';
+        popover.style.top = y + 'px';
+        popover.style.bottom = 'auto';
+        return;
+      }
+
+      var rect = targetEl.getBoundingClientRect();
+      var popWidth = 420;
+      var popHeight = 440;
+
+      var left = rect.left;
+      if (left + popWidth > window.innerWidth - 16) {
+        left = window.innerWidth - popWidth - 16;
+      }
+      if (left < 16) left = 16;
+
+      var top = rect.bottom + 8;
+      if (top + popHeight > window.innerHeight - 16 && rect.top > popHeight) {
+        top = rect.top - popHeight - 8;
+      }
+      if (top < 16) top = 16;
+
+      popover.style.left = left + 'px';
+      popover.style.top = top + 'px';
+      popover.style.bottom = 'auto';
+    }
+
+    function openFeedPreview(options) {
+      if (!options || !options.feedUrl) return;
+      currentFeedOptions = options;
+
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+      currentAbortController = new AbortController();
+
+      var displayTitle = options.title || '订阅源动态';
+      var siteUrl = options.url || options.feedUrl;
+
+      if (titleEl) titleEl.textContent = displayTitle;
+      if (visitSiteEl) visitSiteEl.href = siteUrl;
+      if (rawLinkEl) rawLinkEl.href = options.feedUrl;
+
+      try {
+        var u = new URL(options.feedUrl, window.location.href);
+        if (domainEl) domainEl.textContent = u.hostname;
+      } catch (e) {
+        if (domainEl) domainEl.textContent = '';
+      }
+
+      if (protoEl) protoEl.textContent = 'RSS / Atom';
+      if (statusTextEl) statusTextEl.textContent = '正在连接订阅源...';
+
+      loadingEl.style.display = 'flex';
+      listEl.style.display = 'none';
+      errorEl.style.display = 'none';
+
+      positionPopover(options.targetEl);
+
+      backdrop.style.display = 'block';
+      popover.style.display = 'flex';
+      backdrop.setAttribute('aria-hidden', 'false');
+      popover.setAttribute('aria-hidden', 'false');
+
+      setTimeout(function() {
+        backdrop.classList.add('is-open');
+        popover.classList.add('is-open');
+      }, 10);
+
+      loadFeedData(options.feedUrl, false);
+    }
+
+    function loadFeedData(feedUrl, forceRefresh) {
+      if (forceRefresh) {
+        feedCache.delete(feedUrl);
+        try {
+          var raw = localStorage.getItem(PERSISTENT_CACHE_KEY);
+          if (raw) {
+            var all = JSON.parse(raw);
+            delete all[feedUrl];
+            localStorage.setItem(PERSISTENT_CACHE_KEY, JSON.stringify(all));
+          }
+        } catch (e) {}
+      }
+
+      if (refreshBtn) refreshBtn.classList.add('is-spinning');
+
+      fetchFeedWithFallback(feedUrl, currentAbortController ? currentAbortController.signal : null)
+        .then(function(res) {
+          if (refreshBtn) refreshBtn.classList.remove('is-spinning');
+          renderArticles(res.data, res.isCached, res.viaProxy);
+        })
+        .catch(function(err) {
+          if (refreshBtn) refreshBtn.classList.remove('is-spinning');
+          if (currentAbortController && currentAbortController.signal.aborted) return;
+          renderError(err);
+        });
+    }
+
+    function closeFeedPreview() {
+      if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+      }
+      backdrop.classList.remove('is-open');
+      popover.classList.remove('is-open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      popover.setAttribute('aria-hidden', 'true');
+
+      setTimeout(function() {
+        backdrop.style.display = 'none';
+        popover.style.display = 'none';
+      }, 200);
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeFeedPreview);
+    if (backdrop) backdrop.addEventListener('click', closeFeedPreview);
+
+    function generateDigestMarkdown(articles, options) {
+      if (!articles || !articles.length) return '';
+      var title = (options && options.title) || '最新动态';
+      var siteUrl = (options && options.url) || '';
+      var feedUrl = (options && options.feedUrl) || '';
+      var now = new Date();
+      var nowStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+      var lines = [
+        '### ' + title + ' · 最新动态摘要 (' + nowStr + ')',
+        '> 订阅源: ' + (feedUrl || 'N/A') + (siteUrl ? ' | 站点主页: ' + siteUrl : ''),
+        ''
+      ];
+
+      articles.forEach(function(art, index) {
+        var aTitle = art.title || '无标题动态';
+        var aLink = art.link || siteUrl || '#';
+        var aDate = art.date ? ' (' + art.date + ')' : '';
+        lines.push((index + 1) + '. [' + aTitle + '](' + aLink + ')' + aDate);
+        if (art.snippet) {
+          lines.push('   > ' + art.snippet.replace(/\s+/g, ' ').slice(0, 120));
+        }
+      });
+
+      return lines.join('\n');
+    }
+
+    if (copyDigestBtn) {
+      copyDigestBtn.addEventListener('click', function() {
+        if (!currentArticles || !currentArticles.length) {
+          showToast('⚠️ 当前无可用动态内容');
+          return;
+        }
+        var md = generateDigestMarkdown(currentArticles, currentFeedOptions);
+        copyToClipboard(md, function() {
+          showToast('✓ 已复制 ' + currentArticles.length + ' 篇动态 Markdown 摘要');
+        });
+      });
+    }
+
+    if (markReadBtn) {
+      markReadBtn.addEventListener('click', function() {
+        if (currentFeedOptions && currentFeedOptions.feedUrl && currentArticles) {
+          var guids = currentArticles.map(function(a) { return a.guid || a.link || a.title; });
+          markAllArticlesAsRead(currentFeedOptions.feedUrl, guids);
+          var unreadBadges = listEl.querySelectorAll('.nav-feed-unread-badge');
+          unreadBadges.forEach(function(b) { b.remove(); });
+          showToast('✓ 已将当前动态全部标为已读');
+          if (statusTextEl) {
+            statusTextEl.textContent = currentArticles.length + ' 篇动态 · 全部已读';
+          }
+        }
+      });
+    }
+
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function() {
+        if (currentFeedOptions && currentFeedOptions.feedUrl) {
+          loadFeedData(currentFeedOptions.feedUrl, true);
+        }
+      });
+    }
+
+    if (retryBtn) {
+      retryBtn.addEventListener('click', function() {
+        if (currentFeedOptions && currentFeedOptions.feedUrl) {
+          loadingEl.style.display = 'flex';
+          errorEl.style.display = 'none';
+          loadFeedData(currentFeedOptions.feedUrl, true);
+        }
+      });
+    }
+
+    if (copyRssBtn) {
+      copyRssBtn.addEventListener('click', function() {
+        if (currentFeedOptions && currentFeedOptions.feedUrl) {
+          copyToClipboard(currentFeedOptions.feedUrl, function() {
+            showToast('✓ 订阅源 RSS 地址已复制到剪贴板');
+          });
+        }
+      });
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && popover.classList.contains('is-open')) {
+        e.preventDefault();
+        closeFeedPreview();
+      }
+    });
+
+    // Global Click Delegation for .nav-card-feed-btn across all nav pages
+    document.addEventListener('click', function(e) {
+      var feedBtn = e.target && e.target.closest && e.target.closest('.nav-card-feed-btn');
+      if (!feedBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      var feedUrl = feedBtn.getAttribute('data-feed-url');
+      var card = feedBtn.closest('.nav-card');
+      var cardTitle = feedBtn.getAttribute('data-title') || '';
+      if (!cardTitle && card) {
+        var tEl = card.querySelector('.nav-card-title');
+        cardTitle = tEl ? tEl.textContent.trim() : '';
+      }
+      var siteUrl = card ? (card.getAttribute('data-origin-url') || card.getAttribute('data-url') || card.href) : '';
+
+      if (feedUrl && window.openNavFeedPreview) {
+        window.openNavFeedPreview({
+          title: cardTitle,
+          url: siteUrl,
+          feedUrl: feedUrl,
+          targetEl: feedBtn
+        });
+      }
+    });
+
+    // Idle Prefetch Engine
+    function scheduleIdleFeedPrefetch() {
+      var runPrefetch = function() {
+        var allFeedBtns = document.querySelectorAll('.nav-card[data-feed-url], .nav-card-feed-btn[data-feed-url]');
+        var urls = [];
+        allFeedBtns.forEach(function(el) {
+          var u = el.getAttribute('data-feed-url');
+          if (u && urls.indexOf(u) === -1) urls.push(u);
+        });
+
+        if (urls.length === 0) return;
+        var targets = urls.slice(0, 4);
+        var idx = 0;
+
+        function stepNext() {
+          if (idx >= targets.length) {
+            refreshFeedCardBadges();
+            return;
+          }
+          var targetUrl = targets[idx++];
+          var existing = getPersistentFeed(targetUrl);
+          if (existing) {
+            refreshFeedCardBadges(targetUrl);
+            setTimeout(stepNext, 40);
+            return;
+          }
+          fetchFeedWithFallback(targetUrl, null)
+            .then(function() {
+              refreshFeedCardBadges(targetUrl);
+            })
+            .catch(function() {})
+            .finally(function() {
+              setTimeout(stepNext, 1200);
+            });
+        }
+
+        stepNext();
+      };
+
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(function() {
+          setTimeout(runPrefetch, 1000);
+        }, { timeout: 3000 });
+      } else {
+        setTimeout(runPrefetch, 2000);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        refreshFeedCardBadges();
+        scheduleIdleFeedPrefetch();
+      });
+    } else {
+      setTimeout(function() {
+        refreshFeedCardBadges();
+        scheduleIdleFeedPrefetch();
+      }, 50);
+    }
+
+    window.openNavFeedPreview = openFeedPreview;
+    window.closeNavFeedPreview = closeFeedPreview;
+    window.getNavFeedReadState = getReadState;
+    window.markNavFeedRead = markAllArticlesAsRead;
+    window.refreshNavFeedCardBadges = refreshFeedCardBadges;
+    window.scheduleNavFeedPrefetch = scheduleIdleFeedPrefetch;
+    window.getNavFeedDigestMarkdown = function() {
+      return generateDigestMarkdown(currentArticles, currentFeedOptions);
+    };
+  })();
+</script>

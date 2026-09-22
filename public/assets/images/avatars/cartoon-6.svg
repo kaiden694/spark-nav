@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-bunny" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9a9e"/>
+      <stop offset="100%" stop-color="#fecfef"/>
+    </linearGradient>
+    <clipPath id="circle-clip-6">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-6)">
+    <rect width="120" height="120" fill="url(#bg-bunny)"/>
+    <!-- Ears -->
+    <ellipse cx="44" cy="28" rx="8" ry="22" fill="#ffffff"/>
+    <ellipse cx="44" cy="30" rx="4.5" ry="16" fill="#ffb8b8"/>
+    <ellipse cx="76" cy="28" rx="8" ry="22" fill="#ffffff"/>
+    <ellipse cx="76" cy="30" rx="4.5" ry="16" fill="#ffb8b8"/>
+    <!-- Head -->
+    <circle cx="60" cy="66" r="32" fill="#ffffff"/>
+    <!-- Eyes -->
+    <ellipse cx="46" cy="62" rx="3.5" ry="5" fill="#2d3436"/>
+    <circle cx="45" cy="60" r="1.5" fill="#ffffff"/>
+    <ellipse cx="74" cy="62" rx="3.5" ry="5" fill="#2d3436"/>
+    <circle cx="73" cy="60" r="1.5" fill="#ffffff"/>
+    <!-- Cheeks -->
+    <circle cx="36" cy="72" r="6" fill="#ff7675" opacity="0.6"/>
+    <circle cx="84" cy="72" r="6" fill="#ff7675" opacity="0.6"/>
+    <!-- Nose & Mouth -->
+    <polygon points="58,69 62,69 60,72" fill="#ff7675"/>
+    <path d="M 56 74 Q 60 77 64 74" stroke="#2d3436" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Carrot -->
+    <polygon points="56,92 64,92 60,104" fill="#e67e22"/>
+    <path d="M 60,92 L 56,86 M 60,92 L 64,86" stroke="#27ae60" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

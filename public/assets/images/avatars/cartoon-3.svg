@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-cat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#89f7fe"/>
+      <stop offset="100%" stop-color="#66a6ff"/>
+    </linearGradient>
+    <clipPath id="circle-clip-3">
+      <circle cx="60" cy="60" r="60"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip-3)">
+    <rect width="120" height="120" fill="url(#bg-cat)"/>
+    <!-- Ears -->
+    <polygon points="28,45 36,18 52,40" fill="#f5f6fa"/>
+    <polygon points="32,42 37,25 46,38" fill="#ffb8b8"/>
+    <polygon points="92,45 84,18 68,40" fill="#f5f6fa"/>
+    <polygon points="88,42 83,25 74,38" fill="#ffb8b8"/>
+    <!-- Head -->
+    <circle cx="60" cy="62" r="34" fill="#f5f6fa"/>
+    <!-- Yellow Bell / Scarf -->
+    <path d="M 36 96 Q 60 106 84 96" stroke="#e84118" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <circle cx="60" cy="103" r="6" fill="#fbc531"/>
+    <!-- Eyes -->
+    <path d="M 40 56 Q 46 51 52 56" stroke="#2f3640" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M 68 56 Q 74 51 80 56" stroke="#2f3640" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Nose & Mouth -->
+    <polygon points="58,63 62,63 60,66" fill="#ff7675"/>
+    <path d="M 56 68 Q 60 71 60 67 Q 60 71 64 68" stroke="#2f3640" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Whiskers -->
+    <line x1="28" y1="62" x2="42" y2="64" stroke="#718093" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="26" y1="70" x2="42" y2="68" stroke="#718093" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="92" y1="62" x2="78" y2="64" stroke="#718093" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="94" y1="70" x2="78" y2="68" stroke="#718093" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Cheeks -->
+    <circle cx="38" cy="69" r="6" fill="#ff9ff3" opacity="0.6"/>
+    <circle cx="82" cy="69" r="6" fill="#ff9ff3" opacity="0.6"/>
+  </g>
+</svg>

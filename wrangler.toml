@@ -1,0 +1,8 @@
+name = "spark-nav"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-08"
+
+# 可选：Cloudflare KV 命名空间（用于博主点击量统计，不配亦可正常纯内存运行）
+# [[kv_namespaces]]
+# binding = "VIEWS_KV"
+# id = "your_kv_namespace_id_here"

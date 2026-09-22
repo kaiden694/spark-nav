@@ -1,0 +1,2234 @@
+---
+import NavLayout from '../layouts/NavLayout.astro';
+import {
+  navCategories,
+  navWebsites,
+  navGithubs,
+  navTelegrams,
+  navCreators,
+  getFeaturedNavItems,
+  getAllNavItems,
+  isRecentItem,
+  sortNavItemsByFreshness
+} from '../utils/nav';
+
+const allItems = getAllNavItems();
+const featuredItems = getFeaturedNavItems();
+
+// 2 rows x 4 columns = 8 hot / latest cards for homepage core sections
+const homeFeatured = featuredItems.slice(0, 8);
+const homeTools = sortNavItemsByFreshness(navWebsites).slice(0, 8);
+const homeGithubs = [...navGithubs].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 8);
+const homeTelegrams = [...navTelegrams].sort((a, b) => (b.member_count || 0) - (a.member_count || 0)).slice(0, 8);
+const homeCreators = [...navCreators].sort((a, b) => (b.followers_count || 0) - (a.followers_count || 0)).slice(0, 8);
+
+function formatNumber(num?: number): string {
+  if (!num) return '';
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return String(num);
+}
+
+// 12 Vibrant Neon Colors pool (Ported 1:1 from Gallery)
+const VIBRANT_ACCENTS = [
+  '244, 63, 94',   // Rose
+  '236, 72, 153',  // Pink
+  '217, 70, 239',  // Fuchsia
+  '168, 85, 247',  // Purple
+  '129, 140, 248',  // Indigo
+  '14, 165, 233',   // Sky Blue
+  '20, 184, 166',   // Teal
+  '16, 185, 129',   // Emerald
+  '132, 204, 22',   // Lime
+  '245, 158, 11',   // Amber
+  '249, 115, 22',   // Orange
+  '239, 68, 68'     // Red
+];
+
+function getCardAccent(key: string): string {
+  let hash = 0;
+  const str = String(key || 'item');
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return VIBRANT_ACCENTS[Math.abs(hash) % VIBRANT_ACCENTS.length];
+}
+
+const navJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://sparknav.example.com/#website",
+      "name": "SparkNav · 极客智汇导航与开源矩阵",
+      "url": "/",
+      "description": "全网优质资源精选导航：深度收录优质工具网站、GitHub开源高星项目、Telegram精选频道机器人及全球技术创作者。",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "/search.html?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "SparkNav 核心专区",
+      "hasPart": navCategories.map(cat => ({
+        "@type": "WebPage",
+        "name": cat.name,
+        "description": cat.description || `${cat.name}专区`,
+        "url": `/category/${cat.id}.html`
+      }))
+    }
+  ]
+};
+---
+<NavLayout title="SparkNav · 极客智汇导航与开源矩阵" jsonLd={navJsonLd}>
+  <div class="nav-app">
+    <!-- Top Sticky Header -->
+    <header class="nav-header">
+      <div class="nav-header-inner">
+        <!-- Brand & Navigation -->
+        <div class="nav-brand-group">
+          <a href="/" class="nav-brand-title">
+            <span>⚡ SparkNav</span>
+            <span class="nav-brand-badge">OSS</span>
+          </a>
+        </div>
+
+        <!-- Top Vertical Menu -->
+        <nav class="nav-header-menu" aria-label="垂直专区导航">
+          <a href="/" class="nav-menu-link is-active" title="精选总览首页">
+            <span>🧭 精选总览</span>
+          </a>
+          <a href="/github.html" class="nav-menu-link" title="开源矩阵专区">
+            <span>💻 开源矩阵</span>
+          </a>
+          <a href="/telegram.html" class="nav-menu-link" title="电报生态专区">
+            <span>✈️ 电报生态</span>
+          </a>
+          <a href="/category/tools.html" class="nav-menu-link" title="实用工具专区">
+            <span>🛠️ 实用工具</span>
+          </a>
+          <a href="/category/creators.html" class="nav-menu-link" title="优质博主专区">
+            <span>👤 优质博主</span>
+          </a>
+          
+        </nav>
+
+        <!-- Right Controls -->
+        <div class="nav-actions">
+          <button class="btn-lucky-nav" id="btn-lucky-nav" title="随机探索一个神站 (快捷键: R)">
+            <span class="lucky-dice-icon" id="nav-dice-icon">🎲</span>
+            <span>随机探索</span>
+          </button>
+          <span style="font-size: 12px; color: var(--nav-text-muted); font-weight: 600;">
+            共收录 <strong style="color: var(--nav-accent);">{allItems.length}</strong> 资源
+          </span>
+          <button class="theme-toggle-btn" id="nav-theme-btn" title="切换主题 (Light / OLED)">
+            <svg id="nav-sun-icon" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg id="nav-moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- TGNAV Single Column Main Layout -->
+    <main class="nav-home-tgnav" id="nav-main-content">
+      <!-- TGNAV Hero Search Section -->
+      <section class="tgnav-hero">
+        <div class="tgnav-hero-eyebrow">
+          <span>🧭 XIU NAVIGATION PORTAL</span>
+        </div>
+        <h1 class="tgnav-hero-title">
+          <span class="shiny-text">发现全网极客神器与精选资源</span>
+        </h1>
+        <p class="tgnav-hero-desc">收录全球高星开源项目、Telegram 生态社群、全栈开发工具与全球独立创作者，毫秒级快速索引直达。</p>
+
+        <!-- Big Hero Search Box -->
+        <div class="tgnav-search-wrap">
+          <div class="tgnav-search-box-container">
+            <div class="tgnav-search-box">
+              <svg class="tgnav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="nav-search-input" class="tgnav-search-input" placeholder="输入关键词即时检索资源、开源项目、电报群组..." autocomplete="off" spellcheck="false" />
+              <div class="tgnav-search-tools">
+                <button type="button" class="tgnav-search-clear" id="tgnav-search-clear" style="display: none;" title="清空搜索内容">&times;</button>
+                <kbd class="tgnav-search-kbd" id="nav-search-shortcut-badge" title="按 ⌘K 或 / 唤起全局检索">⌘K / /</kbd>
+              </div>
+            </div>
+
+            <!-- Instant Search Dropdown Popover (Option A) -->
+            <div class="tgnav-search-popover" id="tgnav-search-popover" style="display: none;" role="listbox" aria-label="搜索即时建议">
+              <div class="tgnav-popover-header">
+                <span class="tgnav-popover-count" id="tgnav-popover-count">找到 0 项建议</span>
+                <span class="tgnav-popover-hint"><kbd>↑</kbd><kbd>↓</kbd> 切换 • <kbd>↵</kbd> 直达 • <kbd>ESC</kbd> 关闭</span>
+              </div>
+              <div class="tgnav-popover-list" id="tgnav-popover-list">
+                <!-- Rendered dynamically -->
+              </div>
+              <div class="tgnav-popover-footer" id="tgnav-popover-footer">
+                <button type="button" class="tgnav-popover-more-btn" id="tgnav-popover-more-btn">
+                  <span>⚡ 深度检索全站结果与高级分面 (<span id="tgnav-popover-total">0</span>)</span>
+                  <kbd class="tgnav-popover-kbd">⌘K</kbd>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hot Quick Chips (TGNAV Style) -->
+          <div class="tgnav-quick-chips">
+            <span class="tgnav-chip-label">快捷通道:</span>
+            <a href="#sec-featured" class="tgnav-chip">🌟 常用精选</a>
+            <a href="/github.html" class="tgnav-chip">💻 开源矩阵</a>
+            <a href="/telegram.html" class="tgnav-chip">✈️ 电报生态</a>
+            <a href="/category/tools.html" class="tgnav-chip">🛠️ 实用工具</a>
+            
+          </div>
+        </div>
+      </section>
+        <!-- 0. 我的常用收藏 Section (Dynamic Client Rendered) -->
+        <section class="nav-section nav-favorites-section" id="sec-user-favorites" style="display: none;">
+          <div class="nav-section-head">
+            <div class="nav-section-title-wrap">
+              <span class="nav-section-icon">⭐</span>
+              <h2 class="nav-section-title">我的常用收藏</h2>
+              <span class="nav-section-desc">本地持久化快捷置顶，随时一键直达</span>
+            </div>
+            <div class="nav-favorites-header-actions">
+              <span class="nav-badge" id="favorites-badge-count" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-weight: 700;">0 项</span>
+              <button type="button" class="btn-fav-action" id="btn-export-favorites" title="导出收藏为 JSON 备份">📥 导出 JSON</button>
+              <button type="button" class="btn-fav-action" id="btn-export-bookmarks-html" title="导出为标准浏览器书签 HTML (可导入 Chrome / Edge / Safari / Firefox)">🔖 导出书签</button>
+              <button type="button" class="btn-fav-action" id="btn-export-opml" title="导出为标准 OPML 订阅源 (可导入 Inoreader / Feedly / NetNewsWire)">📰 导出 OPML</button>
+              <button type="button" class="btn-fav-action" id="btn-import-favorites" title="从 JSON、浏览器书签 HTML 或 OPML 订阅源导入恢复">📤 导入</button>
+              <input type="file" id="input-import-favorites" accept=".json,.html,.htm,.opml,.xml,application/json,text/html,application/xml,text/xml" style="display: none;" />
+              <button type="button" class="btn-clear-favorites" id="btn-clear-all-favorites">清空常用</button>
+            </div>
+          </div>
+          <div class="nav-grid" id="nav-favorites-grid"></div>
+        </section>
+
+        <!-- 1. 常用精选 Section -->
+        <section class="nav-section" id="sec-featured">
+          <div class="nav-section-head">
+            <div class="nav-section-title-wrap">
+              <span class="nav-section-icon">🌟</span>
+              <h2 class="nav-section-title">常用精选</h2>
+              <span class="nav-section-desc">核心高频工具与高星开源矩阵</span>
+            </div>
+            <span class="nav-badge badge-featured">精选 {homeFeatured.length} 项</span>
+          </div>
+
+          <div class="nav-grid">
+            {homeFeatured.map(item => {
+              const accentRgb = getCardAccent(item.id || item.title);
+              const itemFeedUrl = item.feed_url || (item.item_type === 'github' && item.repo ? `https://github.com/${item.repo}/releases.atom` : undefined);
+              return (
+                <a
+                  id={item.id}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={`nav-card ${item.is_alive === false ? 'is-offline' : ''}`}
+                  style={`--card-accent-rgb: ${accentRgb}; --card-accent: rgb(${accentRgb});`}
+                  data-keywords={`${item.title} ${item.description} ${item.tags.join(' ')} ${item.url}`}
+                  data-id={item.id}
+                  data-title={item.title}
+                  data-url={item.url}
+                  data-is-alive={item.is_alive === false ? 'false' : 'true'}
+                  data-mirrors={item.mirror_urls && item.mirror_urls.length > 0 ? item.mirror_urls.join(',') : undefined}
+                  data-feed-url={itemFeedUrl}
+                >
+                  <div>
+                    <div class="nav-card-header">
+                      {item.item_type === 'github' ? (
+                        <div class="nav-card-avatar icon-small" style="background: #181717; color: #fff;">
+                          <img
+                            src={item.avatar_url || (item.owner ? `https://github.com/${item.owner}.png?size=96` : '')}
+                            alt={item.title}
+                            loading="lazy"
+                            onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='block';"
+                          />
+                          <svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        </div>
+                      ) : item.item_type === 'telegram' ? (
+                        <div class="nav-card-avatar icon-small" style="background: #0088cc; color: #fff;">
+                          {item.avatar_url && !item.avatar_url.includes('default-avatar') ? (
+                            <img
+                              src={item.avatar_url}
+                              alt={item.title}
+                              loading="lazy"
+                              onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='block';"
+                            />
+                            <svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
+                          ) : (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
+                          )}
+                        </div>
+                      ) : item.item_type === 'creator' ? (
+                        <div class="nav-card-avatar icon-small" style="border-radius: 50%;">
+                          <img
+                            src={item.avatar_url || '/assets/images/avatars/default-avatar.svg'}
+                            alt={item.title}
+                            loading="lazy"
+                            onerror="this.onerror=null;this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='block';"
+                          />
+                          <svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        </div>
+                      ) : (
+                        <div class="nav-card-avatar icon-small">
+                          <img
+                            src={item.icon || 'https://unavatar.io/' + encodeURIComponent(item.url)}
+                            alt={item.title}
+                            loading="lazy"
+                            onerror="this.onerror=null;this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='block';"
+                          />
+                          <svg style="display: none;" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        </div>
+                      )}
+                      <div class="nav-card-info">
+                        <div class="nav-card-title-row">
+                          <span class="nav-card-title" title={item.title}>{item.title}</span>
+                          {isRecentItem(item.created_at) && (
+                            <span class="nav-badge badge-new" title={`新收录 (${item.created_at})`}>NEW</span>
+                          )}
+                          {item.is_alive === false && (
+                            <span class="nav-card-offline-pill" title="该站点当前网络状态受限">⚠️ 状态受限</span>
+                          )}
+                          <span class={`nav-badge ${item.item_type === 'github' ? 'badge-github' : (item.item_type === 'telegram' ? 'badge-tg' : (item.item_type === 'creator' ? 'badge-creator' : 'badge-featured'))}`}>
+                            {item.item_type === 'github' ? '💻 开源' : (item.item_type === 'telegram' ? '✈️ 电报' : (item.item_type === 'creator' ? '👤 博主' : '🌟 精选'))}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="nav-card-desc">{item.description}</p>
+                  </div>
+                  <div class="nav-card-footer">
+                    <div class="nav-card-tags">
+                      {item.tags.slice(0, 2).map(tag => (
+                        <span class="nav-tag-pill">{tag}</span>
+                      ))}
+                    </div>
+                    <div class="nav-card-stat">
+                      {item.item_type === 'github' && <span>⭐ {formatNumber(item.stars)}</span>}
+                      {item.item_type === 'telegram' && <span>👥 {formatNumber(item.member_count)}</span>}
+                      {item.item_type === 'creator' && <span>🔥 {formatNumber(item.followers_count)}</span>}
+                      {item.item_type === 'website' && <span class="nav-card-action">直达 &rarr;</span>}
+                      <div class="nav-card-actions-group">
+                        {itemFeedUrl && (
+                          <button type="button" class="nav-card-feed-btn" title="查看最新动态 (RSS/Atom)" data-feed-url={itemFeedUrl} data-title={item.title}>
+                            <svg viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+                          </button>
+                        )}
+                        <button type="button" class="nav-card-pin-btn" title="收藏至我的常用" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </button>
+                        <button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        <!-- 2. 实用工具 Section -->
+        <section class="nav-section" id="sec-tools" style="--sec-accent: #f59e0b; --sec-accent-rgb: 245, 158, 11;">
+          <div class="nav-section-head">
+            <div class="nav-section-title-wrap">
+              <span class="nav-section-icon">🛠️</span>
+              <h2 class="nav-section-title">实用工具</h2>
+              <span class="nav-section-desc">AI 应用、全平台客户端、开发运维与网络神器</span>
+            </div>
+            <div class="nav-head-actions">
+              <a href="/category/tools.html" class="nav-hub-quick-link" style="color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.1);" title="进入实用工具独立专区大厅">
+                进入完整工具箱 (共 {navWebsites.length} 款) &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-grid">
+            {homeTools.map(item => {
+              const accentRgb = getCardAccent(item.id || item.title);
+              return (
+                <a
+                  id={item.id}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={`nav-card ${item.is_alive === false ? 'is-offline' : ''}`}
+                  style={`--card-accent-rgb: ${accentRgb}; --card-accent: rgb(${accentRgb});`}
+                  data-type={item.pricing || 'free'}
+                  data-subcategory={item.subcategory || ''}
+                  data-keywords={`${item.title} ${item.description} ${item.tags.join(' ')} ${item.url}`}
+                  data-id={item.id}
+                  data-title={item.title}
+                  data-url={item.url}
+                  data-is-alive={item.is_alive === false ? 'false' : 'true'}
+                  data-mirrors={item.mirror_urls && item.mirror_urls.length > 0 ? item.mirror_urls.join(',') : undefined}
+                  data-feed-url={item.feed_url}
+                >
+                  <div>
+                    <div class="nav-card-header">
+                      <div class="nav-card-avatar icon-small">
+                        <img
+                          src={item.icon || 'https://unavatar.io/' + encodeURIComponent(item.url)}
+                          alt={item.title}
+                          loading="lazy"
+                          onerror="this.onerror=null;this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='block';"
+                        />
+                        <svg style="display: none;" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                      </div>
+                      <div class="nav-card-info">
+                        <div class="nav-card-title-row">
+                          <span class="nav-card-title" title={item.title}>{item.title}</span>
+                          {isRecentItem(item.created_at) && (
+                            <span class="nav-badge badge-new" title={`新收录 (${item.created_at})`}>NEW</span>
+                          )}
+                          {item.is_alive === false && (
+                            <span class="nav-card-offline-pill" title="该站点当前网络状态受限">⚠️ 状态受限</span>
+                          )}
+                          {item.pricing && (
+                            <span class="nav-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                              {item.pricing === 'free' ? '免费' : (item.pricing === 'freemium' ? '免费试用' : '商业')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <p class="nav-card-desc">{item.description}</p>
+                  </div>
+                  <div class="nav-card-footer">
+                    <div class="nav-card-tags">
+                      {item.tags.slice(0, 3).map(tag => (
+                        <span class="nav-tag-pill">{tag}</span>
+                      ))}
+                    </div>
+                    <div class="nav-card-stat">
+                      <span class="nav-card-action">直达 &rarr;</span>
+                      <div class="nav-card-actions-group">
+                        {item.feed_url && (
+                          <button type="button" class="nav-card-feed-btn" title="查看最新动态 (RSS/Atom)" data-feed-url={item.feed_url} data-title={item.title}>
+                            <svg viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+                          </button>
+                        )}
+                        <button type="button" class="nav-card-pin-btn" title="收藏至我的常用" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </button>
+                        <button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        <!-- 3. 开源矩阵 Section -->
+        <section class="nav-section" id="sec-github" style="--sec-accent: #10b981; --sec-accent-rgb: 16, 185, 129;">
+          <div class="nav-section-head">
+            <div class="nav-section-title-wrap">
+              <span class="nav-section-icon">💻</span>
+              <h2 class="nav-section-title">开源矩阵</h2>
+              <span class="nav-section-desc">代理核心、全平台图形客户端与开发者前沿项目</span>
+            </div>
+            <div class="nav-head-actions">
+              <a href="/github.html" class="nav-hub-quick-link" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.1);" title="进入开源矩阵独立专区大厅">
+                进入完整开源大厅 (共 {navGithubs.length} 个) &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-grid">
+            {homeGithubs.map(item => {
+              const accentRgb = getCardAccent(item.id || item.repo || item.title);
+              const ghFeedUrl = item.feed_url || (item.repo ? `https://github.com/${item.repo}/releases.atom` : undefined);
+              return (
+                <a
+                  id={item.id}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={`nav-card ${item.is_alive === false ? 'is-offline' : ''}`}
+                  style={`--card-accent-rgb: ${accentRgb}; --card-accent: rgb(${accentRgb});`}
+                  data-type={item.language || ''}
+                  data-subcategory={item.subcategory || ''}
+                  data-keywords={`${item.title} ${item.repo} ${item.description} ${item.language || ''} ${item.tags.join(' ')}`}
+                  data-id={item.id}
+                  data-title={item.title}
+                  data-url={item.url}
+                  data-is-alive={item.is_alive === false ? 'false' : 'true'}
+                  data-mirrors={item.mirror_urls && item.mirror_urls.length > 0 ? item.mirror_urls.join(',') : undefined}
+                  data-feed-url={ghFeedUrl}
+                >
+                  <div>
+                    <div class="nav-card-header">
+                      <div class="nav-card-avatar icon-small" style="background: #181717; color: #fff;">
+                        <img
+                          src={item.avatar_url || (item.owner ? `https://github.com/${item.owner}.png?size=96` : '')}
+                          alt={item.title}
+                          loading="lazy"
+                          onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='block';"
+                        />
+                        <svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                      </div>
+                      <div class="nav-card-info">
+                        <div class="nav-card-title-row">
+                          <span class="nav-card-title" title={item.title}>{item.title}</span>
+                          {isRecentItem(item.created_at) && (
+                            <span class="nav-badge badge-new" title={`新收录 (${item.created_at})`}>NEW</span>
+                          )}
+                          {item.is_alive === false && (
+                            <span class="nav-card-offline-pill" title="该站点当前网络状态受限">⚠️ 状态受限</span>
+                          )}
+                          {item.language && (
+                            <span class="nav-badge" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8;">
+                              {item.language}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <p class="nav-card-desc">{item.description}</p>
+                  </div>
+                  <div class="nav-card-footer">
+                    <div class="nav-card-tags">
+                      {item.tags.slice(0, 2).map(tag => (
+                        <span class="nav-tag-pill">{tag}</span>
+                      ))}
+                    </div>
+                    <div class="nav-card-stat" style="color: #f59e0b;">
+                      <span>⭐ {formatNumber(item.stars)}</span>
+                      {item.forks && <span style="color: var(--nav-text-muted); margin-left: 6px;">🍴 {formatNumber(item.forks)}</span>}
+                      <div class="nav-card-actions-group">
+                        {ghFeedUrl && (
+                          <button type="button" class="nav-card-feed-btn" title="查看最新动态 (Release Atom)" data-feed-url={ghFeedUrl} data-title={item.title}>
+                            <svg viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+                          </button>
+                        )}
+                        <button type="button" class="nav-card-pin-btn" title="收藏至我的常用" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </button>
+                        <button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        <!-- 4. 电报生态 Section -->
+        <section class="nav-section" id="sec-telegram" style="--sec-accent: #0ea5e9; --sec-accent-rgb: 14, 165, 233;">
+          <div class="nav-section-head">
+            <div class="nav-section-title-wrap">
+              <span class="nav-section-icon">✈️</span>
+              <h2 class="nav-section-title">电报生态</h2>
+              <span class="nav-section-desc">优质资讯频道、群组交流与核心机器人</span>
+            </div>
+            <div class="nav-head-actions">
+              <a href="/telegram.html" class="nav-hub-quick-link" style="color: #38bdf8; border-color: rgba(14, 165, 233, 0.4); background: rgba(14, 165, 233, 0.1);" title="进入电报生态独立专区大厅">
+                进入完整电报专区 (共 {navTelegrams.length} 个) &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-grid">
+            {homeTelegrams.map(item => {
+              const accentRgb = getCardAccent(item.id || item.username || item.title);
+              return (
+                <a
+                  id={item.id}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={`nav-card ${item.is_alive === false ? 'is-offline' : ''}`}
+                  style={`--card-accent-rgb: ${accentRgb}; --card-accent: rgb(${accentRgb});`}
+                  data-type={item.type}
+                  data-subcategory={item.subcategory || ''}
+                  data-keywords={`${item.title} ${item.username} ${item.description} ${item.tags.join(' ')}`}
+                  data-id={item.id}
+                  data-title={item.title}
+                  data-url={item.url}
+                  data-is-alive={item.is_alive === false ? 'false' : 'true'}
+                  data-mirrors={item.mirror_urls && item.mirror_urls.length > 0 ? item.mirror_urls.join(',') : undefined}
+                >
+                  <div>
+                    <div class="nav-card-header">
+                      <div class="nav-card-avatar icon-small" style="background: #0088cc; color: #fff;">
+                        {item.avatar_url && !item.avatar_url.includes('default-avatar') ? (
+                          <img
+                            src={item.avatar_url}
+                            alt={item.title}
+                            loading="lazy"
+                            onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='block';"
+                          />
+                          <svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
+                        )}
+                      </div>
+                      <div class="nav-card-info">
+                        <div class="nav-card-title-row">
+                          <span class="nav-card-title" title={item.title}>{item.title}</span>
+                          {isRecentItem(item.created_at) && (
+                            <span class="nav-badge badge-new" title={`新收录 (${item.created_at})`}>NEW</span>
+                          )}
+                          {item.is_alive === false && (
+                            <span class="nav-card-offline-pill" title="该站点当前网络状态受限">⚠️ 状态受限</span>
+                          )}
+                          <span class="nav-badge badge-tg">
+                            {item.type === 'bot' ? '🤖 机器人' : (item.type === 'group' ? '👥 群组' : '📢 频道')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="nav-card-desc">{item.description}</p>
+                  </div>
+                  <div class="nav-card-footer">
+                    <div class="nav-card-tags">
+                      <span class="nav-tag-pill">@{item.username}</span>
+                    </div>
+                    <div class="nav-card-stat" style="color: #0ea5e9;">
+                      {item.member_count ? <span>👥 {formatNumber(item.member_count)} 订户</span> : <span class="nav-card-action">直达 &rarr;</span>}
+                      <div class="nav-card-actions-group">
+                        <button type="button" class="nav-card-pin-btn" title="收藏至我的常用" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </button>
+                        <button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id={item.id}>
+                          <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        <!-- 5. 优质博主 Section -->
+        <section class="nav-section" id="sec-creators" style="--sec-accent: #ec4899; --sec-accent-rgb: 236, 72, 153;">
+          <div class="nav-section-head">
+            <div class="nav-section-title-wrap">
+              <span class="nav-section-icon">👤</span>
+              <h2 class="nav-section-title">优质博主</h2>
+              <span class="nav-section-desc">X、YouTube 等社交平台技术先锋与全球独立创作者</span>
+            </div>
+            <div class="nav-head-actions">
+              <a href="/category/creators.html" class="nav-hub-quick-link" style="color: #fb7185; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.1);" title="进入优质博主独立专区大厅">
+                进入完整博主专区 (共 {navCreators.length} 位) &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-grid">
+            {homeCreators.map(item => {
+              const accentRgb = getCardAccent(item.id || item.handle || item.name);
+              const cardId = item.id || ('creator-' + (item.handle ? item.handle.replace(/[@]/g, '') : item.name));
+              return (
+                <a
+                  id={cardId}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={`nav-card ${item.is_alive === false ? 'is-offline' : ''}`}
+                  style={`--card-accent-rgb: ${accentRgb}; --card-accent: rgb(${accentRgb});`}
+                  data-type={item.platform}
+                  data-subcategory={item.subcategory || ''}
+                  data-keywords={`${item.name} ${item.handle} ${item.description} ${item.field || ''} ${item.tags.join(' ')}`}
+                  data-id={cardId}
+                  data-title={item.name}
+                  data-url={item.url}
+                  data-is-alive={item.is_alive === false ? 'false' : 'true'}
+                  data-mirrors={item.mirror_urls && item.mirror_urls.length > 0 ? item.mirror_urls.join(',') : undefined}
+                >
+                  <div>
+                    <div class="nav-card-header">
+                      <div class="nav-card-avatar" style="border-radius: 50%;">
+                        <img
+                          src={item.avatar_url || 'https://unavatar.io/x/twitter'}
+                          alt={item.name}
+                          loading="lazy"
+                          onerror="this.src='/assets/images/avatars/default-avatar.svg';"
+                        />
+                      </div>
+                      <div class="nav-card-info">
+                        <div class="nav-card-title-row">
+                          <span class="nav-card-title" title={item.name}>{item.name}</span>
+                          {isRecentItem(item.created_at) && (
+                            <span class="nav-badge badge-new" title={`新收录 (${item.created_at})`}>NEW</span>
+                          )}
+                          {item.is_alive === false && (
+                            <span class="nav-card-offline-pill" title="该站点当前网络状态受限">⚠️ 状态受限</span>
+                          )}
+                          <span class="nav-badge badge-creator">{item.platform.toUpperCase()}</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--nav-text-muted);">{item.handle}</div>
+                      </div>
+                    </div>
+                    <p class="nav-card-desc">{item.description}</p>
+                  </div>
+                  <div class="nav-card-footer">
+                    <div class="nav-card-tags">
+                      {item.tags.slice(0, 2).map(tag => (
+                        <span class="nav-tag-pill">{tag}</span>
+                      ))}
+                    </div>
+                    <div class="nav-card-stat" style="color: #8b5cf6;">
+                      {item.followers_count ? <span>🔥 {formatNumber(item.followers_count)} 关注</span> : <span>{item.field || '访问主页'}</span>}
+                      <div class="nav-card-actions-group">
+                        <button type="button" class="nav-card-pin-btn" title="收藏至我的常用" data-id={cardId}>
+                          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </button>
+                        <button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id={cardId}>
+                          <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        <!-- 6. 垂直专题大厅直通车 (Thematic Portals Grid) -->
+        <section class="nav-section tgnav-portals-section" id="sec-thematic-portals">
+          <div class="nav-section-head">
+            <div class="nav-section-title-wrap">
+              <span class="nav-section-icon">🚀</span>
+              <h2 class="nav-section-title">垂直专题大厅</h2>
+              <span class="nav-section-desc">深度细分维度、编程语言与实体索引独立探索工作台</span>
+            </div>
+            <span class="nav-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">4 大专区</span>
+          </div>
+
+          <div class="tgnav-portals-grid">
+            <a href="/github.html" class="tgnav-portal-card" style="--portal-accent: #a855f7; --portal-badge-bg: rgba(168, 85, 247, 0.15);">
+              <div class="tgnav-portal-top">
+                <span class="tgnav-portal-icon">💻</span>
+                <span class="tgnav-portal-badge">GitHub Pro</span>
+              </div>
+              <h3 class="tgnav-portal-title">开源矩阵大厅</h3>
+              <p class="tgnav-portal-desc">精选全球高星开源项目、前沿 AI 工具链与全栈开发框架，按语言与领域多维过滤。</p>
+              <div class="tgnav-portal-footer">
+                <span>{navGithubs.length} 个高星仓库</span>
+                <span class="tgnav-portal-cta">进入专区 &rarr;</span>
+              </div>
+            </a>
+
+            <a href="/telegram.html" class="tgnav-portal-card" style="--portal-accent: #0ea5e9; --portal-badge-bg: rgba(14, 165, 233, 0.15);">
+              <div class="tgnav-portal-top">
+                <span class="tgnav-portal-icon">✈️</span>
+                <span class="tgnav-portal-badge">Telegram Hub</span>
+              </div>
+              <h3 class="tgnav-portal-title">电报生态专区</h3>
+              <p class="tgnav-portal-desc">按频道、机器人、群组形态与科技、资源、资讯主题正交索引，实时探活。</p>
+              <div class="tgnav-portal-footer">
+                <span>{navTelegrams.length} 个精选频道/群组</span>
+                <span class="tgnav-portal-cta">进入专区 &rarr;</span>
+              </div>
+            </a>
+
+            <a href="/category/tools.html" class="tgnav-portal-card" style="--portal-accent: #f59e0b; --portal-badge-bg: rgba(245, 158, 11, 0.15);">
+              <div class="tgnav-portal-top">
+                <span class="tgnav-portal-icon">🛠️</span>
+                <span class="tgnav-portal-badge">Tools Box</span>
+              </div>
+              <h3 class="tgnav-portal-title">实用在线工具箱</h3>
+              <p class="tgnav-portal-desc">AI 效能工具、全平台客户端、格式转换与网络诊断神器，独立分类树索引。</p>
+              <div class="tgnav-portal-footer">
+                <span>{navWebsites.length} 款高效工具</span>
+                <span class="tgnav-portal-cta">进入专区 &rarr;</span>
+              </div>
+            </a>
+
+            <a href="/category/creators.html" class="tgnav-portal-card" style="--portal-accent: #ec4899; --portal-badge-bg: rgba(236, 72, 153, 0.15);">
+              <div class="tgnav-portal-top">
+                <span class="tgnav-portal-icon">👤</span>
+                <span class="tgnav-portal-badge">Indie Creators</span>
+              </div>
+              <h3 class="tgnav-portal-title">全球优质博主</h3>
+              <p class="tgnav-portal-desc">X/Twitter、YouTube 技术博主与极客创作者，覆盖前沿技术分享与思考。</p>
+              <div class="tgnav-portal-footer">
+                <span>{navCreators.length} 位认证博主</span>
+                <span class="tgnav-portal-cta">进入专区 &rarr;</span>
+              </div>
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+  <!-- Client Search & Interaction Script -->
+  <script is:inline>
+    (function() {
+      // ==================== 1. Card Interactive Cursor Spotlight & 3D Tilt Parallax ====================
+      var hasHover = !window.matchMedia || window.matchMedia('(hover: hover)').matches;
+
+      var attach3DTilt = window.attach3DTilt || function(el, tilt) {};
+
+      if (hasHover) {
+        var cards = document.querySelectorAll('.nav-card, .tgnav-portal-card');
+        cards.forEach(function(card) {
+          function updateGlow(e) {
+            var rect = card.getBoundingClientRect();
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            card.style.setProperty('--mouse-x', x + 'px');
+            card.style.setProperty('--mouse-y', y + 'px');
+          }
+          card.addEventListener('mousemove', updateGlow);
+          card.addEventListener('mouseenter', updateGlow);
+          attach3DTilt(card, 6);
+        });
+      }
+
+      // Canvas for sampling avatar / icon dominant vibrant hue (Ported 1:1 from Gallery)
+      var sampleCanvas = document.createElement('canvas');
+      sampleCanvas.width = 16;
+      sampleCanvas.height = 16;
+      var sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+
+      function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h = 0, s = 0, l = (max + min) / 2;
+        if (max !== min) {
+          var d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+          }
+          h *= 60;
+        }
+        return [h, s, l];
+      }
+
+      function hslToRgb(h, s, l) {
+        var hue2rgb = function(p, q, t) {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        var r = hue2rgb(p, q, h / 360 + 1/3);
+        var g = hue2rgb(p, q, h / 360);
+        var b = hue2rgb(p, q, h / 360 - 1/3);
+        return Math.round(r * 255) + ', ' + Math.round(g * 255) + ', ' + Math.round(b * 255);
+      }
+
+      function extractDominantColor(img) {
+        try {
+          sampleCtx.clearRect(0, 0, 16, 16);
+          sampleCtx.drawImage(img, 0, 0, 16, 16);
+          var imgData = sampleCtx.getImageData(0, 0, 16, 16).data;
+          var buckets = new Array(12).fill(0);
+          var hueSums = new Array(12).fill(0);
+          var totalVibrantWeight = 0;
+
+          for (var i = 0; i < imgData.length; i += 4) {
+            var pr = imgData[i];
+            var pg = imgData[i + 1];
+            var pb = imgData[i + 2];
+            var pa = imgData[i + 3];
+            if (pa < 100) continue;
+
+            var hsl = rgbToHsl(pr, pg, pb);
+            var h = hsl[0], s = hsl[1], l = hsl[2];
+            if (s < 0.18 || l < 0.12 || l > 0.90) continue;
+
+            var weight = Math.pow(s, 2.2) * (1 - Math.abs(l - 0.5) * 1.4);
+            var bIdx = Math.floor(h / 30) % 12;
+            buckets[bIdx] += weight;
+            hueSums[bIdx] += h * weight;
+            totalVibrantWeight += weight;
+          }
+
+          if (totalVibrantWeight < 0.1) return null;
+
+          var bestBucket = -1, maxWeight = 0;
+          for (var i = 0; i < 12; i++) {
+            if (buckets[i] > maxWeight) {
+              maxWeight = buckets[i];
+              bestBucket = i;
+            }
+          }
+
+          if (bestBucket === -1 || buckets[bestBucket] === 0) return null;
+
+          var winningHue = Math.round(hueSums[bestBucket] / buckets[bestBucket]);
+          return hslToRgb(winningHue, 0.82, 0.58);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      // Upgrade cards dynamically when images load
+      cards.forEach(function(card) {
+        var img = card.querySelector('.nav-card-avatar img');
+        if (img) {
+          var applyColor = function() {
+            var extracted = extractDominantColor(img);
+            if (extracted) {
+              card.style.setProperty('--card-accent-rgb', extracted);
+              card.style.setProperty('--card-accent', 'rgb(' + extracted + ')');
+            }
+          };
+          if (img.complete && img.naturalWidth !== 0) {
+            applyColor();
+          } else {
+            img.addEventListener('load', applyColor, { once: true });
+          }
+        }
+      });
+
+      // ==================== Click Spark Particle Burst (Ported from Gallery) ====================
+      function triggerClickSpark(e, sparkCount, color) {
+        var x = e ? (e.clientX || window.innerWidth / 2) : window.innerWidth / 2;
+        var y = e ? (e.clientY || window.innerHeight / 2) : window.innerHeight / 2;
+        var targetColor = color || 'var(--nav-accent)';
+
+        for (var i = 0; i < sparkCount; i++) {
+          var spark = document.createElement('div');
+          spark.className = 'click-spark-particle';
+
+          var angle = (Math.PI * 2 * i) / sparkCount + (Math.random() - 0.5) * 0.5;
+          var distance = 35 + Math.random() * 40;
+          var dx = Math.cos(angle) * distance;
+          var dy = Math.sin(angle) * distance;
+          var size = 3 + Math.random() * 4;
+
+          spark.style.left = x + 'px';
+          spark.style.top = y + 'px';
+          spark.style.width = size + 'px';
+          spark.style.height = size + 'px';
+          spark.style.backgroundColor = targetColor;
+          spark.style.boxShadow = '0 0 12px ' + targetColor;
+          spark.style.setProperty('--dx', dx + 'px');
+          spark.style.setProperty('--dy', dy + 'px');
+
+          document.body.appendChild(spark);
+          setTimeout(function(el) { el.remove(); }.bind(null, spark), 650);
+        }
+      }
+
+      // Bind click sparks on cards
+      cards.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          var accent = card.style.getPropertyValue('--card-accent') || 'var(--nav-accent)';
+          triggerClickSpark(e, 8, accent);
+        });
+      });
+
+      // ==================== 3. Lucky Dice Random Explorer ====================
+      var diceBtn = document.getElementById('btn-lucky-nav');
+      var diceIcon = document.getElementById('nav-dice-icon');
+      var diceDegree = 0;
+
+      function triggerLuckyPick() {
+        var visibleCards = Array.from(document.querySelectorAll('.nav-card:not(.is-hidden)'));
+        if (visibleCards.length === 0) return;
+
+        // Spin the dice icon with 360deg
+        diceDegree += 360;
+        if (diceIcon) {
+          diceIcon.style.transform = 'rotate(' + diceDegree + 'deg)';
+        }
+
+        // Pick a random card
+        var luckyCard = visibleCards[Math.floor(Math.random() * visibleCards.length)];
+        luckyCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Trigger glow pulse
+        luckyCard.classList.remove('roulette-highlight');
+        // Force reflow
+        void luckyCard.offsetWidth;
+        luckyCard.classList.add('roulette-highlight');
+
+        var luckyRect = luckyCard.getBoundingClientRect();
+        var luckyAccent = luckyCard.style.getPropertyValue('--card-accent') || 'var(--nav-accent)';
+        triggerClickSpark({
+          clientX: luckyRect.left + luckyRect.width / 2,
+          clientY: luckyRect.top + luckyRect.height / 2
+        }, 16, luckyAccent);
+
+        setTimeout(function() {
+          luckyCard.classList.remove('roulette-highlight');
+        }, 2500);
+      }
+
+      if (diceBtn) {
+        diceBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          triggerLuckyPick();
+        });
+      }
+
+      // Keyboard 'R' shortcut for lucky pick
+      window.addEventListener('keydown', function(e) {
+        if ((e.key === 'r' || e.key === 'R') && document.activeElement !== searchInput) {
+          e.preventDefault();
+          triggerLuckyPick();
+        }
+      });
+
+      // ==================== 4. Dual-Dimension Tabs & Fuzzy Search Filter Engine ====================
+      var searchInput = document.getElementById('nav-search-input');
+      var sections = document.querySelectorAll('.nav-section');
+      var subcatTabBars = document.querySelectorAll('.nav-subcat-tabs');
+      var typeFilterBars = document.querySelectorAll('.nav-type-filter');
+      var currentSectionFilters = {};
+      var currentTypeFilters = {};
+      var searchDebounceTimer = null;
+
+      function resetSectionFilter(sectionId) {
+        currentSectionFilters[sectionId] = 'all';
+        currentTypeFilters[sectionId] = 'all';
+
+        var section = document.getElementById(sectionId);
+        if (!section) return;
+
+        var subcatBar = section.querySelector('.nav-subcat-tabs');
+        if (subcatBar) {
+          subcatBar.querySelectorAll('.nav-subcat-pill').forEach(function(p) {
+            p.classList.remove('is-active');
+            if (p.getAttribute('data-filter') === 'all') p.classList.add('is-active');
+          });
+        }
+
+        var typeBar = section.querySelector('.nav-type-filter');
+        if (typeBar) {
+          typeBar.querySelectorAll('.nav-type-pill').forEach(function(p) {
+            p.classList.remove('is-active');
+            if (p.getAttribute('data-type') === 'all') p.classList.add('is-active');
+          });
+        }
+
+        applyAllFilters(true);
+      }
+
+      function updateDynamicCounts(section) {
+        var sectionId = section.getAttribute('id');
+        var activeSubcat = currentSectionFilters[sectionId] || 'all';
+        var activeType = currentTypeFilters[sectionId] || 'all';
+        var query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+        var sectionCards = Array.from(section.querySelectorAll('.nav-card'));
+
+        // 1. Update Subcategory Tabs Counts based on current activeType & search query
+        var subcatTabs = section.querySelectorAll('.nav-subcat-pill');
+        subcatTabs.forEach(function(pill) {
+          var subcatId = pill.getAttribute('data-filter');
+          var count = sectionCards.filter(function(card) {
+            var cardSubcat = card.getAttribute('data-subcategory') || '';
+            var cardType = card.getAttribute('data-type') || '';
+            var kw = (card.getAttribute('data-keywords') || '').toLowerCase();
+            var matchesQuery = !query || kw.indexOf(query) !== -1;
+            var matchesType = (activeType === 'all') || (cardType === activeType);
+            var matchesSub = (subcatId === 'all') || (cardSubcat === subcatId);
+            return matchesType && matchesSub && matchesQuery;
+          }).length;
+
+          var countBadge = pill.querySelector('.nav-subcat-count');
+          if (countBadge) {
+            countBadge.textContent = count;
+          }
+          if (count === 0) {
+            pill.classList.add('is-empty');
+          } else {
+            pill.classList.remove('is-empty');
+          }
+        });
+
+        // 2. Update Type Filter Counts based on current activeSubcat & search query
+        var typePills = section.querySelectorAll('.nav-type-pill');
+        typePills.forEach(function(pill) {
+          var typeVal = pill.getAttribute('data-type');
+          var count = sectionCards.filter(function(card) {
+            var cardSubcat = card.getAttribute('data-subcategory') || '';
+            var cardType = card.getAttribute('data-type') || '';
+            var kw = (card.getAttribute('data-keywords') || '').toLowerCase();
+            var matchesQuery = !query || kw.indexOf(query) !== -1;
+            var matchesSub = (activeSubcat === 'all') || (cardSubcat === activeSubcat);
+            var matchesT = (typeVal === 'all') || (cardType === typeVal);
+            return matchesSub && matchesT && matchesQuery;
+          }).length;
+
+          var countBadge = pill.querySelector('.nav-type-count');
+          if (countBadge) {
+            countBadge.textContent = count;
+          }
+          if (count === 0) {
+            pill.classList.add('is-empty');
+          } else {
+            pill.classList.remove('is-empty');
+          }
+        });
+
+        // 3. Toggle Empty State in Grid
+        var grid = section.querySelector('.nav-grid');
+        if (grid) {
+          var visibleCards = sectionCards.filter(function(card) {
+            return !card.classList.contains('is-hidden');
+          });
+          var emptyPlaceholder = grid.querySelector('.nav-empty-grid');
+
+          if (visibleCards.length === 0) {
+            if (!emptyPlaceholder) {
+              emptyPlaceholder = document.createElement('div');
+              emptyPlaceholder.className = 'nav-empty-grid';
+              grid.appendChild(emptyPlaceholder);
+            }
+            if (query) {
+              emptyPlaceholder.innerHTML = 
+                '<span class="nav-empty-grid-icon">🔍</span>' +
+                '<div class="nav-empty-grid-text">精选预览卡片中未匹配到相关结果</div>' +
+                '<button type="button" class="nav-empty-grid-btn nav-empty-search-all-btn">在全站 89 个资源中深度检索 &rarr;</button>';
+              var searchAllBtn = emptyPlaceholder.querySelector('.nav-empty-search-all-btn');
+              if (searchAllBtn) {
+                searchAllBtn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  if (window.openNavCommandPalette) {
+                    window.openNavCommandPalette(query);
+                  }
+                });
+              }
+            } else {
+              emptyPlaceholder.innerHTML = 
+                '<span class="nav-empty-grid-icon">🛸</span>' +
+                '<div class="nav-empty-grid-text">当前筛选组合下暂无收录内容</div>' +
+                '<button type="button" class="nav-empty-grid-btn nav-empty-reset-btn">重置本板块筛选</button>';
+              var resetBtn = emptyPlaceholder.querySelector('.nav-empty-reset-btn');
+              if (resetBtn) {
+                resetBtn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  resetSectionFilter(sectionId);
+                });
+              }
+            }
+          } else {
+            if (emptyPlaceholder) {
+              emptyPlaceholder.remove();
+            }
+          }
+        }
+      }
+
+      function syncUrlState() {
+        if (!window.history || !window.history.replaceState) return;
+        var params = new URLSearchParams();
+        var q = (searchInput ? searchInput.value : '').trim();
+        if (q) params.set('q', q);
+
+        if (currentTypeFilters['sec-tools'] && currentTypeFilters['sec-tools'] !== 'all') {
+          params.set('tools_type', currentTypeFilters['sec-tools']);
+        }
+        if (currentSectionFilters['sec-tools'] && currentSectionFilters['sec-tools'] !== 'all') {
+          params.set('tools_sub', currentSectionFilters['sec-tools']);
+        }
+
+        if (currentTypeFilters['sec-github'] && currentTypeFilters['sec-github'] !== 'all') {
+          params.set('gh_lang', currentTypeFilters['sec-github']);
+        }
+        if (currentSectionFilters['sec-github'] && currentSectionFilters['sec-github'] !== 'all') {
+          params.set('gh_sub', currentSectionFilters['sec-github']);
+        }
+
+        if (currentTypeFilters['sec-telegram'] && currentTypeFilters['sec-telegram'] !== 'all') {
+          params.set('tg_type', currentTypeFilters['sec-telegram']);
+        }
+        if (currentSectionFilters['sec-telegram'] && currentSectionFilters['sec-telegram'] !== 'all') {
+          params.set('tg_sub', currentSectionFilters['sec-telegram']);
+        }
+
+        if (currentTypeFilters['sec-creators'] && currentTypeFilters['sec-creators'] !== 'all') {
+          params.set('cr_plat', currentTypeFilters['sec-creators']);
+        }
+        if (currentSectionFilters['sec-creators'] && currentSectionFilters['sec-creators'] !== 'all') {
+          params.set('cr_sub', currentSectionFilters['sec-creators']);
+        }
+
+        var qs = params.toString();
+        var hash = window.location.hash || '';
+        var newUrl = window.location.pathname + (qs ? '?' + qs : '') + hash;
+        if (newUrl !== window.location.pathname + window.location.search + hash) {
+          window.history.replaceState(null, '', newUrl);
+        }
+      }
+
+      function applyAllFilters(shouldSyncUrl) {
+        var query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+        var rawQuery = (searchInput ? searchInput.value : '').trim();
+        var totalVisibleCards = 0;
+
+        sections.forEach(function(section) {
+          var sectionId = section.getAttribute('id');
+          if (sectionId === 'sec-thematic-portals') return;
+          var activeSubcat = currentSectionFilters[sectionId] || 'all';
+          var activeType = currentTypeFilters[sectionId] || 'all';
+          var sectionCards = section.querySelectorAll('.nav-card');
+
+          var visibleCount = 0;
+          sectionCards.forEach(function(card) {
+            var cardSubcat = card.getAttribute('data-subcategory') || '';
+            var matchesSubcat = (activeSubcat === 'all') || (cardSubcat === activeSubcat);
+
+            var cardType = card.getAttribute('data-type') || '';
+            var matchesType = (activeType === 'all') || (cardType === activeType);
+
+            var kw = (card.getAttribute('data-keywords') || '').toLowerCase();
+            var matchesQuery = !query || kw.indexOf(query) !== -1;
+
+            if (matchesSubcat && matchesType && matchesQuery) {
+              card.classList.remove('is-hidden');
+              visibleCount++;
+            } else {
+              card.classList.add('is-hidden');
+            }
+          });
+
+          // If searching and no cards visible, hide the whole section
+          if (query && visibleCount === 0) {
+            section.classList.add('is-hidden');
+          } else {
+            section.classList.remove('is-hidden');
+          }
+
+          totalVisibleCards += visibleCount;
+          updateDynamicCounts(section);
+        });
+
+        var globalEmpty = document.getElementById('nav-global-search-empty');
+        if (query && totalVisibleCards === 0) {
+          if (!globalEmpty) {
+            globalEmpty = document.createElement('div');
+            globalEmpty.id = 'nav-global-search-empty';
+            globalEmpty.className = 'nav-global-empty';
+            var mainContent = document.getElementById('nav-main-content');
+            var portalSec = document.getElementById('sec-thematic-portals');
+            if (mainContent) {
+              if (portalSec) mainContent.insertBefore(globalEmpty, portalSec);
+              else mainContent.appendChild(globalEmpty);
+            }
+          }
+          globalEmpty.style.display = 'flex';
+          globalEmpty.innerHTML = 
+            '<div class="nav-empty-card-box">' +
+              '<span class="nav-empty-grid-icon" style="font-size: 36px;">🛸</span>' +
+              '<h3 style="font-size: 16px; font-weight: 700; color: #f1f5f9; margin: 8px 0 4px;">首页精选卡片中未找到匹配项</h3>' +
+              '<p style="font-size: 13px; color: #94a3b8; margin: 0 0 16px;">首页仅精选展示各专区热门/最新 Top 8，你搜索的内容可能收录在全站 89+ 深度索引中。</p>' +
+              '<button type="button" class="nav-empty-search-all-btn" style="padding: 9px 18px; font-size: 13.5px; font-weight: 600; border-radius: 8px; background: var(--nav-accent, #38bdf8); color: #0f172a; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35); transition: transform 0.15s, opacity 0.15s;">' +
+                '<span>⚡ 开启全局检索面板深度搜索 "' + rawQuery.replace(/"/g, '&quot;') + '"</span>' +
+                '<span>&rarr;</span>' +
+              '</button>' +
+            '</div>';
+          var searchBtn = globalEmpty.querySelector('.nav-empty-search-all-btn');
+          if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              if (window.openNavCommandPalette) {
+                window.openNavCommandPalette(rawQuery);
+              }
+            });
+          }
+        } else {
+          if (globalEmpty) {
+            globalEmpty.style.display = 'none';
+          }
+        }
+
+        if (shouldSyncUrl !== false) {
+          syncUrlState();
+        }
+      }
+
+      function restoreStateFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        var q = params.get('q') || '';
+        if (searchInput) searchInput.value = q;
+
+        var secMap = {
+          'sec-tools': { type: params.get('tools_type'), sub: params.get('tools_sub') },
+          'sec-github': { type: params.get('gh_lang'), sub: params.get('gh_sub') },
+          'sec-telegram': { type: params.get('tg_type'), sub: params.get('tg_sub') },
+          'sec-creators': { type: params.get('cr_plat'), sub: params.get('cr_sub') }
+        };
+
+        sections.forEach(function(section) {
+          var sId = section.getAttribute('id');
+          var cfg = secMap[sId];
+          currentTypeFilters[sId] = (cfg && cfg.type) ? cfg.type : 'all';
+          currentSectionFilters[sId] = (cfg && cfg.sub) ? cfg.sub : 'all';
+
+          var subcatBar = section.querySelector('.nav-subcat-tabs');
+          if (subcatBar) {
+            subcatBar.querySelectorAll('.nav-subcat-pill').forEach(function(p) {
+              if (p.getAttribute('data-filter') === currentSectionFilters[sId]) {
+                p.classList.add('is-active');
+              } else {
+                p.classList.remove('is-active');
+              }
+            });
+          }
+
+          var typeBar = section.querySelector('.nav-type-filter');
+          if (typeBar) {
+            typeBar.querySelectorAll('.nav-type-pill').forEach(function(p) {
+              if (p.getAttribute('data-type') === currentTypeFilters[sId]) {
+                p.classList.add('is-active');
+              } else {
+                p.classList.remove('is-active');
+              }
+            });
+          }
+        });
+
+        applyAllFilters(false);
+
+        if (window.location.hash) {
+          var targetEl = document.querySelector(window.location.hash);
+          if (targetEl) {
+            setTimeout(function() {
+              targetEl.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
+        }
+      }
+
+      // Bind Subcategory Tab Clicks
+      subcatTabBars.forEach(function(bar) {
+        var sectionId = bar.getAttribute('data-section');
+        currentSectionFilters[sectionId] = 'all';
+
+        bar.addEventListener('click', function(e) {
+          var pill = e.target.closest('.nav-subcat-pill');
+          if (!pill) return;
+          var filter = pill.getAttribute('data-filter');
+          if (!filter || filter === currentSectionFilters[sectionId]) return;
+
+          bar.querySelectorAll('.nav-subcat-pill').forEach(function(p) {
+            p.classList.remove('is-active');
+          });
+          pill.classList.add('is-active');
+
+          currentSectionFilters[sectionId] = filter;
+          applyAllFilters(true);
+        });
+      });
+
+      // Bind Section Type Filter Clicks (Right-aligned in section head)
+      typeFilterBars.forEach(function(bar) {
+        var sectionId = bar.getAttribute('data-section');
+        currentTypeFilters[sectionId] = 'all';
+
+        bar.addEventListener('click', function(e) {
+          var pill = e.target.closest('.nav-type-pill');
+          if (!pill) return;
+          var typeVal = pill.getAttribute('data-type');
+          if (!typeVal || typeVal === currentTypeFilters[sectionId]) return;
+
+          bar.querySelectorAll('.nav-type-pill').forEach(function(p) {
+            p.classList.remove('is-active');
+          });
+          pill.classList.add('is-active');
+
+          currentTypeFilters[sectionId] = typeVal;
+          applyAllFilters(true);
+        });
+      });
+
+      // Bind Search Input & Shortcut Badge
+      var cmdBadge = document.getElementById('nav-search-shortcut-badge');
+      if (cmdBadge) {
+        cmdBadge.addEventListener('click', function() {
+          if (window.openNavCommandPalette) {
+            window.openNavCommandPalette();
+          }
+        });
+      }
+
+      var clearSearchBtn = document.getElementById('tgnav-search-clear');
+      if (clearSearchBtn && searchInput) {
+        clearSearchBtn.addEventListener('click', function() {
+          searchInput.value = '';
+          clearSearchBtn.style.display = 'none';
+          hidePopover();
+          applyAllFilters(true);
+          searchInput.focus();
+        });
+      }
+
+      // ==================== 4.1 TGNAV Instant Dropdown Popover (Option A) ====================
+      var popover = document.getElementById('tgnav-search-popover');
+      var popoverList = document.getElementById('tgnav-popover-list');
+      var popoverCount = document.getElementById('tgnav-popover-count');
+      var popoverTotal = document.getElementById('tgnav-popover-total');
+      var popoverMoreBtn = document.getElementById('tgnav-popover-more-btn');
+
+      var popoverWorker = null;
+      var popoverWorkerReady = false;
+      var popoverNavItems = [];
+      var popoverResults = [];
+      var popoverSelectedIndex = -1;
+      var popoverDebounceTimer = null;
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function highlightText(text, tokens) {
+        if (!text) return '';
+        var safe = escapeHtml(text);
+        if (!tokens || !tokens.length) return safe;
+        var validTokens = tokens
+          .filter(Boolean)
+          .map(function(t) { return t.trim(); })
+          .filter(function(t) { return t.length > 0; });
+        if (!validTokens.length) return safe;
+
+        var unique = Array.from(new Set(validTokens)).sort(function(a, b) {
+          return b.length - a.length;
+        });
+        var pattern = unique.map(function(t) {
+          return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }).join('|');
+        try {
+          var reg = new RegExp('(' + pattern + ')', 'gi');
+          return safe.replace(reg, '<span class="tgnav-highlight">$1</span>');
+        } catch (e) {
+          return safe;
+        }
+      }
+
+      function initPopoverSearchWorker() {
+        if (typeof window !== 'undefined' && window.Worker && !popoverWorker) {
+          try {
+            popoverWorker = new Worker('/assets/js/nav-search-worker.js');
+            popoverWorker.onmessage = function(e) {
+              var msg = e.data || {};
+              if (msg.action === 'INIT_SUCCESS') {
+                popoverWorkerReady = true;
+              } else if (msg.action === 'SEARCH_RESULTS' || msg.action === 'SEARCH_SUCCESS') {
+                var currentQ = (searchInput ? searchInput.value : '').trim().toLowerCase();
+                if (msg.query === currentQ) {
+                  popoverResults = msg.results || [];
+                  renderPopover(popoverResults, msg.totalMatched || popoverResults.length, currentQ);
+                }
+              }
+            };
+            popoverWorker.onerror = function() {
+              popoverWorkerReady = false;
+            };
+          } catch (err) {
+            popoverWorkerReady = false;
+          }
+        }
+      }
+
+      function loadPopoverNavIndex() {
+        if (popoverNavItems.length > 0) return Promise.resolve(popoverNavItems);
+        return fetch('/nav-search-index.json')
+          .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(function(data) {
+            popoverNavItems = Array.isArray(data) ? data : [];
+            if (popoverWorker) {
+              var visitCounts = {};
+              try {
+                var rawV = localStorage.getItem('xiu_nav_visit_counts');
+                if (rawV) visitCounts = JSON.parse(rawV);
+              } catch (e) {}
+              var favIds = [];
+              if (typeof window.getNavFavorites === 'function') {
+                favIds = window.getNavFavorites().map(function(f) { return f.id; });
+              }
+              popoverWorker.postMessage({
+                action: 'INIT',
+                items: popoverNavItems,
+                visitCounts: visitCounts,
+                favorites: favIds
+              });
+            }
+            return popoverNavItems;
+          })
+          .catch(function() {
+            return [];
+          });
+      }
+
+      initPopoverSearchWorker();
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(function() { loadPopoverNavIndex(); });
+      } else {
+        setTimeout(loadPopoverNavIndex, 1000);
+      }
+
+      function hidePopover() {
+        if (popover) {
+          popover.style.display = 'none';
+        }
+        popoverSelectedIndex = -1;
+      }
+
+      function renderPopover(items, totalMatched, query) {
+        if (!popover || !popoverList) return;
+        if (!query) {
+          hidePopover();
+          return;
+        }
+
+        popoverSelectedIndex = -1;
+        var tokens = query.split(/\s+/).filter(Boolean);
+
+        if (items.length === 0) {
+          if (popoverCount) popoverCount.textContent = '未找到匹配项';
+          if (popoverTotal) popoverTotal.textContent = '0';
+          popoverList.innerHTML = 
+            '<div class="tgnav-popover-empty">' +
+              '<span class="tgnav-popover-empty-icon">🛸</span>' +
+              '<div>未在全站资源中匹配到相关项</div>' +
+            '</div>';
+          popover.style.display = 'block';
+          return;
+        }
+
+        var topItems = items.slice(0, 8);
+        if (popoverCount) popoverCount.textContent = '实时推荐 Top ' + topItems.length + ' 项';
+        if (popoverTotal) popoverTotal.textContent = String(totalMatched || items.length);
+
+        var typeMap = {
+          'website': { label: '🛠️ 工具', bg: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' },
+          'github': { label: '💻 开源', bg: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' },
+          'telegram': { label: '✈️ 电报', bg: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' },
+          'creator': { label: '👤 创作者', bg: 'rgba(236, 72, 153, 0.15)', color: '#f472b6' }
+        };
+
+        var html = '';
+        for (var i = 0; i < topItems.length; i++) {
+          var item = topItems[i];
+          var conf = typeMap[item.item_type] || { label: '📌 资源', bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8' };
+          var iconSrc = item.icon || '/favicon.ico';
+          var statHtml = item.stat ? '<span style="font-size: 11px; color: #f59e0b; margin-left: 6px;">' + escapeHtml(item.stat) + '</span>' : '';
+          var aliveDot = item.is_alive === false 
+            ? '<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444; margin-right:6px;" title="当前状态异常"></span>'
+            : '<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981; margin-right:6px;" title="在线运行正常"></span>';
+
+          var isFav = false;
+          if (typeof window.isNavFavorite === 'function') {
+            isFav = window.isNavFavorite(item.id);
+          } else {
+            try {
+              var rawFavs = localStorage.getItem('xiu_nav_user_favorites');
+              var parsedFavs = rawFavs ? JSON.parse(rawFavs) : [];
+              isFav = parsedFavs.some(function(x) { return x.id === item.id; });
+            } catch (e) {
+              isFav = false;
+            }
+          }
+          var starFill = isFav ? '#f59e0b' : 'none';
+          var starStroke = isFav ? '#f59e0b' : 'currentColor';
+          var pinTitle = isFav ? '从常用中移除' : '收藏至我的常用';
+          var pinClass = isFav ? ' is-pinned' : '';
+
+          html += 
+            '<div class="tgnav-popover-item" data-index="' + i + '" data-url="' + escapeHtml(item.url) + '" role="option">' +
+              '<img src="' + escapeHtml(iconSrc) + '" alt="" class="tgnav-popover-avatar" loading="lazy" onerror="this.onerror=null;this.src=\'/favicon.ico\';" />' +
+              '<div class="tgnav-popover-info">' +
+                '<div class="tgnav-popover-title-row">' +
+                  aliveDot +
+                  '<span class="tgnav-popover-item-title">' + highlightText(item.title, tokens) + '</span>' +
+                  '<span class="tgnav-popover-badge" style="background:' + conf.bg + '; color:' + conf.color + ';">' + conf.label + '</span>' +
+                  statHtml +
+                '</div>' +
+                '<div class="tgnav-popover-item-desc">' + highlightText(item.description, tokens) + '</div>' +
+              '</div>' +
+              '<button type="button" class="tgnav-popover-pin-btn' + pinClass + '" data-id="' + escapeHtml(item.id) + '" title="' + pinTitle + '" aria-label="快捷收藏">' +
+                '<svg class="tgnav-popover-pin-icon" viewBox="0 0 24 24" fill="' + starFill + '" stroke="' + starStroke + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>' +
+                '</svg>' +
+              '</button>' +
+            '</div>';
+        }
+
+        popoverList.innerHTML = html;
+        popover.style.display = 'block';
+
+        // Bind hover and click events
+        var popoverElements = popoverList.querySelectorAll('.tgnav-popover-item');
+        popoverElements.forEach(function(el) {
+          el.addEventListener('mouseenter', function() {
+            var idx = parseInt(el.getAttribute('data-index'), 10);
+            if (!isNaN(idx)) {
+              setPopoverSelectedIndex(idx);
+            }
+          });
+          el.addEventListener('click', function(e) {
+            if (e.target.closest('.tgnav-popover-pin-btn')) return;
+            var targetUrl = el.getAttribute('data-url');
+            if (targetUrl) {
+              window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            }
+            hidePopover();
+          });
+        });
+
+        // Bind quick favorite pin button clicks
+        var popoverPinBtns = popoverList.querySelectorAll('.tgnav-popover-pin-btn');
+        popoverPinBtns.forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var itemId = btn.getAttribute('data-id');
+            var targetItem = topItems.find(function(it) { return it.id === itemId; });
+            if (!targetItem || typeof window.toggleNavFavorite !== 'function') return;
+
+            var isNowFav = window.toggleNavFavorite({
+              id: targetItem.id,
+              title: targetItem.title,
+              url: targetItem.url,
+              description: targetItem.description,
+              icon: targetItem.icon,
+              tags: targetItem.tags || [],
+              item_type: targetItem.item_type || 'website'
+            });
+
+            btn.classList.toggle('is-pinned', isNowFav);
+            btn.setAttribute('title', isNowFav ? '从常用中移除' : '收藏至我的常用');
+            var icon = btn.querySelector('.tgnav-popover-pin-icon');
+            if (icon) {
+              icon.setAttribute('fill', isNowFav ? '#f59e0b' : 'none');
+              icon.setAttribute('stroke', isNowFav ? '#f59e0b' : 'currentColor');
+            }
+
+            if (typeof showNavToast === 'function') {
+              showNavToast(isNowFav ? '⭐ 已收藏至我的常用看板' : '✓ 已从我的常用中移除');
+            }
+          });
+        });
+      }
+
+      function setPopoverSelectedIndex(idx) {
+        popoverSelectedIndex = idx;
+        if (!popoverList) return;
+        var items = popoverList.querySelectorAll('.tgnav-popover-item');
+        items.forEach(function(it, i) {
+          if (i === popoverSelectedIndex) {
+            it.classList.add('is-selected');
+            it.scrollIntoView({ block: 'nearest' });
+          } else {
+            it.classList.remove('is-selected');
+          }
+        });
+      }
+
+      function executePopoverSearch(query) {
+        if (!query) {
+          hidePopover();
+          return;
+        }
+
+        if (popoverWorker && popoverWorkerReady) {
+          popoverWorker.postMessage({
+            action: 'SEARCH',
+            query: query,
+            filter: 'all',
+            limit: 8
+          });
+          return;
+        }
+
+        // Fallback in-memory search
+        loadPopoverNavIndex().then(function(navs) {
+          var q = query.toLowerCase();
+          var tokens = q.split(/\s+/).filter(Boolean);
+          var matched = [];
+
+          for (var i = 0; i < navs.length; i++) {
+            var item = navs[i];
+            var searchText = (item.search_text || '').toLowerCase();
+            var matchesAll = true;
+            for (var j = 0; j < tokens.length; j++) {
+              if (searchText.indexOf(tokens[j]) === -1) {
+                matchesAll = false;
+                break;
+              }
+            }
+            if (matchesAll) {
+              matched.push(item);
+            }
+          }
+          popoverResults = matched.slice(0, 8);
+          renderPopover(popoverResults, matched.length, query);
+        });
+      }
+
+      if (popoverMoreBtn) {
+        popoverMoreBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var q = (searchInput ? searchInput.value : '').trim();
+          hidePopover();
+          if (window.openNavCommandPalette) {
+            window.openNavCommandPalette(q);
+          }
+        });
+      }
+
+      // Hide popover when clicking outside
+      document.addEventListener('click', function(e) {
+        var boxContainer = document.querySelector('.tgnav-search-box-container');
+        if (boxContainer && !boxContainer.contains(e.target)) {
+          hidePopover();
+        }
+      });
+
+      if (searchInput) {
+        window.addEventListener('keydown', function(e) {
+          if (e.key === '/' && document.activeElement !== searchInput) {
+            e.preventDefault();
+            searchInput.focus();
+          }
+          if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.value = '';
+            if (clearSearchBtn) clearSearchBtn.style.display = 'none';
+            hidePopover();
+            applyAllFilters(true);
+            searchInput.blur();
+          }
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+          if (e.key === 'ArrowDown') {
+            if (popoverResults.length > 0) {
+              e.preventDefault();
+              var nextIdx = (popoverSelectedIndex + 1) % popoverResults.length;
+              setPopoverSelectedIndex(nextIdx);
+            }
+            return;
+          }
+          if (e.key === 'ArrowUp') {
+            if (popoverResults.length > 0) {
+              e.preventDefault();
+              var prevIdx = (popoverSelectedIndex - 1 + popoverResults.length) % popoverResults.length;
+              setPopoverSelectedIndex(prevIdx);
+            }
+            return;
+          }
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (popoverSelectedIndex >= 0 && popoverResults[popoverSelectedIndex]) {
+              var targetItem = popoverResults[popoverSelectedIndex];
+              if (targetItem && targetItem.url) {
+                hidePopover();
+                window.open(targetItem.url, '_blank', 'noopener,noreferrer');
+                return;
+              }
+            }
+            var q = searchInput.value.trim();
+            hidePopover();
+            if (window.openNavCommandPalette) {
+              window.openNavCommandPalette(q);
+            }
+          }
+        });
+
+        searchInput.addEventListener('focus', function() {
+          var val = searchInput.value.trim();
+          if (val) {
+            executePopoverSearch(val);
+          }
+        });
+
+        searchInput.addEventListener('input', function() {
+          var val = searchInput.value.trim();
+          if (clearSearchBtn) {
+            clearSearchBtn.style.display = val ? 'flex' : 'none';
+          }
+          applyAllFilters(false);
+          clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = setTimeout(function() {
+            syncUrlState();
+          }, 250);
+
+          clearTimeout(popoverDebounceTimer);
+          if (!val) {
+            hidePopover();
+          } else {
+            popoverDebounceTimer = setTimeout(function() {
+              executePopoverSearch(val);
+            }, 80);
+          }
+        });
+      }
+
+      // Listen for browser back / forward
+      window.addEventListener('popstate', function() {
+        restoreStateFromUrl();
+      });
+
+      // Initialize from URL state or defaults on load
+      restoreStateFromUrl();
+
+      // ==================== 5. Sidebar Active Link Tracker on Scroll ====================
+      var navLinks = document.querySelectorAll('.nav-sidebar-link');
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var id = entry.target.getAttribute('id');
+            navLinks.forEach(function(link) {
+              if (link.getAttribute('data-target') === id) {
+                link.classList.add('active');
+              } else {
+                link.classList.remove('active');
+              }
+            });
+          }
+        });
+      }, {
+        rootMargin: '-80px 0px -70% 0px'
+      });
+
+      sections.forEach(function(section) {
+        observer.observe(section);
+      });
+
+      // ==================== 6. Deep Link & Card Share System ====================
+      function copyToClipboard(text, onSuccess) {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+            fallbackCopy(text, onSuccess);
+          });
+        } else {
+          fallbackCopy(text, onSuccess);
+        }
+      }
+
+      function fallbackCopy(text, onSuccess) {
+        var textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          if (onSuccess) onSuccess();
+        } catch (err) {}
+        document.body.removeChild(textArea);
+      }
+
+      function showNavToast(message) {
+        var container = document.getElementById('nav-toast-container');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'nav-toast-container';
+          container.className = 'nav-toast-container';
+          document.body.appendChild(container);
+        }
+        var toast = document.createElement('div');
+        toast.className = 'nav-toast-item';
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(function() {
+          toast.style.transition = 'opacity 0.2s, transform 0.2s';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(10px)';
+          setTimeout(function() { toast.remove(); }, 200);
+        }, 2200);
+      }
+
+      function flashBtnSuccess(btn) {
+        if (!btn) return;
+        var oldHtml = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+        btn.classList.add('is-copied');
+        setTimeout(function() {
+          btn.innerHTML = oldHtml;
+          btn.classList.remove('is-copied');
+        }, 1600);
+      }
+
+      function executeCardCopy(copyBtn) {
+        if (!copyBtn) return;
+        var cardId = copyBtn.getAttribute('data-id');
+        var cardEl = copyBtn.closest('.nav-card');
+        var deepLink = window.location.origin + window.location.pathname + '#' + cardId;
+        copyToClipboard(deepLink, function() {
+          flashBtnSuccess(copyBtn);
+          showNavToast('✓ 直达链接已复制到剪贴板');
+          history.replaceState(null, '', '#' + cardId);
+          if (cardEl) {
+            cardEl.classList.remove('card-anchor-highlight');
+            void cardEl.offsetWidth;
+            cardEl.classList.add('card-anchor-highlight');
+            setTimeout(function() { cardEl.classList.remove('card-anchor-highlight'); }, 3000);
+          }
+        });
+      }
+
+      document.addEventListener('click', function(e) {
+        var copyBtn = e.target.closest('.nav-card-copy-btn');
+        if (!copyBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        executeCardCopy(copyBtn);
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          var copyBtn = e.target.closest('.nav-card-copy-btn');
+          if (copyBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            executeCardCopy(copyBtn);
+          }
+        }
+      });
+
+      // ==================== User Favorites Manager & View Renderer ====================
+      var favSection = document.getElementById('sec-user-favorites');
+      var favGrid = document.getElementById('nav-favorites-grid');
+      var favBadge = document.getElementById('favorites-badge-count');
+      var sidebarFavItem = document.getElementById('sidebar-item-favorites');
+      var sidebarFavCount = document.getElementById('sidebar-favorites-count');
+      var btnClearAllFav = document.getElementById('btn-clear-all-favorites');
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function syncAllPinButtons(favorites) {
+        var list = favorites;
+        if (!list) {
+          if (typeof window.getNavFavorites === 'function') {
+            list = window.getNavFavorites();
+          } else {
+            try {
+              var raw = localStorage.getItem('xiu_nav_user_favorites');
+              list = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+              list = [];
+            }
+          }
+        }
+        var favSet = new Set((list || []).map(function(x) { return x.id; }));
+        document.querySelectorAll('.nav-card-pin-btn').forEach(function(btn) {
+          var id = btn.getAttribute('data-id');
+          if (favSet.has(id)) {
+            btn.classList.add('is-pinned');
+            btn.setAttribute('title', '从常用中移除');
+          } else {
+            btn.classList.remove('is-pinned');
+            btn.setAttribute('title', '收藏至我的常用');
+          }
+        });
+      }
+
+      function renderUserFavorites() {
+        if (!favSection || !favGrid) {
+          favSection = document.getElementById('sec-user-favorites');
+          favGrid = document.getElementById('nav-favorites-grid');
+          favBadge = document.getElementById('favorites-badge-count');
+          sidebarFavItem = document.getElementById('sidebar-item-favorites');
+          sidebarFavCount = document.getElementById('sidebar-favorites-count');
+          btnClearAllFav = document.getElementById('btn-clear-all-favorites');
+          if (!favSection || !favGrid) return;
+        }
+
+        var list = [];
+        if (typeof window.getNavFavorites === 'function') {
+          list = window.getNavFavorites();
+        } else {
+          try {
+            var raw = localStorage.getItem('xiu_nav_user_favorites');
+            list = raw ? JSON.parse(raw) : [];
+          } catch (e) {
+            list = [];
+          }
+        }
+
+        if (list.length === 0) {
+          favSection.style.display = 'none';
+          if (sidebarFavItem) sidebarFavItem.style.display = 'none';
+          syncAllPinButtons(list);
+          return;
+        }
+
+        favSection.style.display = 'block';
+        if (sidebarFavItem) {
+          sidebarFavItem.style.display = 'block';
+          if (sidebarFavCount) sidebarFavCount.textContent = list.length;
+        }
+        if (favBadge) favBadge.textContent = list.length + ' 项';
+
+        favGrid.innerHTML = '';
+        var fragment = document.createDocumentFragment();
+
+        for (var i = 0; i < list.length; i++) {
+          var it = list[i];
+          var a = document.createElement('a');
+          a.id = 'fav-' + it.id;
+          a.href = it.url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.className = 'nav-card';
+          a.style.cssText = '--card-accent-rgb: 245, 158, 11; --card-accent: #f59e0b;';
+
+          var avatarHtml = it.icon ? '<img src="' + escapeHtml(it.icon) + '" alt="' + escapeHtml(it.title) + '" onerror="this.src=\'/favicon.ico\';" />' : '<span>⭐</span>';
+
+          var visits = window.getNavVisitCount ? window.getNavVisitCount(it.id) : 0;
+          var metricHtml = visits > 0 ? '<span class="nav-fav-metric" title="已在本机访问 ' + visits + ' 次">🔥 ' + visits + ' 次</span>' : '';
+
+          if (it.feed_url) {
+            a.setAttribute('data-feed-url', it.feed_url);
+          }
+
+          var favFeedBtnHtml = it.feed_url ? (
+            '<button type="button" class="nav-card-feed-btn" title="查看最新动态 (RSS/Atom)" data-feed-url="' + escapeHtml(it.feed_url) + '" data-title="' + escapeHtml(it.title) + '">' +
+              '<svg viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>' +
+            '</button>'
+          ) : '';
+
+            var catPillHtml = it.category ? '<span class="nav-tag-pill" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.3);">' + escapeHtml(it.category) + '</span>' : '';
+
+          a.innerHTML = 
+            '<div>' +
+              '<div class="nav-card-header">' +
+                '<div class="nav-card-avatar" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">' +
+                  avatarHtml +
+                '</div>' +
+                '<div class="nav-card-info">' +
+                  '<div class="nav-card-title-row">' +
+                    '<span class="nav-card-title" title="' + escapeHtml(it.title) + '">' + escapeHtml(it.title) + '</span>' +
+                    '<span class="nav-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">常用置顶</span>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+              '<p class="nav-card-desc">' + escapeHtml(it.description || it.url) + '</p>' +
+            '</div>' +
+            '<div class="nav-card-footer">' +
+              '<div class="nav-card-tags">' + catPillHtml + '<span class="nav-tag-pill" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">⭐ 已置顶</span></div>' +
+              '<div class="nav-card-stat">' +
+                metricHtml +
+                '<div class="nav-card-actions-group">' +
+                  favFeedBtnHtml +
+                  '<button type="button" class="nav-card-pin-btn is-pinned" title="从常用中移除" data-id="' + escapeHtml(it.id) + '">' +
+                    '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>' +
+                  '</button>' +
+                  '<button type="button" class="nav-card-copy-btn" title="复制卡片直达链接" data-id="' + escapeHtml(it.id) + '">' +
+                    '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>' +
+                  '</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+
+          fragment.appendChild(a);
+        }
+
+        favGrid.appendChild(fragment);
+        syncAllPinButtons(list);
+      }
+
+      function executeTogglePin(pinBtn) {
+        if (!pinBtn || !window.toggleNavFavorite) return;
+        var cardId = pinBtn.getAttribute('data-id');
+        var card = pinBtn.closest('.nav-card');
+        if (!card) return;
+
+        var titleEl = card.querySelector('.nav-card-title');
+        var descEl = card.querySelector('.nav-card-desc');
+        var imgEl = card.querySelector('.nav-card-avatar img');
+        var isNowPinned = window.toggleNavFavorite({
+          id: cardId,
+          title: titleEl ? titleEl.textContent.trim() : cardId,
+          url: card.getAttribute('href') || '',
+          description: descEl ? descEl.textContent.trim() : '',
+          icon: imgEl ? imgEl.src : ''
+        });
+
+        showNavToast(isNowPinned ? '✓ 已添加至我的常用收藏' : '✓ 已从我的常用中移除');
+      }
+
+      document.addEventListener('click', function(e) {
+        var pinBtn = e.target.closest('.nav-card-pin-btn');
+        if (pinBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          executeTogglePin(pinBtn);
+          return;
+        }
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          var pinBtn = e.target.closest('.nav-card-pin-btn');
+          if (pinBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            executeTogglePin(pinBtn);
+            return;
+          }
+        }
+      });
+
+
+      if (btnClearAllFav) {
+        btnClearAllFav.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (window.clearNavFavorites) {
+            window.clearNavFavorites();
+            showNavToast('✓ 已清空常用收藏');
+          }
+        });
+      }
+
+      // Export / Import Handlers
+      var btnExportFav = document.getElementById('btn-export-favorites');
+      var btnExportHtml = document.getElementById('btn-export-bookmarks-html');
+      var btnExportOpml = document.getElementById('btn-export-opml');
+      var btnImportFav = document.getElementById('btn-import-favorites');
+      var inputImportFav = document.getElementById('input-import-favorites');
+
+      if (btnExportFav) {
+        btnExportFav.addEventListener('click', function(e) {
+          e.preventDefault();
+          var ok = window.exportNavFavoritesAsJson ? window.exportNavFavoritesAsJson() : false;
+          if (ok) {
+            showNavToast('✓ 常用收藏已成功导出为 JSON 备份');
+          } else {
+            showNavToast('⚠️ 暂无常用收藏可供导出');
+          }
+        });
+      }
+
+      if (btnExportHtml) {
+        btnExportHtml.addEventListener('click', function(e) {
+          e.preventDefault();
+          var ok = window.exportNavFavoritesAsHtml ? window.exportNavFavoritesAsHtml() : false;
+          if (ok) {
+            showNavToast('✓ 已导出为标准浏览器书签 (HTML)，可直接导入 Chrome/Edge/Safari');
+          } else {
+            showNavToast('⚠️ 暂无常用收藏可供导出');
+          }
+        });
+      }
+
+      if (btnExportOpml) {
+        btnExportOpml.addEventListener('click', function(e) {
+          e.preventDefault();
+          var ok = window.exportNavFavoritesAsOpml ? window.exportNavFavoritesAsOpml() : false;
+          if (ok) {
+            showNavToast('✓ 已导出为标准 OPML 订阅源，可直接导入 Inoreader/Feedly/NetNewsWire');
+          } else {
+            showNavToast('⚠️ 暂无常用收藏可供导出');
+          }
+        });
+      }
+
+      if (btnImportFav && inputImportFav) {
+        btnImportFav.addEventListener('click', function(e) {
+          e.preventDefault();
+          inputImportFav.click();
+        });
+
+        inputImportFav.addEventListener('change', function() {
+          var file = inputImportFav.files && inputImportFav.files[0];
+          if (!file) return;
+
+          var reader = new FileReader();
+          reader.onload = function(evt) {
+            var rawText = evt.target && evt.target.result;
+            if (typeof rawText !== 'string' || !rawText.trim()) {
+              showNavToast('⚠️ 导入文件内容为空');
+              inputImportFav.value = '';
+              return;
+            }
+
+            var parsed = window.parseBookmarkFile ? window.parseBookmarkFile(rawText) : { type: 'unknown', items: [] };
+            if (parsed.type === 'unknown' || !parsed.items || parsed.items.length === 0) {
+              showNavToast('⚠️ 未识别到有效的常用收藏或浏览器书签条目');
+              inputImportFav.value = '';
+              return;
+            }
+
+            var added = window.importNavFavorites ? window.importNavFavorites(parsed.items, parsed.profile) : 0;
+            var formatLabel = (parsed.type === 'html') ? '浏览器书签' : (parsed.type === 'opml' ? 'OPML 订阅源' : 'JSON 备份/全量配置');
+            showNavToast('✓ 成功从 ' + formatLabel + ' 合并 ' + added + ' 项常用收藏 (共 ' + parsed.items.length + ' 项)');
+            inputImportFav.value = '';
+          };
+          reader.readAsText(file);
+        });
+      }
+
+      window.addEventListener('nav-favorites-updated', function() {
+        renderUserFavorites();
+      });
+
+      window.addEventListener('nav-visit-counted', function() {
+        renderUserFavorites();
+      });
+
+      window.addEventListener('nav-favorites-ready', function() {
+        renderUserFavorites();
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderUserFavorites);
+      }
+      window.addEventListener('load', renderUserFavorites);
+
+      // Initial render of user favorites
+      renderUserFavorites();
+
+      function handleHashDeepLink() {
+        var hash = window.location.hash;
+        if (!hash || hash.length <= 1) return;
+        var targetId = decodeURIComponent(hash.slice(1));
+        var el = document.getElementById(targetId);
+        if (el) {
+          setTimeout(function() {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.remove('card-anchor-highlight');
+            void el.offsetWidth;
+            el.classList.add('card-anchor-highlight');
+            setTimeout(function() { el.classList.remove('card-anchor-highlight'); }, 3000);
+          }, 150);
+        }
+      }
+
+      window.addEventListener('hashchange', handleHashDeepLink);
+      setTimeout(handleHashDeepLink, 350);
+    })();
+  </script>
+</NavLayout>

@@ -1,0 +1,810 @@
+---
+// MirrorSwitcherModal.astro
+// Universal multi-mirror latency inspection & fast failover switcher modal
+---
+
+<div id="nav-mirror-modal" class="nav-mirror-backdrop" style="display: none;" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mirror-modal-title">
+  <div class="nav-mirror-dialog">
+    <!-- Header -->
+    <div class="nav-mirror-header">
+      <div class="nav-mirror-title-wrap">
+        <span class="nav-mirror-icon">🪞</span>
+        <div>
+          <h3 id="mirror-modal-title" class="nav-mirror-title">镜像路由与加速节点</h3>
+          <p id="mirror-modal-subtitle" class="nav-mirror-subtitle">实时探测官方主站与备用镜像网络延迟</p>
+        </div>
+      </div>
+      <button type="button" class="nav-mirror-close-btn" id="nav-mirror-close-btn" title="关闭 (ESC)">
+        <kbd>ESC</kbd>
+      </button>
+    </div>
+
+    <!-- Node List Body -->
+    <div class="nav-mirror-body">
+      <!-- Target Resource Info Banner -->
+      <div class="nav-mirror-target-banner">
+        <div class="nav-mirror-target-info">
+          <span class="nav-mirror-target-label">当前资源</span>
+          <span class="nav-mirror-target-name" id="mirror-target-name">-</span>
+        </div>
+        <button type="button" class="nav-mirror-retest-btn" id="btn-mirror-retest" title="重新测试所有节点延迟">
+          <span class="retest-icon">🔄</span>
+          <span>重新测速</span>
+        </button>
+      </div>
+
+      <!-- Nodes Container -->
+      <div class="nav-mirror-nodes-list" id="nav-mirror-nodes-list">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="nav-mirror-footer">
+      <div class="nav-mirror-footer-left">
+        <label class="nav-mirror-remember-label" title="开启后，点击直达最快节点将自动把该节点保存为默认路线">
+          <input type="checkbox" id="nav-mirror-remember-cb" checked />
+          <span>设为默认直达路线</span>
+        </label>
+      </div>
+      <div class="nav-mirror-footer-right">
+        <button type="button" class="nav-mirror-btn nav-mirror-btn-secondary" id="nav-mirror-btn-cancel">
+          关闭
+        </button>
+        <button type="button" class="nav-mirror-btn nav-mirror-btn-primary" id="nav-mirror-btn-fastest">
+          <span>⚡ 直达最快节点</span>
+          <span class="fastest-tag" id="mirror-fastest-tag" style="display: none;">-</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .nav-mirror-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-mirror-backdrop.is-open {
+    opacity: 1;
+  }
+
+  .nav-mirror-dialog {
+    width: 100%;
+    max-width: 580px;
+    background: rgba(18, 22, 34, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    transform: scale(0.94) translateY(12px);
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    max-height: 88vh;
+  }
+
+  .nav-mirror-backdrop.is-open .nav-mirror-dialog {
+    transform: scale(1) translateY(0);
+  }
+
+  .nav-mirror-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .nav-mirror-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-mirror-icon {
+    font-size: 24px;
+  }
+
+  .nav-mirror-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+
+  .nav-mirror-subtitle {
+    margin: 2px 0 0 0;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .nav-mirror-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .nav-mirror-close-btn kbd {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav-mirror-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nav-mirror-target-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 8px 14px;
+  }
+
+  .nav-mirror-target-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-mirror-target-label {
+    font-size: 11px;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  .nav-mirror-target-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #38bdf8;
+  }
+
+  .nav-mirror-retest-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .nav-mirror-retest-btn:hover {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+
+  .nav-mirror-nodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-mirror-node-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    transition: all 0.18s ease;
+  }
+
+  .nav-mirror-node-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+
+  .nav-mirror-node-item.is-fastest {
+    border-color: rgba(34, 197, 94, 0.45);
+    background: rgba(34, 197, 94, 0.06);
+  }
+
+  .nav-mirror-node-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    margin-right: 12px;
+  }
+
+  .nav-mirror-node-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-mirror-node-type {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 6px;
+  }
+
+  .type-origin {
+    background: rgba(14, 165, 233, 0.15);
+    color: #38bdf8;
+  }
+
+  .type-mirror {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+  }
+
+  .nav-mirror-fast-pill {
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    padding: 1px 6px;
+    border-radius: 6px;
+  }
+
+  .nav-mirror-node-url {
+    font-size: 12px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav-mirror-node-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .nav-mirror-latency-badge {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .latency-testing {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+  }
+
+  .latency-good {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+  }
+
+  .latency-medium {
+    background: rgba(234, 179, 8, 0.15);
+    color: #facc15;
+  }
+
+  .latency-bad {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+
+  .nav-mirror-btn-visit {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .nav-mirror-btn-visit:hover {
+    background: rgba(56, 189, 248, 0.28);
+    border-color: rgba(56, 189, 248, 0.6);
+  }
+
+  .nav-mirror-btn-copy {
+    padding: 6px 8px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .nav-mirror-btn-copy:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+  }
+
+  .nav-mirror-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-mirror-footer-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-mirror-remember-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #94a3b8;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s ease;
+  }
+
+  .nav-mirror-remember-label:hover {
+    color: #f1f5f9;
+  }
+
+  .nav-mirror-remember-label input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: #0ea5e9;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+  }
+
+  .nav-mirror-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-mirror-default-pill {
+    font-size: 10px;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(14, 165, 233, 0.18);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+  }
+
+  .nav-mirror-btn-setdefault {
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .nav-mirror-btn-setdefault:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #f1f5f9;
+  }
+
+  .nav-mirror-btn-setdefault.is-active {
+    background: rgba(14, 165, 233, 0.2);
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #38bdf8;
+  }
+
+  .nav-mirror-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-mirror-btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+  }
+
+  .nav-mirror-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+  }
+
+  .nav-mirror-btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+  }
+
+  .nav-mirror-btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+
+  .fastest-tag {
+    background: rgba(0, 0, 0, 0.35);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var modal = document.getElementById('nav-mirror-modal');
+    var closeBtn = document.getElementById('nav-mirror-close-btn');
+    var cancelBtn = document.getElementById('nav-mirror-btn-cancel');
+    var targetNameEl = document.getElementById('mirror-target-name');
+    var nodesListEl = document.getElementById('nav-mirror-nodes-list');
+    var retestBtn = document.getElementById('btn-mirror-retest');
+    var fastestBtn = document.getElementById('nav-mirror-btn-fastest');
+    var fastestTag = document.getElementById('mirror-fastest-tag');
+
+    var currentTarget = null;
+    var currentNodes = [];
+    var fastestNode = null;
+
+    function openModal(data) {
+      if (!data) return;
+      currentTarget = data;
+      var title = data.title || '资源卡片';
+      var originUrl = data.url || '';
+      var mirrors = Array.isArray(data.mirrors) ? data.mirrors : [];
+
+      if (targetNameEl) targetNameEl.textContent = title;
+
+      // Compile nodes
+      currentNodes = [];
+      if (originUrl) {
+        currentNodes.push({
+          type: 'origin',
+          label: '官方主站 (Origin)',
+          url: originUrl,
+          latency: null,
+          status: 'pending'
+        });
+      }
+
+      mirrors.forEach(function(m, idx) {
+        if (m && m.trim()) {
+          currentNodes.push({
+            type: 'mirror',
+            label: '加速镜像 #' + (idx + 1),
+            url: m.trim(),
+            latency: null,
+            status: 'pending'
+          });
+        }
+      });
+
+      fastestNode = null;
+      if (fastestTag) fastestTag.style.display = 'none';
+
+      renderNodes();
+      runAllPings();
+
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+      setTimeout(function() {
+        modal.classList.add('is-open');
+      }, 10);
+    }
+
+    function closeModal() {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      setTimeout(function() {
+        modal.style.display = 'none';
+        currentTarget = null;
+      }, 220);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderNodes() {
+      if (!nodesListEl) return;
+      nodesListEl.innerHTML = '';
+
+      var targetKey = currentTarget ? (currentTarget.id || currentTarget.url) : '';
+      var pref = (window.getNavMirrorPreference && targetKey)
+        ? window.getNavMirrorPreference(targetKey)
+        : null;
+
+      currentNodes.forEach(function(node, index) {
+        var isFastest = (fastestNode && fastestNode.url === node.url);
+        var isDefault = pref && (pref.url === node.url);
+        var itemDiv = document.createElement('div');
+        itemDiv.className = 'nav-mirror-node-item' + (isFastest ? ' is-fastest' : '') + (isDefault ? ' is-default-node' : '');
+        itemDiv.setAttribute('data-index', index);
+
+        var latencyClass = 'latency-testing';
+        var latencyText = '⚡ 测速中...';
+
+        if (node.status === 'success' && node.latency !== null) {
+          if (node.latency < 160) {
+            latencyClass = 'latency-good';
+            latencyText = '🟢 ' + node.latency + 'ms';
+          } else if (node.latency < 450) {
+            latencyClass = 'latency-medium';
+            latencyText = '🟡 ' + node.latency + 'ms';
+          } else {
+            latencyClass = 'latency-bad';
+            latencyText = '🔴 ' + node.latency + 'ms';
+          }
+        } else if (node.status === 'timeout' || node.status === 'error') {
+          latencyClass = 'latency-bad';
+          latencyText = '🔴 受限/超时';
+        }
+
+        var typeBadgeClass = (node.type === 'origin') ? 'type-origin' : 'type-mirror';
+        var typeBadgeLabel = (node.type === 'origin') ? '主站' : '镜像';
+        var fastestBadge = isFastest ? '<span class="nav-mirror-fast-pill">⚡ 最快推荐</span>' : '';
+        var defaultBadge = isDefault ? '<span class="nav-mirror-default-pill">★ 默认路线</span>' : '';
+
+        var defaultBtnText = isDefault ? '★ 取消默认' : '📌 设为默认';
+        var defaultBtnClass = 'nav-mirror-btn-setdefault' + (isDefault ? ' is-active' : '');
+
+        itemDiv.innerHTML =
+          '<div class="nav-mirror-node-left">' +
+            '<div class="nav-mirror-node-head">' +
+              '<span class="nav-mirror-node-type ' + typeBadgeClass + '">' + typeBadgeLabel + '</span>' +
+              '<strong style="font-size: 13px; color: #f8fafc;">' + escapeHtml(node.label) + '</strong>' +
+              fastestBadge +
+              defaultBadge +
+            '</div>' +
+            '<div class="nav-mirror-node-url" title="' + escapeHtml(node.url) + '">' + escapeHtml(node.url) + '</div>' +
+          '</div>' +
+          '<div class="nav-mirror-node-right">' +
+            '<span class="nav-mirror-latency-badge ' + latencyClass + '">' + latencyText + '</span>' +
+            '<button type="button" class="' + defaultBtnClass + '" data-url="' + escapeHtml(node.url) + '" title="' + (isDefault ? '取消默认设置，恢复官方主站直达' : '将该节点设为该站点的默认直达路线') + '">' + defaultBtnText + '</button>' +
+            '<button type="button" class="nav-mirror-btn-visit" data-url="' + escapeHtml(node.url) + '">直达 &rarr;</button>' +
+            '<button type="button" class="nav-mirror-btn-copy" data-url="' + escapeHtml(node.url) + '" title="复制节点链接">📋</button>' +
+          '</div>';
+
+        nodesListEl.appendChild(itemDiv);
+      });
+    }
+
+    function pingNode(node, callback) {
+      node.status = 'testing';
+      renderNodes();
+
+      var start = performance.now();
+      var timeout = 3000;
+      var timer = null;
+      var finished = false;
+
+      function done(ok, duration) {
+        if (finished) return;
+        finished = true;
+        if (timer) clearTimeout(timer);
+        node.status = ok ? 'success' : 'error';
+        node.latency = ok ? Math.max(1, Math.round(duration)) : null;
+        renderNodes();
+        updateFastest();
+        if (callback) callback(node);
+      }
+
+      timer = setTimeout(function() {
+        done(false, timeout);
+      }, timeout);
+
+      // Probe via fetch with no-cors or fallback image
+      try {
+        fetch(node.url, { method: 'HEAD', mode: 'no-cors', cache: 'no-store' })
+          .then(function() {
+            var dur = performance.now() - start;
+            done(true, dur);
+          })
+          .catch(function() {
+            // Test with image ping as fallback
+            var img = new Image();
+            img.onload = function() {
+              var dur = performance.now() - start;
+              done(true, dur);
+            };
+            img.onerror = function() {
+              var dur = performance.now() - start;
+              // If errored rapidly, it still completed handshake
+              if (dur < 2500) {
+                done(true, dur);
+              } else {
+                done(false, dur);
+              }
+            };
+            img.src = node.url + (node.url.indexOf('?') === -1 ? '?' : '&') + '_ping=' + Date.now();
+          });
+      } catch (err) {
+        done(false, timeout);
+      }
+    }
+
+    function runAllPings() {
+      currentNodes.forEach(function(node) {
+        pingNode(node);
+      });
+    }
+
+    function updateFastest() {
+      var successes = currentNodes.filter(function(n) {
+        return n.status === 'success' && n.latency !== null;
+      });
+
+      if (successes.length > 0) {
+        successes.sort(function(a, b) { return a.latency - b.latency; });
+        fastestNode = successes[0];
+        if (fastestTag) {
+          fastestTag.style.display = 'inline-block';
+          fastestTag.textContent = fastestNode.latency + 'ms';
+        }
+      } else {
+        fastestNode = null;
+        if (fastestTag) fastestTag.style.display = 'none';
+      }
+      renderNodes();
+    }
+
+    // Retest Button
+    if (retestBtn) {
+      retestBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        runAllPings();
+      });
+    }
+
+    // Open Fastest Button
+    if (fastestBtn) {
+      fastestBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var targetNode = fastestNode || currentNodes[0];
+        var targetUrl = targetNode ? targetNode.url : '';
+        if (targetUrl) {
+          var rememberCb = document.getElementById('nav-mirror-remember-cb');
+          var targetKey = currentTarget ? (currentTarget.id || currentTarget.url) : '';
+          if (rememberCb && rememberCb.checked && targetKey && window.setNavMirrorPreference) {
+            window.setNavMirrorPreference(targetKey, targetUrl, targetNode.latency, targetNode.label);
+            if (window.showNavToast) window.showNavToast('⚡ 已设为默认直达路线');
+          }
+          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+          closeModal();
+        }
+      });
+    }
+
+    // Delegation on node setdefault, visit and copy
+    if (nodesListEl) {
+      nodesListEl.addEventListener('click', function(e) {
+        var setDefBtn = e.target.closest('.nav-mirror-btn-setdefault');
+        var targetKey = currentTarget ? (currentTarget.id || currentTarget.url) : '';
+        if (setDefBtn && targetKey) {
+          var u = setDefBtn.getAttribute('data-url');
+          var currentPref = window.getNavMirrorPreference ? window.getNavMirrorPreference(targetKey) : null;
+          if (currentPref && currentPref.url === u) {
+            if (window.clearNavMirrorPreference) window.clearNavMirrorPreference(targetKey);
+            if (window.showNavToast) window.showNavToast('✓ 已恢复官方默认主站路线');
+          } else {
+            var n = currentNodes.find(function(it) { return it.url === u; });
+            var lat = n ? n.latency : null;
+            var lbl = n ? n.label : '';
+            if (window.setNavMirrorPreference) window.setNavMirrorPreference(targetKey, u, lat, lbl);
+            if (window.showNavToast) window.showNavToast('⚡ 已将该节点设为默认直达路线');
+          }
+          renderNodes();
+          return;
+        }
+
+        var visitBtn = e.target.closest('.nav-mirror-btn-visit');
+        if (visitBtn) {
+          var u = visitBtn.getAttribute('data-url');
+          if (u) {
+            window.open(u, '_blank', 'noopener,noreferrer');
+            closeModal();
+          }
+          return;
+        }
+
+        var copyBtn = e.target.closest('.nav-mirror-btn-copy');
+        if (copyBtn) {
+          var copyU = copyBtn.getAttribute('data-url');
+          if (copyU && navigator.clipboard) {
+            navigator.clipboard.writeText(copyU).then(function() {
+              if (window.showNavToast) window.showNavToast('✓ 节点链接已复制');
+            });
+          }
+        }
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+        closeModal();
+      }
+    });
+
+    // Expose global trigger
+    window.openNavMirrorModal = function(param) {
+      if (!param) return;
+      if (param instanceof HTMLElement) {
+        var cardId = param.id || param.getAttribute('data-id') || '';
+        var titleEl = param.querySelector('.nav-card-title');
+        var cardTitle = titleEl ? titleEl.textContent.trim() : (param.getAttribute('data-title') || '资源卡片');
+        var cardUrl = param.getAttribute('data-origin-url') || param.getAttribute('data-url') || param.getAttribute('href') || '';
+        var mirrorsStr = param.getAttribute('data-mirrors') || '';
+        var mirrorsList = mirrorsStr ? mirrorsStr.split(',').map(function(m) { return m.trim(); }).filter(Boolean) : [];
+        openModal({
+          id: cardId,
+          title: cardTitle,
+          url: cardUrl,
+          mirrors: mirrorsList
+        });
+      } else {
+        openModal(param);
+      }
+    };
+  })();
+</script>
