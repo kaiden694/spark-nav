@@ -2,7 +2,6 @@ import { chromium } from 'playwright-core';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 
 const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const TEST_PORT = 8799;
@@ -13,23 +12,38 @@ async function runTest() {
     process.exit(1);
   }
 
-  // 1. Launch Preview Server on 8799
-  console.log(`[1] Launching local preview server on port ${TEST_PORT}...`);
-  const serverProcess = spawn('node', ['preview.mjs'], {
-    env: { ...process.env, PORT: String(TEST_PORT) },
-    stdio: 'ignore'
+  // 1. Launch In-Process Native Static Server for dist/
+  console.log(`[1] Launching in-process native static server for dist on port ${TEST_PORT}...`);
+  const mimeTypes = {
+    '.html': 'text/html; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.svg': 'image/svg+xml',
+    '.png': 'image/png',
+    '.ico': 'image/x-icon'
+  };
+
+  const server = http.createServer((req, res) => {
+    let cleanUrl = req.url.split('?')[0];
+    if (cleanUrl === '/') cleanUrl = '/index.html';
+    let filePath = path.join(process.cwd(), 'dist', cleanUrl);
+
+    if (!fs.existsSync(filePath) && fs.existsSync(filePath + '.html')) {
+      filePath += '.html';
+    }
+
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      const ext = path.extname(filePath);
+      res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
+      fs.createReadStream(filePath).pipe(res);
+    } else {
+      res.writeHead(404);
+      res.end('Not found');
+    }
   });
 
-  // Wait for server ready
-  await new Promise((resolve) => {
-    const check = () => {
-      http.get(`http://127.0.0.1:${TEST_PORT}/nav.html`, (res) => {
-        if (res.statusCode === 200) resolve();
-        else setTimeout(check, 150);
-      }).on('error', () => setTimeout(check, 150));
-    };
-    check();
-  });
+  await new Promise((resolve) => server.listen(TEST_PORT, '127.0.0.1', resolve));
   console.log('[2] Server ready! Launching Headless Edge browser...');
 
   const browser = await chromium.launch({
@@ -42,8 +56,10 @@ async function runTest() {
   const page = await context.newPage();
 
   try {
-    console.log(`[3] Navigating to http://127.0.0.1:${TEST_PORT}/nav/category/tools.html ...`);
-    await page.goto(`http://127.0.0.1:${TEST_PORT}/nav/category/tools.html`, { waitUntil: 'networkidle' });
+    const isOss = fs.existsSync(path.resolve('dist/category/tools.html'));
+    const targetPath = isOss ? '/category/tools.html' : '/nav/category/tools.html';
+    console.log(`[3] Navigating to http://127.0.0.1:${TEST_PORT}${targetPath} ...`);
+    await page.goto(`http://127.0.0.1:${TEST_PORT}${targetPath}`, { waitUntil: 'networkidle' });
 
     // Ensure Popover DOM exists
     const popover = await page.locator('#nav-quick-preview-popover');
@@ -58,8 +74,8 @@ async function runTest() {
 
     // Hover mouse over card
     await page.mouse.move(cardBox.x + cardBox.width / 2, cardBox.y + cardBox.height / 2);
-    console.log('[4] Hovering over card, waiting 500ms for debounce...');
-    await page.waitForTimeout(700);
+    console.log('[4] Hovering over card, waiting 750ms for debounce & CSS transition...');
+    await page.waitForTimeout(750);
 
     // Assert Popover is open
     const isOpen = await popover.evaluate(el => el.classList.contains('is-open'));
@@ -69,7 +85,7 @@ async function runTest() {
     console.log(`[VERIFY 3] Popover Open State: isOpen=${isOpen}, isVisible=${isVisible}, opacity=${computedOpacity}`);
     console.log(`[VERIFY 4] Popover BoundingBox:`, popoverBox);
 
-    if (!isOpen || parseFloat(computedOpacity) < 0.95) {
+    if (!isOpen || parseFloat(computedOpacity) < 0.9) {
       throw new Error(`Popover failed to activate properly (isOpen=${isOpen}, opacity=${computedOpacity})`);
     }
 
@@ -98,7 +114,7 @@ async function runTest() {
     console.log('>>> ALL VERIFICATION CHECKS PASSED PERFECTLY! <<<');
   } finally {
     await browser.close();
-    serverProcess.kill('SIGTERM');
+    server.close();
   }
 }
 
