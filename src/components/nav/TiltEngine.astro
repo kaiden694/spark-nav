@@ -1,6 +1,6 @@
 ---
 // src/components/nav/TiltEngine.astro
-// Unified 3D Tilt Parallax & Cursor Spotlight Engine for Navigation Hub & Cards
+// Unified 3D Tilt Parallax & Micro-Pitch Dynamic Engine for Navigation Hub & Cards
 ---
 <script is:inline>
 (function() {
@@ -9,11 +9,12 @@
   window.__XIU_TILT_ENGINE_INITIALIZED__ = true;
 
   var prefersReducedQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-  var hoverFineQuery = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : null;
+  var hoverQuery = window.matchMedia ? window.matchMedia('(hover: hover)') : null;
 
   function canRunTilt() {
     if (prefersReducedQuery && prefersReducedQuery.matches) return false;
-    if (hoverFineQuery && !hoverFineQuery.matches) return false;
+    // Require hover support; avoid coarse pointer lock that breaks Windows touch laptops
+    if (hoverQuery && !hoverQuery.matches) return false;
     return true;
   }
 
@@ -22,15 +23,17 @@
     if (element.__xiu_tilt_bound__) return;
     element.__xiu_tilt_bound__ = true;
 
-    maxTilt = maxTilt || 6;
+    maxTilt = (typeof maxTilt === 'number') ? maxTilt : 8;
     element.style.transformStyle = 'preserve-3d';
     element.style.willChange = 'transform';
 
     var rect = null;
     var rafId = null;
+    var resetTimer = null;
 
     function onPointerEnter(e) {
       if (e && e.pointerType === 'touch') return;
+      if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
       rect = element.getBoundingClientRect();
       element.style.transition = 'transform 0.1s ease-out, border-color 0.2s ease, box-shadow 0.2s ease';
     }
@@ -38,24 +41,38 @@
     function onPointerMove(e) {
       if (e && e.pointerType === 'touch') return;
       if (!rect) rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
       var x = e.clientX - rect.left;
       var y = e.clientY - rect.top;
       var centerX = rect.width / 2;
       var centerY = rect.height / 2;
+
+      // Mouse at top -> rotateX > 0; mouse at bottom -> rotateX < 0
+      // Mouse at left -> rotateY < 0; mouse at right -> rotateY > 0
       var rotateX = ((y - centerY) / centerY) * -maxTilt;
       var rotateY = ((x - centerX) / centerX) * maxTilt;
 
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(function() {
-        element.style.transform = 'perspective(1000px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-2px)';
+        element.style.transform = 'perspective(800px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-4px)';
+        element.style.setProperty('--mouse-x', x + 'px');
+        element.style.setProperty('--mouse-y', y + 'px');
       });
     }
 
-    function onPointerLeave() {
+    function onPointerLeave(e) {
       if (rafId) cancelAnimationFrame(rafId);
       rect = null;
       element.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease';
-      element.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      element.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      
+      resetTimer = setTimeout(function() {
+        if (!rect) {
+          element.style.transform = '';
+          element.style.transition = '';
+        }
+      }, 360);
     }
 
     if (window.PointerEvent) {
@@ -75,6 +92,18 @@
     for (var i = 0; i < els.length; i++) {
       attach3DTilt(els[i], maxTilt);
     }
+  }
+
+  function autoMountAllCards() {
+    if (!canRunTilt()) return;
+    init3DTilt('.nav-card, .tgnav-portal-card, .spotlight-card, .cat-spotlight-card');
+  }
+
+  // Automatic binding fallback for static cards
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoMountAllCards);
+  } else {
+    autoMountAllCards();
   }
 
   window.attach3DTilt = attach3DTilt;
