@@ -6,6 +6,7 @@ import KeyboardNavigation from '../components/nav/KeyboardNavigation.astro';
 import MirrorSwitcherModal from '../components/nav/MirrorSwitcherModal.astro';
 import FeedPreviewPopover from '../components/nav/FeedPreviewPopover.astro';
 import NavFloatingToolbar from '../components/nav/NavFloatingToolbar.astro';
+import CardQuickPreviewPopover from '../components/nav/CardQuickPreviewPopover.astro';
 import NavCoreStore from '../components/nav/NavCoreStore.astro';
 import TiltEngine from '../components/nav/TiltEngine.astro';
 
@@ -80,6 +81,7 @@ const {
   <MirrorSwitcherModal />
   <FeedPreviewPopover />
   <NavFloatingToolbar />
+  <CardQuickPreviewPopover />
 
   <!-- Global Navigation Theme Controller & Starfield Particles Background Engine -->
   <script is:inline>
@@ -215,33 +217,48 @@ const {
     })();
   </script>
   
-  <!-- PWA Service Worker Registration & Localhost Self-Healing Cache Cleaner -->
+  <!-- PWA Service Worker Registration, Offline Resilience Watcher & Localhost Self-Healing Cleaner -->
   <script is:inline>
-    if ('serviceWorker' in navigator) {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // 本地开发环境：自动注销旧 SW 并清空本地缓存池，彻底避免 Vite 热更新模块与 CSS 样式被陈旧缓存劫持
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for (var reg of registrations) {
-            reg.unregister();
-          }
-        });
-        if (window.caches) {
-          caches.keys().then(function(names) {
-            for (var name of names) {
-              caches.delete(name);
+    (function() {
+      // 1. Online / Offline network health watcher
+      window.addEventListener('offline', function() {
+        if (typeof window.showNavToast === 'function') {
+          window.showNavToast('📡 当前处于离线状态，已启用本地离线缓存与搜索');
+        }
+      });
+      window.addEventListener('online', function() {
+        if (typeof window.showNavToast === 'function') {
+          window.showNavToast('⚡ 网络连接已恢复');
+        }
+      });
+
+      // 2. Service Worker registration
+      if ('serviceWorker' in navigator) {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          // 本地开发环境：自动注销旧 SW 并清空本地缓存池，彻底避免 Vite 热更新模块与 CSS 样式被陈旧缓存劫持
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (var reg of registrations) {
+              reg.unregister();
             }
           });
-        }
-      } else if (window.location.protocol.startsWith('http')) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(reg) {
-            reg.update();
-          }).catch(function(err) {
-            console.warn('Nav ServiceWorker registration failed:', err);
+          if (window.caches) {
+            caches.keys().then(function(names) {
+              for (var name of names) {
+                caches.delete(name);
+              }
+            });
+          }
+        } else if (window.location.protocol.startsWith('http')) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').then(function(reg) {
+              reg.update();
+            }).catch(function(err) {
+              console.warn('Nav ServiceWorker registration failed:', err);
+            });
           });
-        });
+        }
       }
-    }
+    })();
   </script>
 </body>
 </html>

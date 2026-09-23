@@ -1,16 +1,55 @@
 {
-  "name": "XIU主题演示",
-  "short_name": "XIU主题",
-  "description": "高性能自包含响应式 Astro 静态博客主题",
-  "start_url": "/",
+  "name": "秀博客 · 全网优质资源与开源生态导航",
+  "short_name": "神站导航",
+  "description": "高性能自包含响应式 Astro 博客与导航生态，深度收录实用工具、开源项目与电报生态",
+  "start_url": "/nav.html",
+  "scope": "/",
+  "id": "xiu-nav-pwa-app",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ff5e52",
+  "orientation": "any",
+  "background_color": "#0d1117",
+  "theme_color": "#3b82f6",
+  "categories": [
+    "utilities",
+    "productivity",
+    "developer tools"
+  ],
   "icons": [
     {
       "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "导航总览",
+      "short_name": "总览",
+      "description": "浏览神站导航全部精选资源",
+      "url": "/nav.html",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    },
+    {
+      "name": "实用工具",
+      "short_name": "工具",
+      "description": "高频日常工具、系统效率与神器专区",
+      "url": "/nav/category/tools.html",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    },
+    {
+      "name": "开源矩阵",
+      "short_name": "GitHub",
+      "description": "全球高星开源项目与客户端排行榜",
+      "url": "/nav/github.html",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    },
+    {
+      "name": "电报生态",
+      "short_name": "Telegram",
+      "description": "Telegram 精选中文频道与实用机器人",
+      "url": "/nav/telegram.html",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
     }
   ]
 }

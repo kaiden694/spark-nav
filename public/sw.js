@@ -1,5 +1,5 @@
-const CACHE_NAME = 'xiu-theme-cache-v11';
-const API_CACHE_NAME = 'xiu-api-cache-v3';
+const CACHE_NAME = 'xiu-theme-cache-v12';
+const API_CACHE_NAME = 'xiu-api-cache-v4';
 const MEDIA_CACHE_NAME = 'xiu-media-cache-v2';
 
 const PRECACHE_URLS = [
@@ -16,6 +16,9 @@ const PRECACHE_URLS = [
   '/nav/category/github.html',
   '/nav/category/telegram.html',
   '/nav/category/creators.html',
+  '/category/tools.html',
+  '/category/github.html',
+  '/category/telegram.html',
   '/nav-search-index.json',
   '/assets/js/nav-search-worker.js',
   '/assets/css/style.css',
@@ -139,28 +142,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 1.8 [全局搜索与导航索引] Network-First + 离线缓存降级 (确保博文/收录站点即时更新)
+  // 1.8 [全局搜索与导航索引] Stale-While-Revalidate (SWR 模式：本地极速秒开 + 后台静默更新)
   const isSearchIndex = request.method === 'GET' &&
     (url.pathname === '/search-index.json' || url.pathname === '/nav-search-index.json');
 
   if (isSearchIndex) {
     event.respondWith(
-      Promise.race([
-        fetch(request),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Index network timeout')), 2500))
-      ])
-        .then((response) => {
-          if (response.status === 200) {
-            const clone = response.clone();
-            caches.open(API_CACHE_NAME).then((cache) => cache.put(request, clone));
+      caches.open(API_CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(request);
+        const fetchPromise = fetch(request).then((networkResponse) => {
+          if (networkResponse.status === 200) {
+            cache.put(request, networkResponse.clone());
           }
-          return response;
-        })
-        .catch(async () => {
-          const cached = await caches.match(request);
-          if (cached) return cached;
-          return new Response('[]', { headers: { 'Content-Type': 'application/json' } });
-        })
+          return networkResponse;
+        }).catch(() => null);
+
+        // 如果本地已缓存索引，立即 0 毫秒秒开返回，并在后台静默更新缓存池
+        if (cached) {
+          event.waitUntil(fetchPromise);
+          return cached;
+        }
+
+        // 本地尚无缓存时，等待网络拉取；拉取失败时返回安全空数组
+        const networkResponse = await fetchPromise;
+        if (networkResponse) return networkResponse;
+        return new Response('[]', { headers: { 'Content-Type': 'application/json' } });
+      })
     );
     return;
   }
