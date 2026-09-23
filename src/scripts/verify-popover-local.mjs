@@ -111,6 +111,43 @@ async function runTest() {
     console.log(`[VERIFY 8] Dismissed on Escape key: ${isClosed}`);
     if (!isClosed) throw new Error('Popover failed to close on Escape key');
 
+    // ==================== Keyboard Roaming & Shortcut I Assertion ====================
+    console.log('[5] Testing Keyboard Roaming & Shortcut I trigger...');
+    // Clear mouse hover away from cards
+    await page.mouse.move(10, 10);
+    await page.waitForTimeout(200);
+
+    // Press 'j' to focus first card via keyboard navigation
+    await page.keyboard.press('j');
+    await page.waitForTimeout(150);
+    const isCardFocused = await card.evaluate(el => el.classList.contains('is-keyboard-focused'));
+    console.log(`[VERIFY 9] Card focused via keyboard 'j': ${isCardFocused}`);
+    if (!isCardFocused) throw new Error('Card failed to receive keyboard focus on key j');
+
+    // Press 'i' to toggle Quick Preview Popover via keyboard
+    await page.keyboard.press('i');
+    await page.waitForTimeout(300);
+    const isOpenedByKey = await popover.evaluate(el => el.classList.contains('is-open'));
+    console.log(`[VERIFY 10] Popover activated via keyboard shortcut 'i': ${isOpenedByKey}`);
+    if (!isOpenedByKey) throw new Error('Popover failed to open on shortcut key i');
+
+    // Verify Focus Trap inside Popover: Pin button has focus
+    const isPinFocused = await page.locator('#qp-pin-btn').evaluate(el => document.activeElement === el);
+    console.log(`[VERIFY 11] Popover Focus Trap landed on action button: ${isPinFocused}`);
+
+    // Press 'Tab' to move focus inside Popover
+    await page.keyboard.press('Tab');
+    await page.waitForTimeout(100);
+    const isCopyFocused = await page.locator('#qp-copy-btn').evaluate(el => document.activeElement === el);
+    console.log(`[VERIFY 12] Focus cycled to copy button via Tab: ${isCopyFocused}`);
+
+    // Press 'i' again to dismiss and return focus
+    await page.keyboard.press('i');
+    await page.waitForTimeout(300);
+    const isClosedByKey = await popover.evaluate(el => !el.classList.contains('is-open'));
+    console.log(`[VERIFY 13] Popover dismissed via toggle shortcut 'i': ${isClosedByKey}`);
+    if (!isClosedByKey) throw new Error('Popover failed to close on shortcut key i');
+
     console.log('>>> ALL VERIFICATION CHECKS PASSED PERFECTLY! <<<');
   } finally {
     await browser.close();

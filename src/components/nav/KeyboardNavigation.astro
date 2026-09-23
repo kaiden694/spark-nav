@@ -92,6 +92,12 @@
           </div>
         </div>
         <div class="nav-shortcut-row">
+          <span class="nav-shortcut-desc">全景快览 (Info)</span>
+          <div class="nav-shortcut-keys">
+            <kbd>I</kbd>
+          </div>
+        </div>
+        <div class="nav-shortcut-row">
           <span class="nav-shortcut-desc">复制直达链接</span>
           <div class="nav-shortcut-keys">
             <kbd>C</kbd>
@@ -501,6 +507,9 @@
         el.classList.remove('is-keyboard-focused');
       });
       focusedCardIndex = -1;
+      if (window.isNavQuickPreviewOpen && window.isNavQuickPreviewOpen()) {
+        if (window.closeNavQuickPreview) window.closeNavQuickPreview(false);
+      }
     }
 
     function setKeyboardFocus(index, scroll) {
@@ -516,6 +525,9 @@
         focusedCardIndex = index;
         if (scroll !== false) {
           card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+        if (window.isNavQuickPreviewOpen && window.isNavQuickPreviewOpen()) {
+          if (window.openNavQuickPreview) window.openNavQuickPreview(card, false);
         }
       }
     }
@@ -723,6 +735,17 @@
             });
           } else {
             showToast('⚠️ 该卡片未配置订阅源 (RSS/Atom)');
+          }
+          return;
+        }
+
+        // 2d. 'I': Toggle Card Instant Quick Preview Popover
+        if (e.key === 'i' || e.key === 'I') {
+          e.preventDefault();
+          if (window.isNavQuickPreviewOpen && window.isNavQuickPreviewOpen()) {
+            if (window.closeNavQuickPreview) window.closeNavQuickPreview(true);
+          } else if (window.openNavQuickPreview) {
+            window.openNavQuickPreview(targetCard, true);
           }
           return;
         }

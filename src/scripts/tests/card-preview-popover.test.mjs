@@ -22,6 +22,22 @@ test('CardQuickPreviewPopover component integrity & architecture', () => {
   assert.ok(content.includes('qp-mirrors-section'), 'Must support fast mirror routing display');
   assert.ok(content.includes('qp-metrics'), 'Must support dynamic metrics grid for GitHub/TG/Web');
   assert.ok(content.includes('Escape'), 'Must support Escape key to instantly dismiss popover');
+  assert.ok(content.includes('recycleDOM'), 'Must implement lazy DOM recycling on close');
+  assert.ok(content.includes('window.openNavQuickPreview'), 'Must export openNavQuickPreview global method');
+  assert.ok(content.includes('window.closeNavQuickPreview'), 'Must export closeNavQuickPreview global method');
+  assert.ok(content.includes('window.isNavQuickPreviewOpen'), 'Must export isNavQuickPreviewOpen global query method');
+});
+
+test('KeyboardNavigation integrates with CardQuickPreviewPopover (Shortcut I & HUD)', () => {
+  const kbdPath = path.join(ROOT_DIR, 'src/components/nav/KeyboardNavigation.astro');
+  assert.ok(fs.existsSync(kbdPath), 'KeyboardNavigation.astro must exist');
+
+  const content = fs.readFileSync(kbdPath, 'utf8');
+  assert.ok(content.includes('全景快览 (Info)'), 'HUD shortcuts modal must document Info preview shortcut');
+  assert.ok(content.includes("<kbd>I</kbd>"), 'HUD shortcuts modal must display key I');
+  assert.ok(content.includes("e.key === 'i' || e.key === 'I'"), 'Must handle i/I keydown event');
+  assert.ok(content.includes('window.openNavQuickPreview(targetCard, true)'), 'Must call openNavQuickPreview with focusInside=true');
+  assert.ok(content.includes('window.isNavQuickPreviewOpen()'), 'Must check if popover is open to sync with card focus');
 });
 
 test('NavLayout mounts CardQuickPreviewPopover & network resilience watchers', () => {

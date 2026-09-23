@@ -570,7 +570,7 @@
     }
 
     // Populate and open Popover
-    function openPopover(cardEl) {
+    function openPopover(cardEl, focusInside) {
       currentCard = cardEl;
       var data = resolveCardData(cardEl);
       currentData = data;
@@ -711,10 +711,12 @@
       repositionPopover(cardEl);
 
       popover.style.display = 'flex';
-      // Trigger CSS Transition
       requestAnimationFrame(function() {
         popover.classList.add('is-open');
         popover.setAttribute('aria-hidden', 'false');
+        if (focusInside) {
+          setTimeout(function() { pinBtn.focus(); }, 60);
+        }
       });
     }
 
@@ -749,14 +751,26 @@
       popover.style.top = Math.round(top) + 'px';
     }
 
-    function closePopover() {
+    function recycleDOM() {
+      avatarBox.innerHTML = '';
+      metricsEl.innerHTML = '';
+      tagsEl.innerHTML = '';
+      mirrorsList.innerHTML = '';
+      currentCard = null;
+      currentData = null;
+    }
+
+    function closePopover(returnFocus) {
+      var cardToRefocus = currentCard;
       popover.classList.remove('is-open');
-      popover.setAttribute('aria-hidden', 'false');
+      popover.setAttribute('aria-hidden', 'true');
       setTimeout(function() {
         if (!popover.classList.contains('is-open')) {
           popover.style.display = 'none';
-          currentCard = null;
-          currentData = null;
+          recycleDOM();
+          if (returnFocus && cardToRefocus && typeof cardToRefocus.focus === 'function') {
+            cardToRefocus.focus();
+          }
         }
       }, 220);
     }
@@ -774,7 +788,7 @@
         }
         if (hoverTimer) clearTimeout(hoverTimer);
         hoverTimer = setTimeout(function() {
-          openPopover(card);
+          openPopover(card, false);
         }, DEBOUNCE_MS);
       }
     });
@@ -787,7 +801,7 @@
           hoverTimer = null;
         }
         closeTimer = setTimeout(function() {
-          closePopover();
+          closePopover(false);
         }, CLOSE_DELAY_MS);
       }
     });
@@ -802,20 +816,52 @@
 
     popover.addEventListener('mouseleave', function() {
       closeTimer = setTimeout(function() {
-        closePopover();
+        closePopover(false);
       }, CLOSE_DELAY_MS);
     });
 
-    // Close on ESC key or window scroll/resize
+    // Accessibility: Focus Trap and Keyboard Shortcuts inside Popover
+    popover.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' || e.key === 'i' || e.key === 'I') {
+        e.preventDefault();
+        e.stopPropagation();
+        closePopover(true);
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        var focusable = Array.prototype.slice.call(
+          popover.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+        ).filter(function(el) { return el.offsetParent !== null; });
+
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    });
+
+    // Close on ESC key or window scroll/resize outside
     window.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && popover.classList.contains('is-open')) {
-        closePopover();
+        closePopover(true);
       }
     });
 
     window.addEventListener('scroll', function() {
       if (popover.classList.contains('is-open')) {
-        closePopover();
+        closePopover(false);
       }
     }, { passive: true });
 
@@ -850,5 +896,16 @@
         });
       }
     });
+
+    // Global APIs for KeyboardNavigation and external triggers
+    window.openNavQuickPreview = function(cardEl, focusInside) {
+      openPopover(cardEl, focusInside !== false);
+    };
+    window.closeNavQuickPreview = function(returnFocus) {
+      closePopover(returnFocus !== false);
+    };
+    window.isNavQuickPreviewOpen = function() {
+      return popover.classList.contains('is-open');
+    };
   })();
 </script>
