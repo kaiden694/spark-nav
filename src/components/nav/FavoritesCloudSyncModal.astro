@@ -145,6 +145,9 @@
         <button type="button" id="btn-sync-clear-config" class="btn-sync-ghost" title="清除保存在本机的 Token 与账号信息">
           清除配置
         </button>
+        <button type="button" id="btn-sync-show-qr" class="btn-sync-action btn-sync-qr" title="生成跨端加密配对二维码，手机扫码即可免输密码">
+          📱 手机配对
+        </button>
       </div>
       <div class="nav-sync-footer-right">
         <button type="button" id="btn-sync-pull" class="btn-sync-action btn-sync-pull" title="以云端最新数据覆盖本地">
@@ -155,6 +158,84 @@
         </button>
         <button type="button" id="btn-sync-merge" class="btn-sync-action btn-sync-primary" title="对比本地与云端，基于时间戳智能合并">
           ⚡ 立即双向合并
+        </button>
+      </div>
+    </div>
+
+    <!-- QR Code Pair Overlay -->
+    <div id="nav-sync-qr-overlay" class="nav-sync-qr-overlay" style="display: none;">
+      <div class="nav-sync-qr-card">
+        <div class="nav-sync-qr-header">
+          <div class="nav-sync-qr-title-wrap">
+            <span class="qr-title-icon">📱</span>
+            <span class="qr-title-text">手机扫码免密配对</span>
+          </div>
+          <button type="button" id="btn-sync-qr-close" class="nav-sync-qr-close" title="关闭 (ESC)">✕</button>
+        </div>
+        <p class="nav-sync-qr-desc">使用手机相机或浏览器扫描下方二维码，即可直接导入当前账号配置，免除手动逐字输入长密钥。</p>
+        <div class="nav-sync-qr-canvas-box">
+          <canvas id="nav-sync-qr-canvas" width="220" height="220"></canvas>
+          <div class="nav-sync-qr-loading" id="nav-sync-qr-loading">正在生成离线安全二维码...</div>
+        </div>
+        <div class="nav-sync-qr-meta">
+          <span class="nav-sync-qr-tag" id="nav-sync-qr-provider-tag">GitHub Gist</span>
+          <span class="nav-sync-qr-secure-hint">🔒 纯前端离线直接渲染 · 无第三方中转</span>
+        </div>
+        <button type="button" id="btn-sync-copy-pair-url" class="btn-sync-qr-copy" title="复制包含配对凭据的完整链接">
+          📋 复制配对链接
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Incoming Pairing Confirmation Dialog (For Mobile Scanner) -->
+<div
+  id="nav-sync-incoming-modal"
+  class="nav-sync-backdrop"
+  style="display: none;"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="incoming-modal-title"
+>
+  <div class="nav-sync-dialog nav-sync-dialog-incoming">
+    <div class="nav-sync-header">
+      <div class="nav-sync-title-wrap">
+        <span class="nav-sync-icon">📱</span>
+        <div>
+          <h3 id="incoming-modal-title" class="nav-sync-title">收到跨设备云同步配对请求</h3>
+          <p class="nav-sync-subtitle">来自 PC 端生成的加密配置包</p>
+        </div>
+      </div>
+    </div>
+    <div class="nav-sync-body">
+      <div class="nav-sync-incoming-card">
+        <div class="nav-incoming-row">
+          <span class="incoming-label">同步渠道:</span>
+          <span class="incoming-val" id="incoming-provider-name">GitHub Gist</span>
+        </div>
+        <div class="nav-incoming-row">
+          <span class="incoming-label">授权标识:</span>
+          <span class="incoming-val" id="incoming-account-id">ghp_****...</span>
+        </div>
+        <div class="nav-incoming-row">
+          <span class="incoming-label">自动同步:</span>
+          <span class="incoming-val" id="incoming-auto-sync">开启 (变动后3秒)</span>
+        </div>
+      </div>
+      <p class="nav-incoming-notice">
+        点击“确认导入”后，该配置将安全保存在本机浏览器中，并立即执行双向云端数据合并。
+      </p>
+    </div>
+    <div class="nav-sync-footer">
+      <div class="nav-sync-footer-left">
+        <button type="button" id="btn-incoming-cancel" class="btn-sync-ghost" title="取消并放弃导入">
+          放弃导入
+        </button>
+      </div>
+      <div class="nav-sync-footer-right">
+        <button type="button" id="btn-incoming-confirm" class="btn-sync-action btn-sync-primary" title="导入此配置并从云端同步">
+          ✓ 确认导入并连接云端
         </button>
       </div>
     </div>
@@ -556,442 +637,220 @@
     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
     color: #ffffff;
   }
+
+  .btn-sync-qr {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #34d399;
+  }
+
+  .btn-sync-qr:hover {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: #10b981;
+    color: #ffffff;
+  }
+
+  /* QR Pairing Overlay */
+  .nav-sync-qr-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: rgba(10, 14, 23, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    animation: fadeIn 0.18s ease-out;
+  }
+
+  :global([data-theme="light"]) .nav-sync-qr-overlay {
+    background: rgba(255, 255, 255, 0.96);
+  }
+
+  .nav-sync-qr-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 380px;
+    gap: 12px;
+  }
+
+  .nav-sync-qr-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .nav-sync-qr-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--nav-text-main, #ffffff);
+  }
+
+  :global([data-theme="light"]) .nav-sync-qr-title-wrap {
+    color: #0f172a;
+  }
+
+  .nav-sync-qr-close {
+    background: none;
+    border: none;
+    color: var(--nav-text-muted, #94a3b8);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .nav-sync-qr-close:hover {
+    color: #ef4444;
+  }
+
+  .nav-sync-qr-desc {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--nav-text-sub, #cbd5e1);
+    margin: 0;
+  }
+
+  :global([data-theme="light"]) .nav-sync-qr-desc {
+    color: #475569;
+  }
+
+  .nav-sync-qr-canvas-box {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .nav-sync-qr-canvas-box canvas {
+    width: 200px !important;
+    height: 200px !important;
+    display: block;
+    border-radius: 6px;
+  }
+
+  .nav-sync-qr-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #64748b;
+  }
+
+  .nav-sync-qr-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-sync-qr-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.12);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .nav-sync-qr-secure-hint {
+    font-size: 11px;
+    color: var(--nav-text-muted, #94a3b8);
+  }
+
+  .btn-sync-qr-copy {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--nav-text-main, #ffffff);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  :global([data-theme="light"]) .btn-sync-qr-copy {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #1e293b;
+  }
+
+  .btn-sync-qr-copy:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  /* Incoming Pairing Modal */
+  .nav-sync-dialog-incoming {
+    max-width: 480px;
+  }
+
+  .nav-sync-incoming-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  :global([data-theme="light"]) .nav-sync-incoming-card {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .nav-incoming-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .incoming-label {
+    color: var(--nav-text-muted, #94a3b8);
+    font-weight: 500;
+  }
+
+  .incoming-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--nav-text-main, #ffffff);
+  }
+
+  :global([data-theme="light"]) .incoming-val {
+    color: #0f172a;
+  }
+
+  .nav-incoming-notice {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--nav-text-sub, #cbd5e1);
+    margin: 8px 0 0 0;
+  }
+
+  :global([data-theme="light"]) .nav-incoming-notice {
+    color: #475569;
+  }
 </style>
 
-<script is:inline>
-  (function() {
-    var modal = document.getElementById('nav-cloud-sync-modal');
-    if (!modal) return;
-
-    var STORAGE_CONFIG_KEY = 'xiu_nav_cloud_sync_config';
-    var FAVORITES_KEY = 'xiu_nav_user_favorites';
-
-    var tabBtnGist = document.getElementById('tab-btn-gist');
-    var tabBtnWebdav = document.getElementById('tab-btn-webdav');
-    var panelGist = document.getElementById('panel-gist');
-    var panelWebdav = document.getElementById('panel-webdav');
-
-    var inputGistToken = document.getElementById('sync-gist-token');
-    var inputGistId = document.getElementById('sync-gist-id');
-    var btnToggleMask = document.getElementById('btn-toggle-token-mask');
-
-    var inputWebdavUrl = document.getElementById('sync-webdav-url');
-    var inputWebdavUser = document.getElementById('sync-webdav-user');
-    var inputWebdavPass = document.getElementById('sync-webdav-pass');
-    var inputWebdavPath = document.getElementById('sync-webdav-path');
-
-    var cbAutoSync = document.getElementById('sync-auto-sync');
-    var statusDot = document.getElementById('sync-status-dot');
-    var statusText = document.getElementById('sync-status-text');
-    var timeText = document.getElementById('sync-time-text');
-
-    var btnClose = document.getElementById('nav-sync-close-btn');
-    var btnClear = document.getElementById('btn-sync-clear-config');
-    var btnPull = document.getElementById('btn-sync-pull');
-    var btnPush = document.getElementById('btn-sync-push');
-    var btnMerge = document.getElementById('btn-sync-merge');
-
-    var activeProvider = 'gist';
-    var autoSyncTimer = null;
-
-    // Load Local Sync Config
-    function loadConfig() {
-      try {
-        var raw = localStorage.getItem(STORAGE_CONFIG_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch (e) {}
-      return {
-        provider: 'gist',
-        autoSync: true,
-        lastSyncTime: null,
-        gist: { token: '', gistId: '' },
-        webdav: { url: '', user: '', pass: '', path: '/xiu-nav/favorites.json' }
-      };
-    }
-
-    function saveConfig(cfg) {
-      try {
-        localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(cfg));
-      } catch (e) {}
-    }
-
-    // Populate UI from Config
-    function renderConfigUI() {
-      var cfg = loadConfig();
-      activeProvider = cfg.provider || 'gist';
-      switchTab(activeProvider);
-
-      if (cfg.gist) {
-        inputGistToken.value = cfg.gist.token || '';
-        inputGistId.value = cfg.gist.gistId || '';
-      }
-      if (cfg.webdav) {
-        inputWebdavUrl.value = cfg.webdav.url || '';
-        inputWebdavUser.value = cfg.webdav.user || '';
-        inputWebdavPass.value = cfg.webdav.pass || '';
-        inputWebdavPath.value = cfg.webdav.path || '/xiu-nav/favorites.json';
-      }
-      cbAutoSync.checked = cfg.autoSync !== false;
-
-      updateStatusUI(cfg);
-    }
-
-    function updateStatusUI(cfg) {
-      if (cfg.lastSyncTime) {
-        var dt = new Date(cfg.lastSyncTime);
-        var timeStr = dt.getFullYear() + '-' +
-          String(dt.getMonth() + 1).padStart(2, '0') + '-' +
-          String(dt.getDate()).padStart(2, '0') + ' ' +
-          String(dt.getHours()).padStart(2, '0') + ':' +
-          String(dt.getMinutes()).padStart(2, '0');
-        timeText.textContent = '上次同步: ' + timeStr;
-      } else {
-        timeText.textContent = '上次同步: 从未';
-      }
-
-      var hasConfig = (activeProvider === 'gist' && inputGistToken.value.trim()) ||
-                      (activeProvider === 'webdav' && inputWebdavUrl.value.trim() && inputWebdavUser.value.trim());
-
-      if (hasConfig) {
-        statusDot.className = 'status-indicator ready';
-        statusText.textContent = '配置就绪 · 点击按钮可同步';
-      } else {
-        statusDot.className = 'status-indicator';
-        statusText.textContent = '未配置云端授权密钥';
-      }
-    }
-
-    function switchTab(prov) {
-      activeProvider = prov;
-      if (prov === 'gist') {
-        tabBtnGist.classList.add('is-active');
-        tabBtnWebdav.classList.remove('is-active');
-        panelGist.style.display = 'block';
-        panelWebdav.style.display = 'none';
-      } else {
-        tabBtnWebdav.classList.add('is-active');
-        tabBtnGist.classList.remove('is-active');
-        panelWebdav.style.display = 'block';
-        panelGist.style.display = 'none';
-      }
-    }
-
-    // Modal Visibility
-    function openModal() {
-      renderConfigUI();
-      modal.style.display = 'flex';
-      requestAnimationFrame(function() {
-        modal.classList.add('is-open');
-        modal.setAttribute('aria-hidden', 'false');
-      });
-    }
-
-    function closeModal() {
-      modal.classList.remove('is-open');
-      modal.setAttribute('aria-hidden', 'true');
-      setTimeout(function() {
-        if (!modal.classList.contains('is-open')) {
-          modal.style.display = 'none';
-        }
-      }, 220);
-    }
-
-    // Gather latest settings from UI
-    function harvestConfig() {
-      var cfg = loadConfig();
-      cfg.provider = activeProvider;
-      cfg.autoSync = cbAutoSync.checked;
-      cfg.gist = {
-        token: inputGistToken.value.trim(),
-        gistId: inputGistId.value.trim()
-      };
-      cfg.webdav = {
-        url: inputWebdavUrl.value.trim(),
-        user: inputWebdavUser.value.trim(),
-        pass: inputWebdavPass.value.trim(),
-        path: inputWebdavPath.value.trim() || '/xiu-nav/favorites.json'
-      };
-      saveConfig(cfg);
-      return cfg;
-    }
-
-    // Smart Merge Algorithm (CRDT-lite union with timestamp arbitration)
-    function smartMergeFavorites(localList, cloudList) {
-      var map = new Map();
-      
-      // Index local items
-      (localList || []).forEach(function(item) {
-        if (item && item.id) map.set(item.id, item);
-      });
-
-      // Merge cloud items
-      (cloudList || []).forEach(function(cItem) {
-        if (!cItem || !cItem.id) return;
-        if (!map.has(cItem.id)) {
-          map.set(cItem.id, cItem);
-        } else {
-          var lItem = map.get(cItem.id);
-          var lTime = lItem.pinnedAt || 0;
-          var cTime = cItem.pinnedAt || 0;
-          if (cTime > lTime) {
-            map.set(cItem.id, Object.assign({}, lItem, cItem));
-          } else {
-            map.set(cItem.id, Object.assign({}, cItem, lItem));
-          }
-        }
-      });
-
-      var merged = Array.from(map.values());
-      merged.sort(function(a, b) {
-        return (b.pinnedAt || 0) - (a.pinnedAt || 0);
-      });
-      return merged;
-    }
-
-    // Helper: Toast notice
-    function notify(msg) {
-      if (typeof window.showNavToast === 'function') {
-        window.showNavToast(msg);
-      }
-    }
-
-    // ==================== GitHub Gist Core Engine ====================
-    async function syncGistPull(token, gistId) {
-      if (!token) throw new Error('请先填写 GitHub Personal Access Token');
-      if (!gistId) throw new Error('未指定 Gist ID，无法从云端拉取');
-
-      var res = await fetch('https://api.github.com/gists/' + encodeURIComponent(gistId), {
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Accept': 'application/vnd.github+json'
-        }
-      });
-      if (!res.ok) {
-        if (res.status === 404) throw new Error('未找到指定 Gist，请检查 Gist ID 是否正确');
-        if (res.status === 401) throw new Error('GitHub Token 认证失败，请检查是否具备 gist 权限');
-        throw new Error('GitHub API 返回异常: HTTP ' + res.status);
-      }
-      var gistData = await res.json();
-      var file = gistData.files && (gistData.files['xiu-nav-favorites.json'] || Object.values(gistData.files)[0]);
-      if (!file || !file.content) return [];
-      try {
-        var parsed = JSON.parse(file.content);
-        return Array.isArray(parsed) ? parsed : (parsed.favorites || []);
-      } catch (err) {
-        throw new Error('Gist 文件内容不是有效的 JSON 数组');
-      }
-    }
-
-    async function syncGistPush(token, gistId, list) {
-      if (!token) throw new Error('请先填写 GitHub Personal Access Token');
-      var payload = {
-        description: 'XIU Nav Favorites Cloud Backup',
-        files: {
-          'xiu-nav-favorites.json': {
-            content: JSON.stringify(list, null, 2)
-          }
-        }
-      };
-
-      if (!gistId) {
-        // Create new private Gist
-        payload.public = false;
-        var createRes = await fetch('https://api.github.com/gists', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json',
-            'Accept': 'application/vnd.github+json'
-          },
-          body: JSON.stringify(payload)
-        });
-        if (!createRes.ok) throw new Error('创建 Gist 失败: HTTP ' + createRes.status);
-        var created = await createRes.json();
-        return created.id;
-      } else {
-        // Update existing Gist
-        var updateRes = await fetch('https://api.github.com/gists/' + encodeURIComponent(gistId), {
-          method: 'PATCH',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json',
-            'Accept': 'application/vnd.github+json'
-          },
-          body: JSON.stringify(payload)
-        });
-        if (!updateRes.ok) throw new Error('更新 Gist 失败: HTTP ' + updateRes.status);
-        return gistId;
-      }
-    }
-
-    // ==================== WebDAV Core Engine ====================
-    async function syncWebDAVPull(url, user, pass, path) {
-      if (!url || !user || !pass) throw new Error('请完整填写 WebDAV 服务器、账号及授权密码');
-      var targetUrl = url.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
-      var auth = 'Basic ' + btoa(user + ':' + pass);
-
-      var res = await fetch(targetUrl, {
-        method: 'GET',
-        headers: { 'Authorization': auth }
-      });
-      if (res.status === 404) return [];
-      if (!res.ok) throw new Error('WebDAV 拉取失败: HTTP ' + res.status);
-      var text = await res.text();
-      try {
-        var parsed = JSON.parse(text);
-        return Array.isArray(parsed) ? parsed : (parsed.favorites || []);
-      } catch (e) {
-        throw new Error('WebDAV 文件格式解析失败');
-      }
-    }
-
-    async function syncWebDAVPush(url, user, pass, path, list) {
-      if (!url || !user || !pass) throw new Error('请完整填写 WebDAV 服务器、账号及授权密码');
-      var targetUrl = url.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
-      var auth = 'Basic ' + btoa(user + ':' + pass);
-
-      var res = await fetch(targetUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': auth,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(list, null, 2)
-      });
-      if (!res.ok) throw new Error('WebDAV 推送失败: HTTP ' + res.status);
-      return true;
-    }
-
-    // ==================== Dispatcher Actions ====================
-    async function performAction(actionType) {
-      var cfg = harvestConfig();
-      statusDot.className = 'status-indicator syncing';
-      statusText.textContent = '正在连接云端 (' + (activeProvider === 'gist' ? 'GitHub' : 'WebDAV') + ')...';
-
-      try {
-        var localList = (typeof window.getNavFavorites === 'function') ? window.getNavFavorites() : [];
-        var cloudList = [];
-        var effectiveGistId = cfg.gist.gistId;
-
-        // 1. Fetch Cloud
-        if (activeProvider === 'gist') {
-          if (actionType !== 'push' || effectiveGistId) {
-            cloudList = await syncGistPull(cfg.gist.token, effectiveGistId);
-          }
-        } else {
-          cloudList = await syncWebDAVPull(cfg.webdav.url, cfg.webdav.user, cfg.webdav.pass, cfg.webdav.path);
-        }
-
-        // 2. Compute Resolution
-        var finalList = [];
-        if (actionType === 'pull') {
-          finalList = cloudList;
-          notify('✓ 已成功从云端拉取覆盖本地 (共 ' + finalList.length + ' 项)');
-        } else if (actionType === 'push') {
-          finalList = localList;
-          if (activeProvider === 'gist') {
-            effectiveGistId = await syncGistPush(cfg.gist.token, effectiveGistId, finalList);
-            cfg.gist.gistId = effectiveGistId;
-            inputGistId.value = effectiveGistId;
-          } else {
-            await syncWebDAVPush(cfg.webdav.url, cfg.webdav.user, cfg.webdav.pass, cfg.webdav.path, finalList);
-          }
-          notify('✓ 本地收藏已完全推送至云端 (共 ' + finalList.length + ' 项)');
-        } else {
-          // Merge
-          finalList = smartMergeFavorites(localList, cloudList);
-          if (activeProvider === 'gist') {
-            effectiveGistId = await syncGistPush(cfg.gist.token, effectiveGistId, finalList);
-            cfg.gist.gistId = effectiveGistId;
-            inputGistId.value = effectiveGistId;
-          } else {
-            await syncWebDAVPush(cfg.webdav.url, cfg.webdav.user, cfg.webdav.pass, cfg.webdav.path, finalList);
-          }
-          notify('✓ 云端与本地双向智能合并完成 (最终共 ' + finalList.length + ' 项)');
-        }
-
-        // 3. Update Local Storage & State Store
-        if (typeof window.saveNavFavorites === 'function') {
-          window.saveNavFavorites(finalList);
-        } else {
-          localStorage.setItem(FAVORITES_KEY, JSON.stringify(finalList));
-        }
-
-        window.dispatchEvent(new CustomEvent('nav-favorites-updated', {
-          detail: { favorites: finalList, targetId: null, isPinned: false }
-        }));
-
-        cfg.lastSyncTime = Date.now();
-        saveConfig(cfg);
-        updateStatusUI(cfg);
-        statusDot.className = 'status-indicator ready';
-        statusText.textContent = '同步成功！数据已为最新';
-      } catch (err) {
-        statusDot.className = 'status-indicator error';
-        statusText.textContent = '同步失败: ' + err.message;
-        notify('❌ 同步失败: ' + err.message);
-      }
-    }
-
-    // Auto-Sync Debounce Trigger
-    function triggerAutoSync() {
-      var cfg = loadConfig();
-      if (!cfg.autoSync) return;
-      var canSync = (cfg.provider === 'gist' && cfg.gist.token && cfg.gist.gistId) ||
-                    (cfg.provider === 'webdav' && cfg.webdav.url && cfg.webdav.user && cfg.webdav.pass);
-      if (!canSync) return;
-
-      if (autoSyncTimer) clearTimeout(autoSyncTimer);
-      autoSyncTimer = setTimeout(function() {
-        performAction('merge');
-      }, 3500);
-    }
-
-    // Event Bindings
-    tabBtnGist.addEventListener('click', function() { switchTab('gist'); harvestConfig(); });
-    tabBtnWebdav.addEventListener('click', function() { switchTab('webdav'); harvestConfig(); });
-
-    btnToggleMask.addEventListener('click', function() {
-      if (inputGistToken.type === 'password') {
-        inputGistToken.type = 'text';
-        btnToggleMask.textContent = '🙈';
-      } else {
-        inputGistToken.type = 'password';
-        btnToggleMask.textContent = '👁️';
-      }
-    });
-
-    btnClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) closeModal();
-    });
-
-    window.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal.classList.contains('is-open')) {
-        closeModal();
-      }
-    });
-
-    btnPull.addEventListener('click', function() { performAction('pull'); });
-    btnPush.addEventListener('click', function() { performAction('push'); });
-    btnMerge.addEventListener('click', function() { performAction('merge'); });
-
-    btnClear.addEventListener('click', function() {
-      if (confirm('确定要清除保存在本机的云端同步 Token 与账号凭据吗？')) {
-        localStorage.removeItem(STORAGE_CONFIG_KEY);
-        renderConfigUI();
-        notify('✓ 已安全清除本机云端同步凭据');
-      }
-    });
-
-    // Listen for favorite mutations to trigger auto sync
-    window.addEventListener('nav-favorites-updated', function() {
-      triggerAutoSync();
-    });
-
-    // Global API exports
-    window.openNavCloudSyncModal = openModal;
-    window.closeNavCloudSyncModal = closeModal;
-    window.smartMergeFavorites = smartMergeFavorites;
-  })();
-</script>
+<script is:inline src="/assets/js/qrcode-lite.js"></script>
+<script is:inline src="/assets/js/nav-cloud-sync.js"></script>

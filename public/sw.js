@@ -21,6 +21,8 @@ const PRECACHE_URLS = [
   '/category/telegram.html',
   '/nav-search-index.json',
   '/assets/js/nav-search-worker.js',
+  '/assets/js/qrcode-lite.js',
+  '/assets/js/nav-cloud-sync.js',
   '/assets/css/style.css',
   '/assets/js/jquery.min.js',
   '/assets/js/main.js',

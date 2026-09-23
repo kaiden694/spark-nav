@@ -155,13 +155,104 @@ async function runTest() {
       throw new Error('Re-opening via favorites header failed or did not restore input value');
     }
 
-    // Close via close button
-    await page.click('#nav-sync-close-btn');
-    await page.waitForTimeout(350);
+    // Step 8: Test Generating QR Code for Pairing
+    console.log('[9] Testing QR code generation for pairing...');
+    // Modal is already opened from step 7
 
-    console.log('\n========================================================');
-    console.log('✅ ALL CLOUD SYNC HEADLESS BROWSER VERIFICATIONS PASSED!');
-    console.log('========================================================\n');
+    const btnShowQr = await page.locator('#btn-sync-show-qr');
+    if ((await btnShowQr.count()) === 0) throw new Error('#btn-sync-show-qr must exist');
+    await btnShowQr.click();
+    await page.waitForTimeout(400);
+
+    const qrOverlay = await page.locator('#nav-sync-qr-overlay');
+    const qrOverlayVisible = await qrOverlay.evaluate(el => window.getComputedStyle(el).display !== 'none');
+    console.log(`[VERIFY 10] QR Overlay visible: ${qrOverlayVisible}`);
+    if (!qrOverlayVisible) throw new Error('QR Overlay failed to appear');
+
+    // Wait for canvas to draw
+    await page.waitForSelector('#nav-sync-qr-canvas', { state: 'visible' });
+    const hasCanvasPixels = await page.evaluate(() => {
+      const canvas = document.getElementById('nav-sync-qr-canvas');
+      if (!canvas) return false;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return false;
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      // Check if there are non-transparent/non-white pixels drawn
+      let darkPixels = 0;
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        if (imgData.data[i] < 50 && imgData.data[i + 1] < 50 && imgData.data[i + 2] < 50) {
+          darkPixels++;
+        }
+      }
+      return darkPixels > 50;
+    });
+    console.log(`[VERIFY 11] QR Canvas has rendered QR modules: ${hasCanvasPixels}`);
+    if (!hasCanvasPixels) throw new Error('QR Canvas failed to render valid QR code modules');
+
+    // Close QR overlay
+    await page.click('#btn-sync-qr-close');
+    await page.waitForTimeout(200);
+
+    // Close main sync modal
+    await page.click('#nav-sync-close-btn');
+    await page.waitForTimeout(200);
+
+    // Step 9: Simulate Mobile Scanner Incoming Pairing Request
+    console.log('[10] Simulating mobile scan with #sync-pair=... payload in URL...');
+    const mockMobileWebDAV = {
+      p: 'webdav',
+      u: 'https://dav.jianguoyun.com/dav/',
+      us: 'test-mobile@xiu.local',
+      pw: 'mobile_secure_key_888',
+      pt: '/my-favs.json',
+      a: true
+    };
+    const b64 = Buffer.from(JSON.stringify(mockMobileWebDAV)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const mobilePage = await context.newPage();
+    await mobilePage.goto(`http://127.0.0.1:${TEST_PORT}${targetPath}#sync-pair=${b64}`, { waitUntil: 'domcontentloaded' });
+    await mobilePage.waitForTimeout(400);
+
+    // Assert incoming modal is open
+    const incomingModal = await mobilePage.locator('#nav-sync-incoming-modal');
+    const incomingModalOpen = await incomingModal.evaluate(el => el.classList.contains('is-open'));
+    console.log(`[VERIFY 12] Incoming pairing modal automatically opened: ${incomingModalOpen}`);
+    if (!incomingModalOpen) throw new Error('Incoming pairing modal failed to trigger from URL hash');
+
+    // Assert URL Hash was immediately wiped for security
+    const currentUrl = mobilePage.url();
+    const hashCleaned = !currentUrl.includes('#sync-pair=');
+    console.log(`[VERIFY 13] Sensitive Hash wiped from URL bar immediately: ${hashCleaned} (currentUrl=${currentUrl})`);
+    if (!hashCleaned) throw new Error('Sensitive pairing hash was not wiped from URL bar');
+
+    // Verify account info rendered
+    const incomingUser = await mobilePage.locator('#incoming-account-id').textContent();
+    console.log(`[VERIFY 14] Incoming user identifier: "${incomingUser}"`);
+    if (!incomingUser.includes('test-mobile@xiu.local')) throw new Error('Incoming account details mismatch');
+
+    // Click confirm pairing
+    console.log('[11] Confirming pairing on mobile page...');
+    await mobilePage.click('#btn-incoming-confirm');
+    await mobilePage.waitForTimeout(300);
+
+    // Check LocalStorage on mobilePage
+    const mobileSavedConfig = await mobilePage.evaluate(() => {
+      const raw = localStorage.getItem('xiu_nav_cloud_sync_config');
+      return raw ? JSON.parse(raw) : null;
+    });
+    console.log(`[VERIFY 15] Mobile LocalStorage received config:`, mobileSavedConfig ? {
+      provider: mobileSavedConfig.provider,
+      user: mobileSavedConfig.webdav?.user
+    } : null);
+
+    if (!mobileSavedConfig || mobileSavedConfig.webdav?.user !== 'test-mobile@xiu.local') {
+      throw new Error('Config was not saved properly in mobile LocalStorage upon confirmation');
+    }
+
+    await mobilePage.close();
+
+    console.log('\n================================================================');
+    console.log('✅ ALL 15 CLOUD SYNC & QR PAIRING HEADLESS BROWSER VERIFICATIONS PASSED!');
+    console.log('================================================================\n');
   } finally {
     await browser.close();
     server.close();

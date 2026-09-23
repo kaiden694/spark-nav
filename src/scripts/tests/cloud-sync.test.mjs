@@ -7,7 +7,9 @@ import {
   smartMergeFavorites,
   buildGistPayload,
   buildWebDAVTargetUrl,
-  validateSyncConfig
+  validateSyncConfig,
+  encodePairingPayload,
+  decodePairingPayload
 } from '../../utils/cloud-sync.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -121,9 +123,17 @@ test('FavoritesCloudSyncModal component architecture integrity', () => {
   assert.ok(content.includes('btn-sync-pull'), 'Must provide Cloud Pull action');
   assert.ok(content.includes('btn-sync-push'), 'Must provide Cloud Push action');
   assert.ok(content.includes('btn-sync-merge'), 'Must provide Smart Merge action');
-  assert.ok(content.includes('triggerAutoSync'), 'Must implement debounce auto sync');
-  assert.ok(content.includes('window.openNavCloudSyncModal'), 'Must expose window.openNavCloudSyncModal');
-  assert.ok(content.includes('window.closeNavCloudSyncModal'), 'Must expose window.closeNavCloudSyncModal');
+  assert.ok(content.includes('/assets/js/qrcode-lite.js'), 'Must load qrcode-lite.js');
+  assert.ok(content.includes('/assets/js/nav-cloud-sync.js'), 'Must load nav-cloud-sync.js');
+
+  const jsPath = path.join(ROOT_DIR, 'public/assets/js/nav-cloud-sync.js');
+  assert.ok(fs.existsSync(jsPath), 'nav-cloud-sync.js must exist');
+  const jsContent = fs.readFileSync(jsPath, 'utf8');
+  assert.ok(jsContent.includes('triggerAutoSync'), 'Must implement debounce auto sync');
+  assert.ok(jsContent.includes('window.openNavCloudSyncModal'), 'Must expose window.openNavCloudSyncModal');
+  assert.ok(jsContent.includes('window.closeNavCloudSyncModal'), 'Must expose window.closeNavCloudSyncModal');
+  assert.ok(jsContent.includes('window.openNavCloudSyncQR'), 'Must expose window.openNavCloudSyncQR');
+  assert.ok(jsContent.includes('checkIncomingPairing'), 'Must implement incoming pairing detector');
 });
 
 test('NavLayout properly imports and renders FavoritesCloudSyncModal', () => {
@@ -155,5 +165,53 @@ test('Home page and NavFloatingToolbar integrate Cloud Sync triggers', () => {
 
   assert.ok(toolbarContent.includes('id="nav-float-sync-btn"'), 'NavFloatingToolbar must have floating sync button');
   assert.ok(toolbarContent.includes('window.openNavCloudSyncModal()'), 'NavFloatingToolbar must trigger window.openNavCloudSyncModal()');
+});
+
+test('encodePairingPayload and decodePairingPayload: roundtrip for Gist configuration', () => {
+  const origCfg = {
+    provider: 'gist',
+    autoSync: true,
+    gist: { token: 'ghp_secretToken_1234567890abcdef', gistId: 'gist_987654321' }
+  };
+  const url = encodePairingPayload(origCfg, 'https://xiu-theme.pages.dev/nav.html');
+  assert.ok(url.startsWith('https://xiu-theme.pages.dev/nav.html#sync-pair='));
+
+  const decoded = decodePairingPayload(url);
+  assert.ok(decoded);
+  assert.equal(decoded.provider, 'gist');
+  assert.equal(decoded.autoSync, true);
+  assert.equal(decoded.gist.token, 'ghp_secretToken_1234567890abcdef');
+  assert.equal(decoded.gist.gistId, 'gist_987654321');
+});
+
+test('encodePairingPayload and decodePairingPayload: roundtrip for WebDAV configuration', () => {
+  const origCfg = {
+    provider: 'webdav',
+    autoSync: false,
+    webdav: {
+      url: 'https://dav.jianguoyun.com/dav/',
+      user: 'user@example.com',
+      pass: 'app_token_pass_999',
+      path: '/my-nav/favs.json'
+    }
+  };
+  const url = encodePairingPayload(origCfg, 'https://sparknav.example.com/');
+  assert.ok(url.startsWith('https://sparknav.example.com/#sync-pair='));
+
+  const decoded = decodePairingPayload(url);
+  assert.ok(decoded);
+  assert.equal(decoded.provider, 'webdav');
+  assert.equal(decoded.autoSync, false);
+  assert.equal(decoded.webdav.url, 'https://dav.jianguoyun.com/dav/');
+  assert.equal(decoded.webdav.user, 'user@example.com');
+  assert.equal(decoded.webdav.pass, 'app_token_pass_999');
+  assert.equal(decoded.webdav.path, '/my-nav/favs.json');
+});
+
+test('decodePairingPayload: defends against malformed or malicious inputs', () => {
+  assert.equal(decodePairingPayload(''), null);
+  assert.equal(decodePairingPayload('https://example.com/nav.html'), null);
+  assert.equal(decodePairingPayload('#sync-pair=INVALID_BASE64_###'), null);
+  assert.equal(decodePairingPayload('#sync-pair=' + Buffer.from('{"not":"a_sync_cfg"}').toString('base64')), null);
 });
 

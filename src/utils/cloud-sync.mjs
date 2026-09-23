@@ -113,3 +113,111 @@ export function validateSyncConfig(cfg) {
 
   return { valid: false, error: '未知的云同步提供商' };
 }
+
+/**
+ * Universal safe Base64 encoder (works in both Node.js and Browser)
+ * @param {string} str 
+ * @returns {string} URL-safe Base64
+ */
+export function safeBase64Encode(str) {
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(str, 'utf-8')
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode(parseInt(p1, 16));
+  }))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+/**
+ * Universal safe Base64 decoder (works in both Node.js and Browser)
+ * @param {string} str 
+ * @returns {string} UTF-8 decoded string
+ */
+export function safeBase64Decode(str) {
+  var b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(b64, 'base64').toString('utf-8');
+  }
+  var raw = atob(b64);
+  return decodeURIComponent(Array.prototype.map.call(raw, function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+
+/**
+ * Encodes sync config into an actionable pairing URL with hash fragment
+ * @param {Object} cfg 
+ * @param {string} baseUrl e.g. "https://xiu-theme.pages.dev/nav.html"
+ * @returns {string} Full Pairing URL
+ */
+export function encodePairingPayload(cfg, baseUrl = '') {
+  if (!cfg) return '';
+  var compact = { p: cfg.provider || 'gist', v: 1, a: Boolean(cfg.autoSync) };
+
+  if (compact.p === 'gist' && cfg.gist) {
+    compact.t = (cfg.gist.token || '').trim();
+    compact.g = (cfg.gist.gistId || '').trim();
+  } else if (compact.p === 'webdav' && cfg.webdav) {
+    compact.u = (cfg.webdav.url || '').trim();
+    compact.us = (cfg.webdav.user || '').trim();
+    compact.pw = (cfg.webdav.pass || '').trim();
+    compact.pt = (cfg.webdav.path || '/xiu-nav/favorites.json').trim();
+  }
+
+  var encoded = safeBase64Encode(JSON.stringify(compact));
+  var cleanBase = (baseUrl || '').split('#')[0];
+  return cleanBase ? `${cleanBase}#sync-pair=${encoded}` : `#sync-pair=${encoded}`;
+}
+
+/**
+ * Decodes and validates pairing payload from hash or full URL
+ * @param {string} hashOrUrl e.g. "#sync-pair=..." or full URL
+ * @returns {Object|null} Standardized config object or null if invalid
+ */
+export function decodePairingPayload(hashOrUrl) {
+  if (!hashOrUrl || typeof hashOrUrl !== 'string') return null;
+
+  var match = hashOrUrl.match(/#sync-pair=([A-Za-z0-9_\-]+)/);
+  if (!match || !match[1]) return null;
+
+  try {
+    var jsonStr = safeBase64Decode(match[1]);
+    var parsed = JSON.parse(jsonStr);
+    if (!parsed || typeof parsed !== 'object') return null;
+
+    var provider = parsed.p === 'webdav' ? 'webdav' : 'gist';
+    var res = {
+      provider: provider,
+      autoSync: parsed.a !== false,
+      lastSyncTime: null,
+      gist: { token: '', gistId: '' },
+      webdav: { url: '', user: '', pass: '', path: '/xiu-nav/favorites.json' }
+    };
+
+    if (provider === 'gist') {
+      res.gist.token = (parsed.t || '').trim();
+      res.gist.gistId = (parsed.g || '').trim();
+      if (!res.gist.token) return null;
+    } else {
+      res.webdav.url = (parsed.u || '').trim();
+      res.webdav.user = (parsed.us || '').trim();
+      res.webdav.pass = (parsed.pw || '').trim();
+      res.webdav.path = (parsed.pt || '/xiu-nav/favorites.json').trim();
+      if (!res.webdav.url || !res.webdav.user || !res.webdav.pass) return null;
+    }
+
+    return res;
+  } catch (err) {
+    return null;
+  }
+}
+
