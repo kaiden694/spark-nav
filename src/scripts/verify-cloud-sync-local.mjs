@@ -129,6 +129,15 @@ async function runTest() {
       throw new Error('Config was not saved properly in LocalStorage');
     }
 
+    // Verify Mouse Click does NOT trigger .is-keyboard-focused or black shortcut badge
+    console.log('[7.5] Verifying mouse click on card does NOT show keyboard badge...');
+    const testCard = await page.locator('.nav-card').first();
+    await testCard.dispatchEvent('click');
+    await page.waitForTimeout(200);
+    const hasFocusAfterClick = await testCard.evaluate(el => el.classList.contains('is-keyboard-focused'));
+    console.log(`[VERIFY 6.5] Mouse click card has .is-keyboard-focused: ${hasFocusAfterClick}`);
+    if (hasFocusAfterClick) throw new Error('Mouse click on card should NOT add .is-keyboard-focused');
+
     // Step 7: Pin a card and test Favorites Section header trigger
     console.log('[8] Pinning first card to reveal favorites section...');
     const pinBtn = await page.locator('.nav-card-pin-btn').first();

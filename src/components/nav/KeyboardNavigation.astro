@@ -523,7 +523,7 @@
       }
     }
 
-    // Mouse click tracking: align focus index when user clicks a card
+    // Mouse click tracking: update focusedCardIndex without showing keyboard badge
     document.addEventListener('click', function(e) {
       var card = e.target.closest('.nav-card');
       if (card) {
@@ -531,7 +531,6 @@
         var idx = cards.indexOf(card);
         if (idx !== -1) {
           clearKeyboardFocus();
-          card.classList.add('is-keyboard-focused');
           focusedCardIndex = idx;
         }
       } else {
