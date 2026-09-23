@@ -67,6 +67,23 @@ async function verifyEdgeLive() {
     const isClosed = await popover.evaluate(el => !el.classList.contains('is-open'));
     console.log(`[VERIFY 8] Dismissed on Escape key: ${isClosed}`);
 
+    // Verify Live Keyboard Roaming & Shortcut I
+    await page.mouse.move(10, 10);
+    await page.keyboard.press('j');
+    await page.waitForTimeout(150);
+    const isCardFocused = await card.evaluate(el => el.classList.contains('is-keyboard-focused'));
+    console.log(`[VERIFY 8a] Live Card focused via 'j': ${isCardFocused}`);
+
+    await page.keyboard.press('i');
+    await page.waitForTimeout(300);
+    const isOpenedByKey = await popover.evaluate(el => el.classList.contains('is-open'));
+    console.log(`[VERIFY 8b] Live Popover activated via shortcut 'i': ${isOpenedByKey}`);
+
+    await page.keyboard.press('i');
+    await page.waitForTimeout(300);
+    const isClosedByKey = await popover.evaluate(el => !el.classList.contains('is-open'));
+    console.log(`[VERIFY 8c] Live Popover dismissed via toggle shortcut 'i': ${isClosedByKey}`);
+
     // Check PWA Manifest on live edge
     const manifestRes = await page.request.get('https://xiu-theme.pages.dev/manifest.json');
     console.log(`[VERIFY 9] Live manifest.json status: ${manifestRes.status()}`);
