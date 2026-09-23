@@ -7,10 +7,6 @@ const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge
 const TEST_PORT = 8799;
 
 async function runTest() {
-  if (!fs.existsSync(EDGE_PATH)) {
-    console.error('Edge executable not found at', EDGE_PATH);
-    process.exit(1);
-  }
 
   // 1. Launch In-Process Native Static Server for dist/
   console.log(`[1] Launching in-process native static server for dist on port ${TEST_PORT}...`);
@@ -44,10 +40,11 @@ async function runTest() {
   });
 
   await new Promise((resolve) => server.listen(TEST_PORT, '127.0.0.1', resolve));
-  console.log('[2] Server ready! Launching Headless Edge browser...');
+  const hasEdge = fs.existsSync(EDGE_PATH);
+  console.log(`[2] Server ready! Launching Headless browser (${hasEdge ? 'Microsoft Edge' : 'Chromium'})...`);
 
   const browser = await chromium.launch({
-    executablePath: EDGE_PATH,
+    ...(hasEdge ? { executablePath: EDGE_PATH } : {}),
     headless: true
   });
   const context = await browser.newContext({
