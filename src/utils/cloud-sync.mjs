@@ -186,11 +186,12 @@ export function encodePairingPayload(cfg, baseUrl = '') {
 export function decodePairingPayload(hashOrUrl) {
   if (!hashOrUrl || typeof hashOrUrl !== 'string') return null;
 
-  var match = hashOrUrl.match(/#sync-pair=([A-Za-z0-9_\-]+)/);
+  var match = hashOrUrl.match(/#sync-pair=([A-Za-z0-9_\-+=%]+)/);
   if (!match || !match[1]) return null;
 
   try {
-    var jsonStr = safeBase64Decode(match[1]);
+    var rawStr = decodeURIComponent(match[1]);
+    var jsonStr = safeBase64Decode(rawStr);
     var parsed = JSON.parse(jsonStr);
     if (!parsed || typeof parsed !== 'object') return null;
 
