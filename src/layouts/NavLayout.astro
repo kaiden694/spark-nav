@@ -7,6 +7,7 @@ import MirrorSwitcherModal from '../components/nav/MirrorSwitcherModal.astro';
 import FeedPreviewPopover from '../components/nav/FeedPreviewPopover.astro';
 import NavFloatingToolbar from '../components/nav/NavFloatingToolbar.astro';
 import CardQuickPreviewPopover from '../components/nav/CardQuickPreviewPopover.astro';
+import FavoritesCloudSyncModal from '../components/nav/FavoritesCloudSyncModal.astro';
 import NavCoreStore from '../components/nav/NavCoreStore.astro';
 import TiltEngine from '../components/nav/TiltEngine.astro';
 
@@ -18,9 +19,9 @@ interface Props {
 }
 
 const {
-  title = "SparkNav · 极客智汇导航与开源矩阵",
-  description = "全网优质资源精选导航：深度收录优质工具网站、GitHub开源高星项目、Telegram精选频道机器人及全球技术创作者。",
-  canonical = "/",
+  title = "神站导航 · 秀博客全网精选资源与开源矩阵",
+  description = "秀博客专属导航站：深度收录优质网站、GitHub开源高星项目、Telegram生态频道机器人及全球优质社交博主。",
+  canonical = "/nav.html",
   jsonLd
 } = Astro.props;
 ---
@@ -82,6 +83,7 @@ const {
   <FeedPreviewPopover />
   <NavFloatingToolbar />
   <CardQuickPreviewPopover />
+  <FavoritesCloudSyncModal />
 
   <!-- Global Navigation Theme Controller & Starfield Particles Background Engine -->
   <script is:inline>

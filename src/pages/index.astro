@@ -202,6 +202,7 @@ const navJsonLd = {
             </div>
             <div class="nav-favorites-header-actions">
               <span class="nav-badge" id="favorites-badge-count" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-weight: 700;">0 项</span>
+              <button type="button" class="btn-fav-action" id="btn-cloud-sync-favorites" title="配置并执行跨设备云端双向同步 (GitHub Gist / WebDAV)">☁️ 云端同步</button>
               <button type="button" class="btn-fav-action" id="btn-export-favorites" title="导出收藏为 JSON 备份">📥 导出 JSON</button>
               <button type="button" class="btn-fav-action" id="btn-export-bookmarks-html" title="导出为标准浏览器书签 HTML (可导入 Chrome / Edge / Safari / Firefox)">🔖 导出书签</button>
               <button type="button" class="btn-fav-action" id="btn-export-opml" title="导出为标准 OPML 订阅源 (可导入 Inoreader / Feedly / NetNewsWire)">📰 导出 OPML</button>
@@ -2121,7 +2122,19 @@ const navJsonLd = {
         });
       }
 
-      // Export / Import Handlers
+      // Export / Import / Cloud Sync Handlers
+      var btnCloudSync = document.getElementById('btn-cloud-sync-favorites');
+      if (btnCloudSync) {
+        btnCloudSync.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (typeof window.openNavCloudSyncModal === 'function') {
+            window.openNavCloudSyncModal();
+          } else if (typeof showNavToast === 'function') {
+            showNavToast('⚠️ 云端同步模块正在准备就绪...');
+          }
+        });
+      }
+
       var btnExportFav = document.getElementById('btn-export-favorites');
       var btnExportHtml = document.getElementById('btn-export-bookmarks-html');
       var btnExportOpml = document.getElementById('btn-export-opml');

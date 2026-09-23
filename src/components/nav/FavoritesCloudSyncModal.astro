@@ -1,0 +1,997 @@
+---
+// FavoritesCloudSyncModal.astro
+// Universal Cross-Device Cloud Sync Engine for XIU Navigation Favorites
+// Supports GitHub Gist (zero server, private gist) and WebDAV (Nutstore / Nextcloud / NAS)
+// Zero-knowledge & pure client direct communication
+---
+
+<div
+  id="nav-cloud-sync-modal"
+  class="nav-sync-backdrop"
+  style="display: none;"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="sync-modal-title"
+>
+  <div class="nav-sync-dialog">
+    <!-- Header -->
+    <div class="nav-sync-header">
+      <div class="nav-sync-title-wrap">
+        <span class="nav-sync-icon">☁️</span>
+        <div>
+          <h3 id="sync-modal-title" class="nav-sync-title">常用收藏 · 跨设备云端同步</h3>
+          <p class="nav-sync-subtitle">多设备数据互通 · 纯前端加密直连 · 零服务端中转</p>
+        </div>
+      </div>
+      <button type="button" class="nav-sync-close-btn" id="nav-sync-close-btn" title="关闭 (ESC)">
+        <kbd>ESC</kbd>
+      </button>
+    </div>
+
+    <!-- Provider Tabs -->
+    <div class="nav-sync-tabs">
+      <button type="button" class="nav-sync-tab is-active" id="tab-btn-gist" data-provider="gist">
+        <span>🐙 GitHub Gist (推荐)</span>
+      </button>
+      <button type="button" class="nav-sync-tab" id="tab-btn-webdav" data-provider="webdav">
+        <span>📁 WebDAV (坚果云 / NAS)</span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="nav-sync-body">
+      <!-- 1. GitHub Gist Config Form -->
+      <div class="nav-sync-panel" id="panel-gist">
+        <div class="nav-sync-form-group">
+          <label class="nav-sync-label" for="sync-gist-token">
+            <span>GitHub Personal Access Token (PAT)</span>
+            <a
+              href="https://github.com/settings/tokens/new?scopes=gist&description=XiuNavFavoritesSync"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="nav-sync-help-link"
+              title="点击直达 GitHub 生成专用 Token，仅勾选 gist 权限即可"
+            >
+              获取 Token &rarr;
+            </a>
+          </label>
+          <div class="nav-sync-input-wrap">
+            <input
+              type="password"
+              id="sync-gist-token"
+              class="nav-sync-input"
+              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="button" id="btn-toggle-token-mask" class="nav-sync-toggle-mask" title="显示/隐藏 Token">
+              👁️
+            </button>
+          </div>
+          <span class="nav-sync-hint">仅需 <strong>gist</strong> 权限。Token 仅加密留存于您当前浏览器的 LocalStorage 中，绝不上报站长服务器。</span>
+        </div>
+
+        <div class="nav-sync-form-group">
+          <label class="nav-sync-label" for="sync-gist-id">
+            <span>Gist ID (首次可留空自动创建)</span>
+          </label>
+          <input
+            type="text"
+            id="sync-gist-id"
+            class="nav-sync-input"
+            placeholder="留空自动新建私有 Gist，或粘贴已有的 Gist ID"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <span class="nav-sync-hint">如需在手机/其他电脑同步，在此输入已创建的 Gist ID 即可拉取。</span>
+        </div>
+      </div>
+
+      <!-- 2. WebDAV Config Form -->
+      <div class="nav-sync-panel" id="panel-webdav" style="display: none;">
+        <div class="nav-sync-form-group">
+          <label class="nav-sync-label" for="sync-webdav-url">
+            <span>WebDAV 服务器地址</span>
+          </label>
+          <input
+            type="text"
+            id="sync-webdav-url"
+            class="nav-sync-input"
+            placeholder="例如: https://dav.jianguoyun.com/dav/"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="nav-sync-form-row">
+          <div class="nav-sync-form-group">
+            <label class="nav-sync-label" for="sync-webdav-user">用户名 / 邮箱</label>
+            <input type="text" id="sync-webdav-user" class="nav-sync-input" placeholder="WebDAV 用户名" />
+          </div>
+          <div class="nav-sync-form-group">
+            <label class="nav-sync-label" for="sync-webdav-pass">应用密码 / Token</label>
+            <input type="password" id="sync-webdav-pass" class="nav-sync-input" placeholder="应用授权密码" />
+          </div>
+        </div>
+
+        <div class="nav-sync-form-group">
+          <label class="nav-sync-label" for="sync-webdav-path">文件存储路径</label>
+          <input type="text" id="sync-webdav-path" class="nav-sync-input" value="/xiu-nav/favorites.json" />
+        </div>
+      </div>
+
+      <!-- Common Settings -->
+      <div class="nav-sync-switches">
+        <label class="nav-sync-checkbox-label">
+          <input type="checkbox" id="sync-auto-sync" checked />
+          <span>收藏发生变动时，3秒内静默自动同步至云端</span>
+        </label>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="nav-sync-status-bar" id="sync-status-bar">
+        <div class="nav-sync-status-left">
+          <span class="status-indicator" id="sync-status-dot">●</span>
+          <span id="sync-status-text">未进行云端同步</span>
+        </div>
+        <div class="nav-sync-status-right" id="sync-time-text">上次同步: 从未</div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="nav-sync-footer">
+      <div class="nav-sync-footer-left">
+        <button type="button" id="btn-sync-clear-config" class="btn-sync-ghost" title="清除保存在本机的 Token 与账号信息">
+          清除配置
+        </button>
+      </div>
+      <div class="nav-sync-footer-right">
+        <button type="button" id="btn-sync-pull" class="btn-sync-action btn-sync-pull" title="以云端最新数据覆盖本地">
+          ⬇️ 云端覆盖本地
+        </button>
+        <button type="button" id="btn-sync-push" class="btn-sync-action btn-sync-push" title="以本地数据覆盖云端">
+          ⬆️ 本地覆盖云端
+        </button>
+        <button type="button" id="btn-sync-merge" class="btn-sync-action btn-sync-primary" title="对比本地与云端，基于时间戳智能合并">
+          ⚡ 立即双向合并
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .nav-sync-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-sync-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-sync-dialog {
+    width: 100%;
+    max-width: 580px;
+    background: rgba(18, 22, 34, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .nav-sync-backdrop.is-open .nav-sync-dialog {
+    transform: scale(1) translateY(0);
+  }
+
+  :global([data-theme="light"]) .nav-sync-dialog {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Header */
+  .nav-sync-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  :global([data-theme="light"]) .nav-sync-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.01);
+  }
+
+  .nav-sync-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-sync-icon {
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .nav-sync-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--nav-text-main, #ffffff);
+  }
+
+  :global([data-theme="light"]) .nav-sync-title {
+    color: #0f172a;
+  }
+
+  .nav-sync-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: var(--nav-text-muted, #94a3b8);
+  }
+
+  .nav-sync-close-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--nav-text-muted, #94a3b8);
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.15s ease;
+  }
+
+  .nav-sync-close-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
+
+  :global([data-theme="light"]) .nav-sync-close-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  /* Tabs */
+  .nav-sync-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4px 16px 0 16px;
+    gap: 8px;
+  }
+
+  :global([data-theme="light"]) .nav-sync-tabs {
+    background: rgba(0, 0, 0, 0.02);
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .nav-sync-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nav-text-muted, #94a3b8);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .nav-sync-tab:hover {
+    color: var(--nav-text-main, #ffffff);
+  }
+
+  :global([data-theme="light"]) .nav-sync-tab:hover {
+    color: #0f172a;
+  }
+
+  .nav-sync-tab.is-active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+  }
+
+  /* Body */
+  .nav-sync-body {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .nav-sync-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nav-sync-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .nav-sync-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nav-text-sub, #cbd5e1);
+  }
+
+  :global([data-theme="light"]) .nav-sync-label {
+    color: #334155;
+  }
+
+  .nav-sync-help-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .nav-sync-help-link:hover {
+    text-decoration: underline;
+  }
+
+  .nav-sync-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-sync-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--nav-text-main, #ffffff);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+  }
+
+  :global([data-theme="light"]) .nav-sync-input {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #0f172a;
+  }
+
+  .nav-sync-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+
+  .nav-sync-toggle-mask {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+  }
+
+  .nav-sync-toggle-mask:hover {
+    opacity: 1;
+  }
+
+  .nav-sync-hint {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--nav-text-muted, #94a3b8);
+  }
+
+  .nav-sync-switches {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 4px;
+  }
+
+  .nav-sync-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--nav-text-sub, #cbd5e1);
+    cursor: pointer;
+  }
+
+  :global([data-theme="light"]) .nav-sync-checkbox-label {
+    color: #334155;
+  }
+
+  /* Status Bar */
+  .nav-sync-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  :global([data-theme="light"]) .nav-sync-status-bar {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .nav-sync-status-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+
+  .status-indicator {
+    font-size: 14px;
+    color: #94a3b8;
+  }
+
+  .status-indicator.ready { color: #10b981; }
+  .status-indicator.syncing { color: #3b82f6; animation: pulse 1s infinite; }
+  .status-indicator.error { color: #ef4444; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .nav-sync-status-right {
+    color: var(--nav-text-muted, #94a3b8);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+
+  /* Footer */
+  .nav-sync-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  :global([data-theme="light"]) .nav-sync-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.01);
+  }
+
+  .nav-sync-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-sync-ghost {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    opacity: 0.8;
+    transition: opacity 0.15s ease;
+  }
+
+  .btn-sync-ghost:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+
+  .btn-sync-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--nav-text-sub, #cbd5e1);
+    transition: all 0.15s ease;
+  }
+
+  :global([data-theme="light"]) .btn-sync-action {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #334155;
+  }
+
+  .btn-sync-action:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  :global([data-theme="light"]) .btn-sync-action:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #0f172a;
+  }
+
+  .btn-sync-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  }
+
+  .btn-sync-primary:hover {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+    color: #ffffff;
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var modal = document.getElementById('nav-cloud-sync-modal');
+    if (!modal) return;
+
+    var STORAGE_CONFIG_KEY = 'xiu_nav_cloud_sync_config';
+    var FAVORITES_KEY = 'xiu_nav_user_favorites';
+
+    var tabBtnGist = document.getElementById('tab-btn-gist');
+    var tabBtnWebdav = document.getElementById('tab-btn-webdav');
+    var panelGist = document.getElementById('panel-gist');
+    var panelWebdav = document.getElementById('panel-webdav');
+
+    var inputGistToken = document.getElementById('sync-gist-token');
+    var inputGistId = document.getElementById('sync-gist-id');
+    var btnToggleMask = document.getElementById('btn-toggle-token-mask');
+
+    var inputWebdavUrl = document.getElementById('sync-webdav-url');
+    var inputWebdavUser = document.getElementById('sync-webdav-user');
+    var inputWebdavPass = document.getElementById('sync-webdav-pass');
+    var inputWebdavPath = document.getElementById('sync-webdav-path');
+
+    var cbAutoSync = document.getElementById('sync-auto-sync');
+    var statusDot = document.getElementById('sync-status-dot');
+    var statusText = document.getElementById('sync-status-text');
+    var timeText = document.getElementById('sync-time-text');
+
+    var btnClose = document.getElementById('nav-sync-close-btn');
+    var btnClear = document.getElementById('btn-sync-clear-config');
+    var btnPull = document.getElementById('btn-sync-pull');
+    var btnPush = document.getElementById('btn-sync-push');
+    var btnMerge = document.getElementById('btn-sync-merge');
+
+    var activeProvider = 'gist';
+    var autoSyncTimer = null;
+
+    // Load Local Sync Config
+    function loadConfig() {
+      try {
+        var raw = localStorage.getItem(STORAGE_CONFIG_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return {
+        provider: 'gist',
+        autoSync: true,
+        lastSyncTime: null,
+        gist: { token: '', gistId: '' },
+        webdav: { url: '', user: '', pass: '', path: '/xiu-nav/favorites.json' }
+      };
+    }
+
+    function saveConfig(cfg) {
+      try {
+        localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(cfg));
+      } catch (e) {}
+    }
+
+    // Populate UI from Config
+    function renderConfigUI() {
+      var cfg = loadConfig();
+      activeProvider = cfg.provider || 'gist';
+      switchTab(activeProvider);
+
+      if (cfg.gist) {
+        inputGistToken.value = cfg.gist.token || '';
+        inputGistId.value = cfg.gist.gistId || '';
+      }
+      if (cfg.webdav) {
+        inputWebdavUrl.value = cfg.webdav.url || '';
+        inputWebdavUser.value = cfg.webdav.user || '';
+        inputWebdavPass.value = cfg.webdav.pass || '';
+        inputWebdavPath.value = cfg.webdav.path || '/xiu-nav/favorites.json';
+      }
+      cbAutoSync.checked = cfg.autoSync !== false;
+
+      updateStatusUI(cfg);
+    }
+
+    function updateStatusUI(cfg) {
+      if (cfg.lastSyncTime) {
+        var dt = new Date(cfg.lastSyncTime);
+        var timeStr = dt.getFullYear() + '-' +
+          String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+          String(dt.getDate()).padStart(2, '0') + ' ' +
+          String(dt.getHours()).padStart(2, '0') + ':' +
+          String(dt.getMinutes()).padStart(2, '0');
+        timeText.textContent = '上次同步: ' + timeStr;
+      } else {
+        timeText.textContent = '上次同步: 从未';
+      }
+
+      var hasConfig = (activeProvider === 'gist' && inputGistToken.value.trim()) ||
+                      (activeProvider === 'webdav' && inputWebdavUrl.value.trim() && inputWebdavUser.value.trim());
+
+      if (hasConfig) {
+        statusDot.className = 'status-indicator ready';
+        statusText.textContent = '配置就绪 · 点击按钮可同步';
+      } else {
+        statusDot.className = 'status-indicator';
+        statusText.textContent = '未配置云端授权密钥';
+      }
+    }
+
+    function switchTab(prov) {
+      activeProvider = prov;
+      if (prov === 'gist') {
+        tabBtnGist.classList.add('is-active');
+        tabBtnWebdav.classList.remove('is-active');
+        panelGist.style.display = 'block';
+        panelWebdav.style.display = 'none';
+      } else {
+        tabBtnWebdav.classList.add('is-active');
+        tabBtnGist.classList.remove('is-active');
+        panelWebdav.style.display = 'block';
+        panelGist.style.display = 'none';
+      }
+    }
+
+    // Modal Visibility
+    function openModal() {
+      renderConfigUI();
+      modal.style.display = 'flex';
+      requestAnimationFrame(function() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+    }
+
+    function closeModal() {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      setTimeout(function() {
+        if (!modal.classList.contains('is-open')) {
+          modal.style.display = 'none';
+        }
+      }, 220);
+    }
+
+    // Gather latest settings from UI
+    function harvestConfig() {
+      var cfg = loadConfig();
+      cfg.provider = activeProvider;
+      cfg.autoSync = cbAutoSync.checked;
+      cfg.gist = {
+        token: inputGistToken.value.trim(),
+        gistId: inputGistId.value.trim()
+      };
+      cfg.webdav = {
+        url: inputWebdavUrl.value.trim(),
+        user: inputWebdavUser.value.trim(),
+        pass: inputWebdavPass.value.trim(),
+        path: inputWebdavPath.value.trim() || '/xiu-nav/favorites.json'
+      };
+      saveConfig(cfg);
+      return cfg;
+    }
+
+    // Smart Merge Algorithm (CRDT-lite union with timestamp arbitration)
+    function smartMergeFavorites(localList, cloudList) {
+      var map = new Map();
+      
+      // Index local items
+      (localList || []).forEach(function(item) {
+        if (item && item.id) map.set(item.id, item);
+      });
+
+      // Merge cloud items
+      (cloudList || []).forEach(function(cItem) {
+        if (!cItem || !cItem.id) return;
+        if (!map.has(cItem.id)) {
+          map.set(cItem.id, cItem);
+        } else {
+          var lItem = map.get(cItem.id);
+          var lTime = lItem.pinnedAt || 0;
+          var cTime = cItem.pinnedAt || 0;
+          if (cTime > lTime) {
+            map.set(cItem.id, Object.assign({}, lItem, cItem));
+          } else {
+            map.set(cItem.id, Object.assign({}, cItem, lItem));
+          }
+        }
+      });
+
+      var merged = Array.from(map.values());
+      merged.sort(function(a, b) {
+        return (b.pinnedAt || 0) - (a.pinnedAt || 0);
+      });
+      return merged;
+    }
+
+    // Helper: Toast notice
+    function notify(msg) {
+      if (typeof window.showNavToast === 'function') {
+        window.showNavToast(msg);
+      }
+    }
+
+    // ==================== GitHub Gist Core Engine ====================
+    async function syncGistPull(token, gistId) {
+      if (!token) throw new Error('请先填写 GitHub Personal Access Token');
+      if (!gistId) throw new Error('未指定 Gist ID，无法从云端拉取');
+
+      var res = await fetch('https://api.github.com/gists/' + encodeURIComponent(gistId), {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/vnd.github+json'
+        }
+      });
+      if (!res.ok) {
+        if (res.status === 404) throw new Error('未找到指定 Gist，请检查 Gist ID 是否正确');
+        if (res.status === 401) throw new Error('GitHub Token 认证失败，请检查是否具备 gist 权限');
+        throw new Error('GitHub API 返回异常: HTTP ' + res.status);
+      }
+      var gistData = await res.json();
+      var file = gistData.files && (gistData.files['xiu-nav-favorites.json'] || Object.values(gistData.files)[0]);
+      if (!file || !file.content) return [];
+      try {
+        var parsed = JSON.parse(file.content);
+        return Array.isArray(parsed) ? parsed : (parsed.favorites || []);
+      } catch (err) {
+        throw new Error('Gist 文件内容不是有效的 JSON 数组');
+      }
+    }
+
+    async function syncGistPush(token, gistId, list) {
+      if (!token) throw new Error('请先填写 GitHub Personal Access Token');
+      var payload = {
+        description: 'XIU Nav Favorites Cloud Backup',
+        files: {
+          'xiu-nav-favorites.json': {
+            content: JSON.stringify(list, null, 2)
+          }
+        }
+      };
+
+      if (!gistId) {
+        // Create new private Gist
+        payload.public = false;
+        var createRes = await fetch('https://api.github.com/gists', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github+json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!createRes.ok) throw new Error('创建 Gist 失败: HTTP ' + createRes.status);
+        var created = await createRes.json();
+        return created.id;
+      } else {
+        // Update existing Gist
+        var updateRes = await fetch('https://api.github.com/gists/' + encodeURIComponent(gistId), {
+          method: 'PATCH',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github+json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!updateRes.ok) throw new Error('更新 Gist 失败: HTTP ' + updateRes.status);
+        return gistId;
+      }
+    }
+
+    // ==================== WebDAV Core Engine ====================
+    async function syncWebDAVPull(url, user, pass, path) {
+      if (!url || !user || !pass) throw new Error('请完整填写 WebDAV 服务器、账号及授权密码');
+      var targetUrl = url.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+      var auth = 'Basic ' + btoa(user + ':' + pass);
+
+      var res = await fetch(targetUrl, {
+        method: 'GET',
+        headers: { 'Authorization': auth }
+      });
+      if (res.status === 404) return [];
+      if (!res.ok) throw new Error('WebDAV 拉取失败: HTTP ' + res.status);
+      var text = await res.text();
+      try {
+        var parsed = JSON.parse(text);
+        return Array.isArray(parsed) ? parsed : (parsed.favorites || []);
+      } catch (e) {
+        throw new Error('WebDAV 文件格式解析失败');
+      }
+    }
+
+    async function syncWebDAVPush(url, user, pass, path, list) {
+      if (!url || !user || !pass) throw new Error('请完整填写 WebDAV 服务器、账号及授权密码');
+      var targetUrl = url.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+      var auth = 'Basic ' + btoa(user + ':' + pass);
+
+      var res = await fetch(targetUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': auth,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(list, null, 2)
+      });
+      if (!res.ok) throw new Error('WebDAV 推送失败: HTTP ' + res.status);
+      return true;
+    }
+
+    // ==================== Dispatcher Actions ====================
+    async function performAction(actionType) {
+      var cfg = harvestConfig();
+      statusDot.className = 'status-indicator syncing';
+      statusText.textContent = '正在连接云端 (' + (activeProvider === 'gist' ? 'GitHub' : 'WebDAV') + ')...';
+
+      try {
+        var localList = (typeof window.getNavFavorites === 'function') ? window.getNavFavorites() : [];
+        var cloudList = [];
+        var effectiveGistId = cfg.gist.gistId;
+
+        // 1. Fetch Cloud
+        if (activeProvider === 'gist') {
+          if (actionType !== 'push' || effectiveGistId) {
+            cloudList = await syncGistPull(cfg.gist.token, effectiveGistId);
+          }
+        } else {
+          cloudList = await syncWebDAVPull(cfg.webdav.url, cfg.webdav.user, cfg.webdav.pass, cfg.webdav.path);
+        }
+
+        // 2. Compute Resolution
+        var finalList = [];
+        if (actionType === 'pull') {
+          finalList = cloudList;
+          notify('✓ 已成功从云端拉取覆盖本地 (共 ' + finalList.length + ' 项)');
+        } else if (actionType === 'push') {
+          finalList = localList;
+          if (activeProvider === 'gist') {
+            effectiveGistId = await syncGistPush(cfg.gist.token, effectiveGistId, finalList);
+            cfg.gist.gistId = effectiveGistId;
+            inputGistId.value = effectiveGistId;
+          } else {
+            await syncWebDAVPush(cfg.webdav.url, cfg.webdav.user, cfg.webdav.pass, cfg.webdav.path, finalList);
+          }
+          notify('✓ 本地收藏已完全推送至云端 (共 ' + finalList.length + ' 项)');
+        } else {
+          // Merge
+          finalList = smartMergeFavorites(localList, cloudList);
+          if (activeProvider === 'gist') {
+            effectiveGistId = await syncGistPush(cfg.gist.token, effectiveGistId, finalList);
+            cfg.gist.gistId = effectiveGistId;
+            inputGistId.value = effectiveGistId;
+          } else {
+            await syncWebDAVPush(cfg.webdav.url, cfg.webdav.user, cfg.webdav.pass, cfg.webdav.path, finalList);
+          }
+          notify('✓ 云端与本地双向智能合并完成 (最终共 ' + finalList.length + ' 项)');
+        }
+
+        // 3. Update Local Storage & State Store
+        if (typeof window.saveNavFavorites === 'function') {
+          window.saveNavFavorites(finalList);
+        } else {
+          localStorage.setItem(FAVORITES_KEY, JSON.stringify(finalList));
+        }
+
+        window.dispatchEvent(new CustomEvent('nav-favorites-updated', {
+          detail: { favorites: finalList, targetId: null, isPinned: false }
+        }));
+
+        cfg.lastSyncTime = Date.now();
+        saveConfig(cfg);
+        updateStatusUI(cfg);
+        statusDot.className = 'status-indicator ready';
+        statusText.textContent = '同步成功！数据已为最新';
+      } catch (err) {
+        statusDot.className = 'status-indicator error';
+        statusText.textContent = '同步失败: ' + err.message;
+        notify('❌ 同步失败: ' + err.message);
+      }
+    }
+
+    // Auto-Sync Debounce Trigger
+    function triggerAutoSync() {
+      var cfg = loadConfig();
+      if (!cfg.autoSync) return;
+      var canSync = (cfg.provider === 'gist' && cfg.gist.token && cfg.gist.gistId) ||
+                    (cfg.provider === 'webdav' && cfg.webdav.url && cfg.webdav.user && cfg.webdav.pass);
+      if (!canSync) return;
+
+      if (autoSyncTimer) clearTimeout(autoSyncTimer);
+      autoSyncTimer = setTimeout(function() {
+        performAction('merge');
+      }, 3500);
+    }
+
+    // Event Bindings
+    tabBtnGist.addEventListener('click', function() { switchTab('gist'); harvestConfig(); });
+    tabBtnWebdav.addEventListener('click', function() { switchTab('webdav'); harvestConfig(); });
+
+    btnToggleMask.addEventListener('click', function() {
+      if (inputGistToken.type === 'password') {
+        inputGistToken.type = 'text';
+        btnToggleMask.textContent = '🙈';
+      } else {
+        inputGistToken.type = 'password';
+        btnToggleMask.textContent = '👁️';
+      }
+    });
+
+    btnClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeModal();
+    });
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+        closeModal();
+      }
+    });
+
+    btnPull.addEventListener('click', function() { performAction('pull'); });
+    btnPush.addEventListener('click', function() { performAction('push'); });
+    btnMerge.addEventListener('click', function() { performAction('merge'); });
+
+    btnClear.addEventListener('click', function() {
+      if (confirm('确定要清除保存在本机的云端同步 Token 与账号凭据吗？')) {
+        localStorage.removeItem(STORAGE_CONFIG_KEY);
+        renderConfigUI();
+        notify('✓ 已安全清除本机云端同步凭据');
+      }
+    });
+
+    // Listen for favorite mutations to trigger auto sync
+    window.addEventListener('nav-favorites-updated', function() {
+      triggerAutoSync();
+    });
+
+    // Global API exports
+    window.openNavCloudSyncModal = openModal;
+    window.closeNavCloudSyncModal = closeModal;
+    window.smartMergeFavorites = smartMergeFavorites;
+  })();
+</script>

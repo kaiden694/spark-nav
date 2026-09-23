@@ -73,7 +73,17 @@
     <span class="nav-float-tooltip">失效纠错</span>
   </div>
 
-  <!-- Item 5: Keyboard Shortcuts Guide (Desktop only) -->
+  <!-- Item 5: Favorites Cloud Sync (Gist / WebDAV) -->
+  <div class="nav-float-item">
+    <button type="button" class="nav-float-btn" id="nav-float-sync-btn" title="常用收藏跨端同步 (Gist / WebDAV)" aria-label="云端同步">
+      <svg class="nav-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+      </svg>
+    </button>
+    <span class="nav-float-tooltip">云端同步</span>
+  </div>
+
+  <!-- Item 6: Keyboard Shortcuts Guide (Desktop only) -->
   <div class="nav-float-item nav-float-desktop-only">
     <button type="button" class="nav-float-btn" id="nav-float-shortcuts-btn" title="全域快捷键漫游矩阵 (?)" aria-label="键盘快捷键">
       <svg class="nav-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -895,6 +905,17 @@
         e.preventDefault();
         if (typeof window.openNavShortcutsModal === 'function') {
           window.openNavShortcutsModal();
+        }
+      });
+    }
+
+    // 2c. Cloud Sync Modal Linkage
+    var syncBtn = document.getElementById('nav-float-sync-btn');
+    if (syncBtn) {
+      syncBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (typeof window.openNavCloudSyncModal === 'function') {
+          window.openNavCloudSyncModal();
         }
       });
     }
