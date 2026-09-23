@@ -819,7 +819,7 @@ const telegramJsonLd = {
         var memberText = item.member_count ? ' · ' + formatNum(item.member_count) + ' 成员' : '';
         var avatarHtml = '';
         if (item.avatar_url && !item.avatar_url.includes('default-avatar')) {
-          avatarHtml = '<img class="spotlight-avatar" src="' + escapeHtml(item.avatar_url) + '" alt="' + escapeHtml(item.title) + '" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'flex\';" />' +
+          avatarHtml = '<img class="spotlight-avatar" src="' + escapeHtml(item.avatar_url) + '" alt="' + escapeHtml(item.title) + '" loading="eager" decoding="async" fetchpriority="high" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'flex\';" />' +
             '<div class="spotlight-avatar-fallback" style="display: none;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg></div>';
         } else {
           avatarHtml = '<div class="spotlight-avatar-fallback"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg></div>';
@@ -962,16 +962,21 @@ const telegramJsonLd = {
         }, 2200);
       }
 
-      function renderCard(item) {
+      function renderCard(item, index) {
         var accentRgb = getAccent(item.id || item.username);
         var typeBadge = item.type === 'bot' ? '🤖 机器人' : (item.type === 'group' ? '👥 群组' : '📢 频道');
         var countText = item.member_count ? '👥 ' + formatNum(item.member_count) : '';
         var cardId = item.id || ('tg-' + item.username);
         var isNsfw = Boolean(item.is_nsfw || (item.tags && item.tags.includes('NSFW')) || item.subcategory === 'nsfw');
 
+        var isEager = (typeof index === 'number' && index < 12);
+        var imgAttrs = isEager
+          ? (index < 4 ? 'loading="eager" decoding="async" fetchpriority="high"' : 'loading="eager" decoding="async"')
+          : 'loading="lazy" decoding="async"';
+
         var avatarHtml = '';
         if (item.avatar_url && !item.avatar_url.includes('default-avatar')) {
-          avatarHtml = '<img src="' + escapeHtml(item.avatar_url) + '" alt="' + escapeHtml(item.title) + '" loading="lazy" onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'block\';" />' +
+          avatarHtml = '<img src="' + escapeHtml(item.avatar_url) + '" alt="' + escapeHtml(item.title) + '" ' + imgAttrs + ' onerror="this.style.display=\'none\'; if (this.nextElementSibling) this.nextElementSibling.style.display=\'block\';" />' +
             '<svg style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>';
         } else {
           avatarHtml = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>';
@@ -1224,7 +1229,7 @@ const telegramJsonLd = {
         var nextBatch = filteredItems.slice(renderedCount, renderedCount + BATCH_SIZE);
         var fragment = document.createDocumentFragment();
         for (var i = 0; i < nextBatch.length; i++) {
-          fragment.appendChild(renderCard(nextBatch[i]));
+          fragment.appendChild(renderCard(nextBatch[i], renderedCount + i));
         }
         cardGrid.appendChild(fragment);
         renderedCount += nextBatch.length;

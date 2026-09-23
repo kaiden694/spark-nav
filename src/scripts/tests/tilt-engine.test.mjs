@@ -22,11 +22,18 @@ test('TiltEngine component integrity and safety guards', () => {
   assert.ok(content.includes('window.init3DTilt = init3DTilt'), 'TiltEngine must export init3DTilt on window');
 });
 
-test('NavLayout mounts TiltEngine component', () => {
+test('NavLayout mounts TiltEngine component in <head> before <slot />', () => {
   const layoutPath = path.join(ROOT_DIR, 'src/layouts/NavLayout.astro');
   const content = fs.readFileSync(layoutPath, 'utf8');
   assert.ok(content.includes("import TiltEngine from '../components/nav/TiltEngine.astro';"), 'NavLayout must import TiltEngine');
   assert.ok(content.includes('<TiltEngine />'), 'NavLayout must render <TiltEngine />');
+
+  const engineIdx = content.indexOf('<TiltEngine />');
+  const headEndIdx = content.lastIndexOf('</head>');
+  const slotIdx = content.indexOf('<slot />');
+  assert.ok(engineIdx > 0, 'TiltEngine must exist');
+  assert.ok(engineIdx < headEndIdx, 'TiltEngine must be placed inside <head> before </head>');
+  assert.ok(engineIdx < slotIdx, 'TiltEngine must be placed before <slot />');
 });
 
 test('Navigation entry pages delegate to global attach3DTilt', () => {
@@ -60,3 +67,26 @@ test('GitHub Actions health check workflow supports websites-only target', () =>
   assert.ok(content.includes('- websites-only'), 'Workflow options must include websites-only');
   assert.ok(content.includes('--websites-only'), 'Workflow step must dispatch --websites-only flag');
 });
+
+test('Critical path LCP preloading: index and vertical hubs prioritize first-screen images', () => {
+  // 1. Homepage featured section
+  const indexPath = path.join(ROOT_DIR, 'src/pages/index.astro');
+  const indexContent = fs.readFileSync(indexPath, 'utf8');
+  assert.ok(indexContent.includes('loading="eager"'), 'index.astro homeFeatured must use eager loading');
+  assert.ok(indexContent.includes('fetchpriority={idx < 4 ? "high" : "auto"}'), 'index.astro must prioritize first 4 card avatars');
+
+  // 2. Hub pages renderCard & Spotlight
+  const hubPages = [
+    'src/pages/category/[category].astro',
+    'src/pages/github.astro',
+    'src/pages/telegram.astro'
+  ];
+
+  for (const p of hubPages) {
+    const hubContent = fs.readFileSync(path.join(ROOT_DIR, p), 'utf8');
+    assert.ok(hubContent.includes('function renderCard(item, index)'), `${p} renderCard must accept index argument`);
+    assert.ok(hubContent.includes('isEager = (typeof index === \'number\' && index < 12)'), `${p} must mark top 12 cards as eager`);
+    assert.ok(hubContent.includes('fetchpriority="high"'), `${p} spotlight must specify high fetchpriority`);
+  }
+});
+
