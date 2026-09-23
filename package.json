@@ -10,7 +10,6 @@
         "check": "astro check",
         "check:functions": "tsc -p tsconfig.functions.json",
         "test:unit": "node --test src/scripts/tests/*.test.mjs",
-        "verify:popover": "node src/scripts/verify-popover-local.mjs",
         "verify:cloudsync": "node src/scripts/verify-cloud-sync-local.mjs",
         "search:index": "node src/scripts/build-nav-search-index.mjs",
         "nav:audit:tg": "node src/scripts/audit-telegram-sources.mjs",
