@@ -5,12 +5,11 @@
 ---
   <script is:inline>
     (function() {
-      var FAVORITES_KEY = 'spark_nav_user_favorites';
-      var LEGACY_FAVORITES_KEY = 'xiu_nav_user_favorites';
+      var FAVORITES_KEY = 'xiu_nav_user_favorites';
 
       window.getNavFavorites = function() {
         try {
-          var raw = localStorage.getItem(FAVORITES_KEY) || localStorage.getItem(LEGACY_FAVORITES_KEY);
+          var raw = localStorage.getItem(FAVORITES_KEY);
           return raw ? JSON.parse(raw) : [];
         } catch (e) {
           return [];
@@ -94,6 +93,52 @@
             isPinned: false
           }
         }));
+      };
+
+      window.executeNavCardPin = function(targetEl) {
+        if (!targetEl || typeof window.toggleNavFavorite !== 'function') return false;
+        var btn = (targetEl.classList && targetEl.classList.contains('nav-card-pin-btn')) ? targetEl : (targetEl.querySelector ? targetEl.querySelector('.nav-card-pin-btn') : null);
+        var card = (targetEl.closest && targetEl.closest('.nav-card')) || (targetEl.classList && targetEl.classList.contains('nav-card') ? targetEl : null);
+        if (!card && btn && btn.closest) card = btn.closest('.nav-card');
+        if (!card && !btn) return false;
+
+        var cardId = (btn && btn.getAttribute('data-id')) || (card && card.getAttribute('data-id')) || (card && card.id) || '';
+        if (cardId.startsWith('fav-')) cardId = cardId.slice(4);
+        if (!cardId) return false;
+
+        var titleEl = card ? card.querySelector('.nav-card-title') : null;
+        var descEl = card ? card.querySelector('.nav-card-desc') : null;
+        var imgEl = card ? card.querySelector('.nav-card-avatar img') : null;
+
+        var itemPayload = {
+          id: cardId,
+          title: titleEl ? titleEl.textContent.trim() : cardId,
+          url: (card && (card.getAttribute('data-origin-url') || card.getAttribute('data-url') || card.getAttribute('href'))) || '',
+          description: descEl ? descEl.textContent.trim() : '',
+          icon: imgEl ? imgEl.src : '',
+          item_type: (card && card.getAttribute('data-type')) || 'website'
+        };
+
+        var isNowPinned = window.toggleNavFavorite(itemPayload);
+
+        // Immediate visual feedback on all matching buttons
+        try {
+          var allMatchingBtns = document.querySelectorAll('.nav-card-pin-btn[data-id="' + cardId + '"]');
+          allMatchingBtns.forEach(function(b) {
+            b.classList.toggle('is-pinned', isNowPinned);
+            b.setAttribute('title', isNowPinned ? '从常用中移除' : '收藏至我的常用');
+          });
+        } catch (e) {}
+
+        // Toast feedback
+        var toastMsg = isNowPinned ? '✓ 已添加至我的常用收藏' : '✓ 已从我的常用中移除';
+        if (typeof window.showNavToast === 'function') {
+          window.showNavToast(toastMsg);
+        } else if (typeof showNavToast === 'function') {
+          showNavToast(toastMsg);
+        }
+
+        return isNowPinned;
       };
 
       function simpleHash(str) {
@@ -438,12 +483,11 @@
       };
 
       // ==================== User Visit Frequency Metrics ====================
-      var VISIT_COUNTS_KEY = 'spark_nav_visit_counts';
-      var LEGACY_VISIT_COUNTS_KEY = 'xiu_nav_visit_counts';
+      var VISIT_COUNTS_KEY = 'xiu_nav_visit_counts';
 
       window.getNavVisitCounts = function() {
         try {
-          var raw = localStorage.getItem(VISIT_COUNTS_KEY) || localStorage.getItem(LEGACY_VISIT_COUNTS_KEY);
+          var raw = localStorage.getItem(VISIT_COUNTS_KEY);
           return raw ? JSON.parse(raw) : {};
         } catch (e) {
           return {};
@@ -471,11 +515,11 @@
         return current;
       };
 
-      // Global delegation to track clicks on nav cards
+      // Global delegation to track valid navigations on nav cards
       document.addEventListener('click', function(e) {
         var card = e.target.closest('.nav-card');
         if (!card) return;
-        if (e.target.closest('.nav-card-copy-btn') || e.target.closest('.nav-card-pin-btn')) {
+        if (e.target.closest('.nav-card-copy-btn') || e.target.closest('.nav-card-pin-btn') || e.target.closest('.nav-card-feed-btn') || e.target.closest('.nav-card-report-btn') || e.target.closest('.nav-card-actions-group') || e.defaultPrevented) {
           return;
         }
         var cid = card.id;
@@ -485,13 +529,102 @@
         }
       });
 
+      // ==================== Universal Card Action Protection & Delegation (Capture Phase) ====================
+      (function initNavActionProtection() {
+        var lastActionPointerDown = null;
+
+        function findNearestActionButton(group, clientX, clientY) {
+          if (!group) return null;
+          var btns = group.querySelectorAll('.nav-card-pin-btn, .nav-card-copy-btn, .nav-card-feed-btn, .nav-card-report-btn');
+          if (btns.length === 0) return null;
+          if (btns.length === 1) return btns[0];
+          var closestBtn = null;
+          var minDist = Infinity;
+          for (var i = 0; i < btns.length; i++) {
+            var rect = btns[i].getBoundingClientRect();
+            var cx = rect.left + rect.width / 2;
+            var cy = rect.top + rect.height / 2;
+            var dist = Math.hypot(clientX - cx, clientY - cy);
+            if (dist < minDist) {
+              minDist = dist;
+              closestBtn = btns[i];
+            }
+          }
+          return closestBtn;
+        }
+
+        function onPointerDownCapture(e) {
+          var actionBtn = e.target.closest('.nav-card-pin-btn, .nav-card-copy-btn, .nav-card-feed-btn, .nav-card-report-btn');
+          var actionsGroup = e.target.closest('.nav-card-actions-group');
+          if (actionBtn || actionsGroup) {
+            lastActionPointerDown = {
+              btn: actionBtn || findNearestActionButton(actionsGroup, e.clientX, e.clientY) || actionsGroup.querySelector('.nav-card-pin-btn'),
+              group: actionsGroup,
+              card: e.target.closest('.nav-card'),
+              time: Date.now()
+            };
+          }
+        }
+
+        if (window.PointerEvent) {
+          document.addEventListener('pointerdown', onPointerDownCapture, true);
+        } else {
+          document.addEventListener('mousedown', onPointerDownCapture, true);
+        }
+
+        document.addEventListener('click', function(e) {
+          var actionBtn = e.target.closest('.nav-card-pin-btn, .nav-card-copy-btn, .nav-card-feed-btn, .nav-card-report-btn');
+          var actionsGroup = e.target.closest('.nav-card-actions-group');
+          var card = e.target.closest('.nav-card');
+
+          var rememberedBtn = null;
+          if (lastActionPointerDown && (Date.now() - lastActionPointerDown.time < 650)) {
+            if ((card && lastActionPointerDown.card === card) || (actionsGroup && lastActionPointerDown.group === actionsGroup)) {
+              rememberedBtn = lastActionPointerDown.btn;
+            }
+          }
+          lastActionPointerDown = null;
+
+          var effectiveBtn = actionBtn || rememberedBtn;
+          if (!effectiveBtn && actionsGroup) {
+            effectiveBtn = findNearestActionButton(actionsGroup, e.clientX, e.clientY);
+          }
+
+          if (effectiveBtn || actionsGroup) {
+            // CRITICAL DEFENSE: Prevent the outer <a> element from navigating to the external website
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (effectiveBtn && effectiveBtn.classList.contains('nav-card-pin-btn')) {
+              if (!e.__navPinHandled__) {
+                e.__navPinHandled__ = true;
+                if (typeof window.executeNavCardPin === 'function') {
+                  window.executeNavCardPin(effectiveBtn);
+                }
+              }
+            } else if (effectiveBtn && effectiveBtn.classList.contains('nav-card-copy-btn')) {
+              if (typeof window.executeCardCopy === 'function') {
+                window.executeCardCopy(effectiveBtn);
+              } else if (!actionBtn) {
+                effectiveBtn.click();
+              }
+            } else if (effectiveBtn && effectiveBtn.classList.contains('nav-card-feed-btn')) {
+              if (typeof window.openNavFeedPreviewPopover === 'function') {
+                window.openNavFeedPreviewPopover(effectiveBtn.getAttribute('data-feed-url'), effectiveBtn.getAttribute('data-title') || '', effectiveBtn);
+              } else if (!actionBtn) {
+                effectiveBtn.click();
+              }
+            }
+          }
+        }, true); // CAPTURE: Priority interception before native <a> link navigation
+      })();
+
       // ==================== Smart Mirror Route Preferences ====================
-      var MIRROR_PREFS_KEY = 'spark_nav_mirror_prefs';
-      var LEGACY_MIRROR_PREFS_KEY = 'xiu_nav_mirror_prefs';
+      var MIRROR_PREFS_KEY = 'xiu_nav_mirror_prefs';
 
       window.getNavMirrorPreferences = function() {
         try {
-          var raw = localStorage.getItem(MIRROR_PREFS_KEY) || localStorage.getItem(LEGACY_MIRROR_PREFS_KEY);
+          var raw = localStorage.getItem(MIRROR_PREFS_KEY);
           return raw ? JSON.parse(raw) : {};
         } catch (e) {
           return {};
@@ -595,12 +728,11 @@
       }
 
       // ==================== User Custom Feeds Store ====================
-      var CUSTOM_FEEDS_KEY = 'spark_nav_custom_feeds';
-      var LEGACY_CUSTOM_FEEDS_KEY = 'xiu_nav_custom_feeds';
+      var CUSTOM_FEEDS_KEY = 'xiu_nav_custom_feeds';
 
       window.getNavCustomFeeds = function() {
         try {
-          var raw = localStorage.getItem(CUSTOM_FEEDS_KEY) || localStorage.getItem(LEGACY_CUSTOM_FEEDS_KEY);
+          var raw = localStorage.getItem(CUSTOM_FEEDS_KEY);
           return raw ? JSON.parse(raw) : {};
         } catch (e) {
           return {};

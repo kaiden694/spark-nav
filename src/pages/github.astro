@@ -1038,6 +1038,12 @@ const githubJsonLd = {
           var doPin = function(e) {
             e.preventDefault();
             e.stopPropagation();
+            if (e.__navPinHandled__) return;
+            e.__navPinHandled__ = true;
+            if (typeof window.executeNavCardPin === 'function') {
+              window.executeNavCardPin(pinBtn);
+              return;
+            }
             if (window.toggleNavFavorite) {
               var isNowPinned = window.toggleNavFavorite({
                 id: cardId,

@@ -815,8 +815,8 @@
       var card = e.target.closest('.nav-card');
       if (!card) return;
       
-      // Do not trigger on copy button click
-      if (e.target.closest('.nav-card-copy-btn')) return;
+      // Do not trigger long-press sheet on micro action buttons or actions group
+      if (e.target.closest('.nav-card-copy-btn, .nav-card-pin-btn, .nav-card-feed-btn, .nav-card-report-btn, .nav-card-actions-group')) return;
 
       targetCard = card;
       isLongPressActive = false;

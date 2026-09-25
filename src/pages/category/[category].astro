@@ -1313,6 +1313,12 @@ const categoryJsonLd = {
           pinBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            if (e.__navPinHandled__) return;
+            e.__navPinHandled__ = true;
+            if (typeof window.executeNavCardPin === 'function') {
+              window.executeNavCardPin(pinBtn);
+              return;
+            }
             if (typeof window.toggleNavFavorite === 'function') {
               var itemPayload = {
                 id: cardId,

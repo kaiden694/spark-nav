@@ -1902,11 +1902,15 @@ const navJsonLd = {
         });
       }
 
+      window.executeCardCopy = executeCardCopy;
+
       document.addEventListener('click', function(e) {
         var copyBtn = e.target.closest('.nav-card-copy-btn');
         if (!copyBtn) return;
         e.preventDefault();
         e.stopPropagation();
+        if (e.__navCopyHandled__) return;
+        e.__navCopyHandled__ = true;
         executeCardCopy(copyBtn);
       });
 
@@ -2088,7 +2092,12 @@ const navJsonLd = {
       }
 
       function executeTogglePin(pinBtn) {
-        if (!pinBtn || !window.toggleNavFavorite) return;
+        if (!pinBtn) return;
+        if (typeof window.executeNavCardPin === 'function') {
+          window.executeNavCardPin(pinBtn);
+          return;
+        }
+        if (!window.toggleNavFavorite) return;
         var cardId = pinBtn.getAttribute('data-id');
         var card = pinBtn.closest('.nav-card');
         if (!card) return;
@@ -2112,6 +2121,8 @@ const navJsonLd = {
         if (pinBtn) {
           e.preventDefault();
           e.stopPropagation();
+          if (e.__navPinHandled__) return;
+          e.__navPinHandled__ = true;
           executeTogglePin(pinBtn);
           return;
         }
@@ -2123,6 +2134,8 @@ const navJsonLd = {
           if (pinBtn) {
             e.preventDefault();
             e.stopPropagation();
+            if (e.__navPinHandled__) return;
+            e.__navPinHandled__ = true;
             executeTogglePin(pinBtn);
             return;
           }

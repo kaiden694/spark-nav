@@ -139,7 +139,47 @@ async function main() {
       throw new Error('Favorites section should remain hidden after refresh when empty');
     }
 
-    console.log('\n🎉 ALL FAVORITES PERSISTENCE TESTS PASSED 100%!');
+    // 10. Robustness Test: Edge & Gap Clicking to verify ZERO Link Navigation
+    console.log('🛡️ Testing edge-click, gap-click, and mouseup drift protection...');
+    const testCard = await page.waitForSelector('.nav-card:not(#sec-user-favorites .nav-card)');
+    const testPinBtn = await testCard.$('.nav-card-pin-btn');
+    const initialUrl = page.url();
+
+    // 10a. Click at top-left edge of the pin button (1px from boundary)
+    const pinBox = await testPinBtn.boundingBox();
+    if (pinBox) {
+      await page.mouse.click(pinBox.x + 1, pinBox.y + 1);
+      await page.waitForTimeout(200);
+      if (page.url() !== initialUrl) {
+        throw new Error(`Edge-click caused navigation away to ${page.url()}!`);
+      }
+
+      // 10b. Mouse down inside button, mouseup 4px outside button (simulating active shrink / drift)
+      await page.mouse.move(pinBox.x + pinBox.width / 2, pinBox.y + pinBox.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(pinBox.x + pinBox.width + 4, pinBox.y + pinBox.height / 2);
+      await page.mouse.up();
+      await page.waitForTimeout(200);
+      if (page.url() !== initialUrl) {
+        throw new Error(`Drift mouseup caused navigation away to ${page.url()}!`);
+      }
+    }
+
+    // 10c. Click on the actions-group directly (in the gap between buttons)
+    const actionsGroup = await testCard.$('.nav-card-actions-group');
+    if (actionsGroup) {
+      const groupBox = await actionsGroup.boundingBox();
+      if (groupBox) {
+        await page.mouse.click(groupBox.x + groupBox.width / 2, groupBox.y + groupBox.height / 2);
+        await page.waitForTimeout(200);
+        if (page.url() !== initialUrl) {
+          throw new Error(`Actions group gap-click caused navigation away to ${page.url()}!`);
+        }
+      }
+    }
+    console.log('✓ Zero Link Navigation confirmed: all edge, drift, and gap clicks safely intercepted!');
+
+    console.log('\n🎉 ALL FAVORITES PERSISTENCE & HIT-SHIELD TESTS PASSED 100%!');
   } finally {
     await browser.close();
   }

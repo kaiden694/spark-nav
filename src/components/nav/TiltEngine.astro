@@ -51,6 +51,11 @@
       if (!rect) rect = element.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
 
+      // Stabilize hit target: freeze dynamic 3D tilt while hovering action buttons cluster
+      if (e.target && e.target.closest && (e.target.closest('.nav-card-actions-group') || e.target.closest('.nav-card-pin-btn') || e.target.closest('.nav-card-copy-btn'))) {
+        return;
+      }
+
       var x = e.clientX - rect.left;
       var y = e.clientY - rect.top;
       var centerX = rect.width / 2;
