@@ -1,6 +1,6 @@
 {
     "name": "spark-nav",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Modern Cyberpunk / OLED Style Geek Navigation System & Open Source Matrix",
     "type": "module",
     "scripts": {
