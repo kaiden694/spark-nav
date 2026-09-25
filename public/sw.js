@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xiu-theme-cache-v12';
+const CACHE_NAME = 'xiu-theme-cache-v13';
 const API_CACHE_NAME = 'xiu-api-cache-v4';
 const MEDIA_CACHE_NAME = 'xiu-media-cache-v2';
 

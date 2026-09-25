@@ -259,8 +259,26 @@ async function runTest() {
 
     await mobilePage.close();
 
+    // Step 12: Test expired QR scan rejection (> 5 minutes)
+    console.log('[12] Simulating expired QR scan (> 5 minutes)...');
+    const expiredPayload = {
+      ...mockMobileWebDAV,
+      ts: Date.now() - 360000 // 6 minutes ago
+    };
+    const expiredB64 = Buffer.from(JSON.stringify(expiredPayload)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const expiredPage = await context.newPage();
+    await expiredPage.goto(`http://127.0.0.1:${TEST_PORT}${targetPath}#sync-pair=${expiredB64}`, { waitUntil: 'domcontentloaded' });
+    await expiredPage.waitForTimeout(400);
+
+    const expiredModal = await expiredPage.locator('#nav-sync-incoming-modal');
+    const expiredModalOpen = await expiredModal.evaluate(el => el.classList.contains('is-open'));
+    console.log(`[VERIFY 16] Expired pairing modal rejected & blocked: ${!expiredModalOpen}`);
+    if (expiredModalOpen) throw new Error('Expired pairing payload should NOT open incoming confirmation modal');
+
+    await expiredPage.close();
+
     console.log('\n================================================================');
-    console.log('✅ ALL 15 CLOUD SYNC & QR PAIRING HEADLESS BROWSER VERIFICATIONS PASSED!');
+    console.log('✅ ALL 16 CLOUD SYNC & QR PAIRING HEADLESS BROWSER VERIFICATIONS PASSED!');
     console.log('================================================================\n');
   } finally {
     await browser.close();

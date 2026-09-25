@@ -43,6 +43,7 @@
   var qrLoading = document.getElementById('nav-sync-qr-loading');
   var qrTag = document.getElementById('nav-sync-qr-provider-tag');
   var btnCopyPairUrl = document.getElementById('btn-sync-copy-pair-url');
+  var btnQrRefresh = document.getElementById('btn-sync-qr-refresh');
 
   // Incoming Scanner Confirmation Elements
   var incomingModal = document.getElementById('nav-sync-incoming-modal');
@@ -427,7 +428,7 @@
 
   function encodePairingPayload(cfg, baseUrl) {
     if (!cfg) return '';
-    var compact = { p: cfg.provider || 'gist', v: 1, a: Boolean(cfg.autoSync) };
+    var compact = { p: cfg.provider || 'gist', v: 1, a: Boolean(cfg.autoSync), ts: Date.now() };
     if (compact.p === 'gist' && cfg.gist) {
       compact.t = (cfg.gist.token || '').trim();
       compact.g = (cfg.gist.gistId || '').trim();
@@ -451,11 +452,21 @@
       var jsonStr = safeBase64Decode(rawStr);
       var parsed = JSON.parse(jsonStr);
       if (!parsed || typeof parsed !== 'object') return null;
+
+      // TTL Nonce Check (5 minutes = 300,000ms)
+      if (parsed.ts) {
+        var age = Date.now() - Number(parsed.ts);
+        if (age > 300000) {
+          return { expired: true, age: age };
+        }
+      }
+
       var provider = parsed.p === 'webdav' ? 'webdav' : 'gist';
       var res = {
         provider: provider,
         autoSync: parsed.a !== false,
         lastSyncTime: null,
+        createdAt: parsed.ts ? Number(parsed.ts) : null,
         gist: { token: '', gistId: '' },
         webdav: { url: '', user: '', pass: '', path: '/xiu-nav/favorites.json' }
       };
@@ -530,6 +541,13 @@
         }
       };
     }
+
+    if (btnQrRefresh) {
+      btnQrRefresh.onclick = function() {
+        showQROverlay();
+        notify('✓ 已刷新配对二维码与有效时限');
+      };
+    }
   }
 
   function closeQROverlay() {
@@ -550,8 +568,12 @@
       window.location.hash = '';
     }
 
-    if (!incoming || !incomingModal) {
-      if (!incoming) notify('⚠️ 配对请求格式无效或凭据已损坏');
+    if (!incoming || !incomingModal || incoming.expired) {
+      if (incoming && incoming.expired) {
+        notify('⚠️ 配对二维码已失效（超过5分钟有效时限），请在源设备上重新点击生成二维码');
+      } else if (!incoming) {
+        notify('⚠️ 配对请求格式无效或凭据已损坏');
+      }
       return;
     }
 

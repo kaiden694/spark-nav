@@ -154,14 +154,15 @@ export function safeBase64Decode(str) {
 }
 
 /**
- * Encodes sync config into an actionable pairing URL with hash fragment
+ * Encodes sync config into an actionable pairing URL with hash fragment and TTL timestamp
  * @param {Object} cfg 
  * @param {string} baseUrl e.g. "https://xiu-theme.pages.dev/nav.html"
+ * @param {number} now Optional timestamp override for deterministic testing
  * @returns {string} Full Pairing URL
  */
-export function encodePairingPayload(cfg, baseUrl = '') {
+export function encodePairingPayload(cfg, baseUrl = '', now = Date.now()) {
   if (!cfg) return '';
-  var compact = { p: cfg.provider || 'gist', v: 1, a: Boolean(cfg.autoSync) };
+  var compact = { p: cfg.provider || 'gist', v: 1, a: Boolean(cfg.autoSync), ts: Number(now) };
 
   if (compact.p === 'gist' && cfg.gist) {
     compact.t = (cfg.gist.token || '').trim();
@@ -181,9 +182,10 @@ export function encodePairingPayload(cfg, baseUrl = '') {
 /**
  * Decodes and validates pairing payload from hash or full URL
  * @param {string} hashOrUrl e.g. "#sync-pair=..." or full URL
- * @returns {Object|null} Standardized config object or null if invalid
+ * @param {Object} options Validation options: { maxAgeMs, now }
+ * @returns {Object|null} Standardized config object or null if invalid, or { expired: true }
  */
-export function decodePairingPayload(hashOrUrl) {
+export function decodePairingPayload(hashOrUrl, { maxAgeMs = 300000, now = Date.now() } = {}) {
   if (!hashOrUrl || typeof hashOrUrl !== 'string') return null;
 
   var match = hashOrUrl.match(/#sync-pair=([A-Za-z0-9_\-+=%]+)/);
@@ -195,11 +197,20 @@ export function decodePairingPayload(hashOrUrl) {
     var parsed = JSON.parse(jsonStr);
     if (!parsed || typeof parsed !== 'object') return null;
 
+    // TTL Nonce Check (Default 5 minutes = 300,000ms)
+    if (parsed.ts) {
+      var age = Number(now) - Number(parsed.ts);
+      if (age > maxAgeMs) {
+        return { expired: true, age: age, maxAgeMs: maxAgeMs };
+      }
+    }
+
     var provider = parsed.p === 'webdav' ? 'webdav' : 'gist';
     var res = {
       provider: provider,
       autoSync: parsed.a !== false,
       lastSyncTime: null,
+      createdAt: parsed.ts ? Number(parsed.ts) : null,
       gist: { token: '', gistId: '' },
       webdav: { url: '', user: '', pass: '', path: '/xiu-nav/favorites.json' }
     };

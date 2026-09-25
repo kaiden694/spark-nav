@@ -215,3 +215,40 @@ test('decodePairingPayload: defends against malformed or malicious inputs', () =
   assert.equal(decodePairingPayload('#sync-pair=' + Buffer.from('{"not":"a_sync_cfg"}').toString('base64')), null);
 });
 
+test('encodePairingPayload and decodePairingPayload: TTL Nonce expiration and backward compatibility', () => {
+  const cfg = {
+    provider: 'gist',
+    autoSync: true,
+    gist: { token: 'ghp_ttl_test_token_123', gistId: 'gist_ttl_456' }
+  };
+
+  const fixedNow = 1758750000000;
+  // 1. Fresh payload within 5 minutes (e.g. 2 minutes old)
+  const freshUrl = encodePairingPayload(cfg, 'https://xiu-theme.pages.dev/nav.html', fixedNow);
+  const freshDecoded = decodePairingPayload(freshUrl, { now: fixedNow + 120000 });
+  assert.ok(freshDecoded);
+  assert.equal(freshDecoded.expired, undefined);
+  assert.equal(freshDecoded.gist.token, 'ghp_ttl_test_token_123');
+  assert.equal(freshDecoded.createdAt, fixedNow);
+
+  // 2. Expired payload (e.g. 6 minutes old > 5 minutes maxAgeMs)
+  const expiredDecoded = decodePairingPayload(freshUrl, { now: fixedNow + 360000, maxAgeMs: 300000 });
+  assert.ok(expiredDecoded);
+  assert.equal(expiredDecoded.expired, true);
+  assert.ok(expiredDecoded.age >= 360000);
+
+  // 3. Legacy payload without ts (backward compatibility)
+  const legacyPayload = Buffer.from(JSON.stringify({
+    p: 'gist',
+    v: 1,
+    a: true,
+    t: 'ghp_legacy_token',
+    g: 'gist_legacy'
+  })).toString('base64');
+  const legacyDecoded = decodePairingPayload('#sync-pair=' + legacyPayload);
+  assert.ok(legacyDecoded);
+  assert.equal(legacyDecoded.expired, undefined);
+  assert.equal(legacyDecoded.gist.token, 'ghp_legacy_token');
+});
+
+

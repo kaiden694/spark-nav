@@ -10,11 +10,19 @@
 
   var prefersReducedQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   var hoverQuery = window.matchMedia ? window.matchMedia('(hover: hover)') : null;
+  var anyHoverQuery = window.matchMedia ? window.matchMedia('(any-hover: hover)') : null;
+
+  var isDegradedPerf = false;
+  var droppedFrameCount = 0;
+  var lastFrameTime = 0;
 
   function canRunTilt() {
+    if (isDegradedPerf) return false;
     if (prefersReducedQuery && prefersReducedQuery.matches) return false;
-    // Require hover support; avoid coarse pointer lock that breaks Windows touch laptops
-    if (hoverQuery && !hoverQuery.matches) return false;
+    // Require hover support; check both primary and any available pointer (supports Windows touch laptops with mouse/trackpad)
+    if (hoverQuery && !hoverQuery.matches) {
+      if (!anyHoverQuery || !anyHoverQuery.matches) return false;
+    }
     return true;
   }
 
@@ -54,7 +62,21 @@
       var rotateY = ((x - centerX) / centerX) * maxTilt;
 
       if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(function() {
+      rafId = requestAnimationFrame(function(now) {
+        if (lastFrameTime > 0 && typeof now === 'number') {
+          var delta = now - lastFrameTime;
+          if (delta > 48) { // > 3 dropped frames at 60fps
+            droppedFrameCount++;
+            if (droppedFrameCount >= 8) {
+              isDegradedPerf = true;
+              element.style.transform = '';
+              return;
+            }
+          } else if (droppedFrameCount > 0) {
+            droppedFrameCount--;
+          }
+        }
+        lastFrameTime = now;
         element.style.transform = 'perspective(800px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-4px)';
         element.style.setProperty('--mouse-x', x + 'px');
         element.style.setProperty('--mouse-y', y + 'px');
@@ -104,6 +126,30 @@
     document.addEventListener('DOMContentLoaded', autoMountAllCards);
   } else {
     autoMountAllCards();
+  }
+
+  // MutationObserver for dynamically injected cards (favorites, filters, search, async widgets)
+  if (typeof MutationObserver !== 'undefined') {
+    var observer = new MutationObserver(function(mutations) {
+      if (!canRunTilt()) return;
+      var hasNewNodes = false;
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].addedNodes && mutations[i].addedNodes.length > 0) {
+          hasNewNodes = true;
+          break;
+        }
+      }
+      if (hasNewNodes) {
+        autoMountAllCards();
+      }
+    });
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+      });
+    }
   }
 
   window.attach3DTilt = attach3DTilt;

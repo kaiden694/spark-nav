@@ -181,9 +181,17 @@
           <span class="nav-sync-qr-tag" id="nav-sync-qr-provider-tag">GitHub Gist</span>
           <span class="nav-sync-qr-secure-hint">🔒 纯前端离线直接渲染 · 无第三方中转</span>
         </div>
-        <button type="button" id="btn-sync-copy-pair-url" class="btn-sync-qr-copy" title="复制包含配对凭据的完整链接">
-          📋 复制配对链接
-        </button>
+        <div style="font-size: 11.5px; color: var(--nav-text-muted, #94a3b8); text-align: center; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 5px;">
+          <span>⏱️ 有效期 5 分钟 (动态一次性时效保护)</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="btn-sync-qr-refresh" class="btn-sync-qr-copy" style="flex: 1; background: rgba(255,255,255,0.06);" title="重新生成带最新时效的配对二维码">
+            🔄 刷新二维码
+          </button>
+          <button type="button" id="btn-sync-copy-pair-url" class="btn-sync-qr-copy" style="flex: 1;" title="复制包含配对凭据的完整链接">
+            📋 复制配对链接
+          </button>
+        </div>
       </div>
     </div>
   </div>

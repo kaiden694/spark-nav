@@ -2062,6 +2062,24 @@ const navJsonLd = {
               '</div>' +
             '</div>';
 
+          if (typeof attach3DTilt === 'function') {
+            attach3DTilt(a, 6);
+          } else if (typeof window !== 'undefined' && window.attach3DTilt) {
+            window.attach3DTilt(a, 6);
+          }
+          if (hasHover) {
+            a.addEventListener('mousemove', function(e) {
+              var rect = a.getBoundingClientRect();
+              a.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+              a.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+            });
+            a.addEventListener('mouseenter', function(e) {
+              var rect = a.getBoundingClientRect();
+              a.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+              a.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+            });
+          }
+
           fragment.appendChild(a);
         }
 

@@ -20,6 +20,9 @@ test('TiltEngine component integrity and safety guards', () => {
   assert.ok(content.includes('willChange'), 'TiltEngine must elevate elements to GPU layer via willChange');
   assert.ok(content.includes('window.attach3DTilt = attach3DTilt'), 'TiltEngine must export attach3DTilt on window');
   assert.ok(content.includes('window.init3DTilt = init3DTilt'), 'TiltEngine must export init3DTilt on window');
+  assert.ok(content.includes('MutationObserver'), 'TiltEngine must monitor dynamic card injection via MutationObserver');
+  assert.ok(content.includes('any-hover'), 'TiltEngine must support any-hover for hybrid touch/mouse devices');
+  assert.ok(content.includes('isDegradedPerf'), 'TiltEngine must implement adaptive degradation for low-performance devices');
 });
 
 test('NavLayout mounts TiltEngine component in <head> before <slot />', () => {
@@ -37,11 +40,17 @@ test('NavLayout mounts TiltEngine component in <head> before <slot />', () => {
 });
 
 test('Navigation entry pages delegate to global attach3DTilt', () => {
-  const pages = [
+  const isOss = !fs.existsSync(path.join(ROOT_DIR, 'src/pages/nav.astro'));
+  const pages = isOss ? [
     'src/pages/index.astro',
     'src/pages/github.astro',
     'src/pages/telegram.astro',
     'src/pages/category/[category].astro'
+  ] : [
+    'src/pages/nav.astro',
+    'src/pages/nav/github.astro',
+    'src/pages/nav/telegram.astro',
+    'src/pages/nav/category/[category].astro'
   ];
 
   for (const p of pages) {
@@ -68,18 +77,27 @@ test('GitHub Actions health check workflow supports websites-only target', () =>
   assert.ok(content.includes('--websites-only'), 'Workflow step must dispatch --websites-only flag');
 });
 
-test('Critical path LCP preloading: index and vertical hubs prioritize first-screen images', () => {
-  // 1. Homepage featured section
-  const indexPath = path.join(ROOT_DIR, 'src/pages/index.astro');
-  const indexContent = fs.readFileSync(indexPath, 'utf8');
-  assert.ok(indexContent.includes('loading="eager"'), 'index.astro homeFeatured must use eager loading');
-  assert.ok(indexContent.includes('fetchpriority={idx < 4 ? "high" : "auto"}'), 'index.astro must prioritize first 4 card avatars');
+test('Critical path LCP preloading: nav.astro and vertical hubs prioritize first-screen images', () => {
+  const isOss = !fs.existsSync(path.join(ROOT_DIR, 'src/pages/nav.astro'));
+  // 1. Navigation portal featured section
+  const homePath = isOss ? path.join(ROOT_DIR, 'src/pages/index.astro') : path.join(ROOT_DIR, 'src/pages/nav.astro');
+  const navContent = fs.readFileSync(homePath, 'utf8');
+  assert.ok(navContent.includes('loading="eager"'), 'Navigation home homeFeatured must use eager loading');
+  assert.ok(
+    navContent.includes('fetchpriority={isFirstFour ? "high" : "auto"}') ||
+    navContent.includes('fetchpriority={idx < 4 ? "high" : "auto"}'),
+    'Navigation home must prioritize first 4 card avatars'
+  );
 
   // 2. Hub pages renderCard & Spotlight
-  const hubPages = [
+  const hubPages = isOss ? [
     'src/pages/category/[category].astro',
     'src/pages/github.astro',
     'src/pages/telegram.astro'
+  ] : [
+    'src/pages/nav/category/[category].astro',
+    'src/pages/nav/github.astro',
+    'src/pages/nav/telegram.astro'
   ];
 
   for (const p of hubPages) {
