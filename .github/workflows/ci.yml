@@ -36,5 +36,5 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Headless Browser Popover & Keyboard Roaming E2E Verification
-        run: npm run verify:popover
+      - name: Headless Browser Pin Hit Area & Zero Penetration E2E Verification
+        run: npm run verify:pin-hit

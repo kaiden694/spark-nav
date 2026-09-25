@@ -20,7 +20,9 @@ async function runTest() {
 
   const server = http.createServer((req, res) => {
     let cleanUrl = req.url.split('?')[0];
-    if (cleanUrl === '/') cleanUrl = '/nav.html';
+    if (cleanUrl === '/') {
+      cleanUrl = fs.existsSync(path.join(process.cwd(), 'dist', 'index.html')) ? '/index.html' : '/nav.html';
+    }
     let filePath = path.join(process.cwd(), 'dist', cleanUrl);
 
     if (!fs.existsSync(filePath) && fs.existsSync(filePath + '.html')) {
@@ -51,7 +53,8 @@ async function runTest() {
   const page = await context.newPage();
 
   try {
-    const targetUrl = `http://127.0.0.1:${TEST_PORT}/nav.html`;
+    const hasNavHtml = fs.existsSync(path.join(process.cwd(), 'dist', 'nav.html'));
+    const targetUrl = `http://127.0.0.1:${TEST_PORT}${hasNavHtml ? '/nav.html' : '/'}`;
     console.log(`[3] Navigating to ${targetUrl} ...`);
     await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(500);
